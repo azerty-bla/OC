@@ -1,0 +1,146 @@
+---
+import "../../../../styles/global.css";
+import ExpertisePage from "../../../../layouts/ExpertisePage.astro";
+import FaqAccordion from "../../../../components/FaqAccordion.astro";
+
+const faqItems = [
+  {
+    question: "Quelle est la fréquence d'entretien d'une VMC double flux ?",
+    answer: `<p>L'entretien d'une VMC double flux professionnelle suit un calendrier précis pour garantir ses performances dans la durée :</p>
+<ul>
+<li><strong>Tous les 3 à 6 mois</strong> : vérification et remplacement des filtres d'insufflation (F7) et d'extraction (G4). En environnement poussiéreux (industrie, proximité routière), le remplacement peut être nécessaire tous les 2 mois.</li>
+<li><strong>Tous les 6 mois</strong> : contrôle visuel de l'échangeur, vérification des courroies (si moteur AC), mesure des débits aux bouches, contrôle de l'évacuation des condensats.</li>
+<li><strong>Tous les ans</strong> : nettoyage de l'échangeur thermique, vérification de l'étanchéité des registres et du bypass, contrôle électrique complet, mise à jour de la régulation.</li>
+<li><strong>Tous les 5 à 7 ans</strong> : nettoyage complet du réseau de gaines par un prestataire spécialisé (obligation réglementaire dans les ERP et locaux tertiaires selon la norme NF EN 15780).</li>
+</ul>
+<p>Un contrat de maintenance préventive coûte entre 600 et 2 000 €/an selon la taille de l'installation. Il permet de maintenir le rendement de l'échangeur au-dessus de 85 % et d'éviter les pannes coûteuses. Un filtre encrassé peut augmenter la consommation électrique des ventilateurs de 30 à 50 %.</p>`
+  },
+  {
+    question: "Quel est le niveau sonore d'une VMC double flux ?",
+    answer: `<p>Le bruit est un sujet majeur, surtout dans les espaces de travail tertiaires où la concentration des occupants est primordiale. Les niveaux sonores varient selon l'emplacement :</p>
+<ul>
+<li><strong>Au caisson</strong> : 45 à 65 dB(A) selon le débit. Le local technique doit être isolé acoustiquement (cloison minimum 40 dB).</li>
+<li><strong>Aux bouches de soufflage</strong> : 25 à 35 dB(A) en fonctionnement nominal. La norme NF S 31-080 impose un maximum de 38 dB(A) dans les bureaux ouverts et 33 dB(A) dans les bureaux individuels.</li>
+<li><strong>Dans les gaines</strong> : les silencieux (pièges à sons) installés en sortie de caisson atténuent le bruit de 15 à 25 dB. Leur dimensionnement est critique pour respecter les seuils réglementaires.</li>
+</ul>
+<p>Les VMC double flux à moteurs EC (electronically commutated) sont significativement plus silencieuses que les modèles à moteurs AC, notamment à charge partielle. La modulation de vitesse progressive élimine les à-coups sonores lors des changements de régime.</p>`
+  },
+  {
+    question: "Comment protéger l'échangeur contre le gel ?",
+    answer: `<p>Lorsque la température extérieure descend en dessous de –5 °C, l'humidité contenue dans l'air extrait peut condenser et geler au contact des plaques froides de l'échangeur. Ce givre réduit le débit d'air et peut endommager l'échangeur. Plusieurs solutions existent :</p>
+<ul>
+<li><strong>Préchauffage électrique</strong> : une batterie de préchauffage (500 W à 3 kW) porte l'air neuf à 0 °C avant l'échangeur. Simple mais consommatrice d'énergie.</li>
+<li><strong>Registre de dégivrage</strong> : réduction temporaire du débit d'air neuf (bypass partiel) pour réchauffer l'échangeur. Le plus courant en tertiaire.</li>
+<li><strong>Échangeur enthalpique</strong> : transfère aussi l'humidité, limitant naturellement le risque de gel. Adapté aux climats froids.</li>
+<li><strong>Puits canadien</strong> : préchauffage géothermique de l'air neuf (gain de 5 à 10 °C). Solution la plus performante mais coûteuse à l'installation (10 000 à 20 000 €).</li>
+</ul>
+<p>En zone H1 (Nord et Est de la France), la protection antigel est indispensable. Le choix de la solution dépend du climat local, du débit de l'installation et du budget disponible. Oteria Conseil intègre systématiquement cette problématique dans le dimensionnement des projets.</p>`
+  },
+  {
+    question: "À quoi sert le bypass été ?",
+    answer: `<p>Le bypass (ou court-circuit) est un dispositif qui permet de contourner l'échangeur thermique lorsque la récupération de chaleur n'est pas souhaitée. Il s'active automatiquement dans deux situations :</p>
+<ul>
+<li><strong>Free cooling nocturne</strong> : en été, lorsque la température extérieure nocturne est inférieure à la température intérieure (typiquement entre 22h et 7h), l'air frais entre directement sans être réchauffé par l'échangeur. Cela refroidit gratuitement la masse thermique du bâtiment.</li>
+<li><strong>Mi-saison</strong> : au printemps et en automne, lorsque la température extérieure est proche de la consigne intérieure, l'échangeur n'apporte aucun bénéfice et génère une perte de charge inutile.</li>
+</ul>
+<p>Un bypass bien piloté (sonde de température intérieure + extérieure + horloge) peut réduire les besoins de climatisation de <strong>15 à 25 %</strong> dans les bâtiments tertiaires, contribuant directement aux objectifs du décret tertiaire. La motorisation du bypass est standard sur les caissons professionnels ; seuls certains modèles résidentiels bas de gamme utilisent un bypass manuel.</p>`
+  },
+  {
+    question: "Quand faut-il remplacer les filtres ?",
+    answer: `<p>Le remplacement des filtres est l'opération de maintenance la plus fréquente et la plus critique pour les performances du système. Les indicateurs de remplacement sont :</p>
+<ul>
+<li><strong>Perte de charge</strong> : un filtre F7 neuf présente une perte de charge de 80 à 120 Pa. Il doit être remplacé lorsque la perte de charge atteint 250 à 300 Pa (mesurée par un pressostat différentiel ou une alarme sur la GTB).</li>
+<li><strong>Durée</strong> : en environnement tertiaire urbain, un filtre F7 dure 4 à 6 mois. En milieu industriel ou très pollué, 2 à 3 mois. En zone rurale, jusqu'à 8 mois.</li>
+<li><strong>Aspect visuel</strong> : un filtre saturé apparaît uniformément gris-noir. Attention : un filtre peut paraître propre visuellement tout en étant colmaté en profondeur.</li>
+</ul>
+<p>Le coût d'un jeu de filtres (insufflation F7 + extraction G4) varie de 100 à 400 € selon la taille du caisson. Ne jamais faire fonctionner la VMC sans filtres : les poussières encrassent l'échangeur de manière irréversible, réduisant son rendement de 5 à 15 points en quelques mois.</p>`
+  },
+  {
+    question: "Quelle est la durée de vie d'une VMC double flux ?",
+    answer: `<p>La durée de vie d'une VMC double flux professionnelle dépend de la qualité du matériel et de l'entretien :</p>
+<ul>
+<li><strong>Échangeur thermique</strong> : 20 à 30 ans (pas de pièce mobile, usure uniquement par corrosion ou encrassement).</li>
+<li><strong>Caisson et structure</strong> : 20 à 25 ans pour un caisson en acier galvanisé double peau.</li>
+<li><strong>Moteurs et ventilateurs</strong> : 10 à 15 ans pour des moteurs EC, 7 à 10 ans pour des moteurs AC. Le remplacement des moteurs est une opération courante à mi-vie.</li>
+<li><strong>Régulation électronique</strong> : 10 à 15 ans avant obsolescence technologique.</li>
+<li><strong>Réseau de gaines</strong> : 30 à 40 ans si correctement installé et nettoyé périodiquement.</li>
+</ul>
+<p>La durée de vie conventionnelle retenue par les fiches CEE est de <strong>17 ans</strong>, ce qui correspond à une estimation conservatrice de la durée de fonctionnement optimal de l'ensemble du système. En pratique, un matériel de qualité (fabricants européens certifiés) correctement entretenu dépasse régulièrement 20 ans de service.</p>`
+  },
+  {
+    question: "La VMC double flux est-elle compatible avec le chauffage existant ?",
+    answer: `<p>Oui, la VMC double flux est compatible avec tous les systèmes de chauffage existants. Elle ne remplace pas le chauffage mais réduit significativement ses besoins :</p>
+<ul>
+<li><strong>Chauffage central (radiateurs, plancher chauffant)</strong> : la VMC DF réduit les déperditions par ventilation de 80 à 95 %. Le chauffage peut être redimensionné à la baisse lors d'un remplacement de chaudière.</li>
+<li><strong>Pompe à chaleur air/air</strong> : la réduction du besoin de chauffage permet de choisir une PAC de puissance inférieure (économie à l'investissement).</li>
+<li><strong>Chauffage électrique</strong> : c'est la combinaison la plus favorable économiquement, les économies absolues étant les plus élevées (prix du kWh électrique > gaz).</li>
+<li><strong>CTA (centrale de traitement d'air)</strong> : une VMC DF peut remplacer la fonction de récupération d'énergie d'une CTA vieillissante, souvent à moindre coût.</li>
+</ul>
+<p>Dans tous les cas, l'installation d'une VMC double flux nécessite une vérification de l'équilibrage aéraulique global du bâtiment. Les entrées d'air en façade (grilles hygroréglables ou autoréglables) doivent être supprimées et obturées pour éviter un court-circuit aéraulique qui annulerait les performances du système.</p>`
+  },
+  {
+    question: "Quelle différence entre VMC simple flux et double flux ?",
+    answer: `<p>La différence fondamentale réside dans le traitement de l'air neuf :</p>
+<ul>
+<li><strong>VMC simple flux</strong> : un seul ventilateur extrait l'air vicié. L'air neuf entre passivement par des grilles en façade, à la température extérieure. Aucune récupération de chaleur, aucune filtration de l'air entrant.</li>
+<li><strong>VMC double flux</strong> : deux ventilateurs (un pour l'extraction, un pour l'insufflation). L'air neuf est filtré, préchauffé par l'échangeur puis distribué dans les locaux via un réseau de gaines dédié.</li>
+</ul>
+<p>Les conséquences pratiques sont majeures :</p>
+<ul>
+<li>Économie de chauffage : 0 % (simple flux) vs 20-30 % (double flux)</li>
+<li>Filtration : aucune vs F7-F9 (élimination de 85%+ des PM2.5 et pollens)</li>
+<li>Confort : courants d'air froid en hiver (SF) vs air tempéré (DF)</li>
+<li>Isolation acoustique : dégradée par les grilles en façade (SF) vs maintenue (DF)</li>
+<li>Éligibilité CEE : non (SF) vs oui si rendement ≥ 85 % (DF)</li>
+</ul>`
+  },
+  {
+    question: "Comment la VMC double flux gère-t-elle l'humidité ?",
+    answer: `<p>La gestion de l'humidité dépend du type d'échangeur installé :</p>
+<ul>
+<li><strong>Échangeur à plaques (sensible)</strong> : transfère uniquement la chaleur. L'humidité de l'air extrait se condense partiellement sur les plaques froides et est évacuée par un siphon. L'air insufflé est plus sec que l'air extrait, ce qui peut nécessiter une humidification en hiver dans certains locaux (taux cible : 40-60 % HR).</li>
+<li><strong>Échangeur enthalpique (latent)</strong> : transfère chaleur ET humidité à travers une membrane perméable à la vapeur d'eau. En hiver, il récupère 50 à 70 % de l'humidité de l'air extrait, maintenant un taux d'humidité plus confortable sans appoint. Pas de condensats à évacuer.</li>
+<li><strong>Échangeur rotatif</strong> : transfère également chaleur et humidité. Rendement enthalpique élevé (75-85 %) mais risque de transfert d'odeurs entre les flux (déconseillé en industrie avec polluants).</li>
+</ul>
+<p>Pour les bâtiments tertiaires, l'échangeur enthalpique est souvent le meilleur compromis : il maintient un taux d'humidité confortable toute l'année sans équipement supplémentaire. En industrie, le choix dépend du process (risque de contamination croisée, nature des polluants extraits).</p>`
+  },
+  {
+    question: "La VMC double flux fonctionne-t-elle aussi en été ?",
+    answer: `<p>Oui, la VMC double flux fonctionne toute l'année. Son comportement s'adapte aux saisons :</p>
+<ul>
+<li><strong>Hiver</strong> : récupération maximale de chaleur. L'échangeur préchauffe l'air neuf de -5 °C à +16 °C environ (pour un rendement de 90 % et une température intérieure de 20 °C).</li>
+<li><strong>Mi-saison</strong> : bypass activé lorsque les températures sont proches. La VMC assure uniquement le renouvellement d'air et la filtration.</li>
+<li><strong>Été (jour)</strong> : si climatisation, l'échangeur « récupère le froid » en refroidissant l'air neuf entrant au contact de l'air extrait climatisé. Économie de 10 à 15 % sur la climatisation.</li>
+<li><strong>Été (nuit)</strong> : bypass ouvert pour le free cooling. L'air frais nocturne (18-22 °C) ventile directement le bâtiment, stockant la fraîcheur dans la masse thermique (dalle béton, cloisons).</li>
+</ul>
+<p>La VMC double flux est donc un équipement 4 saisons qui optimise le confort et les consommations énergétiques tout au long de l'année. Son fonctionnement continu garantit une qualité d'air intérieur constante, indépendamment des conditions climatiques extérieures.</p>`
+  }
+];
+---
+
+<ExpertisePage
+  title="VMC double flux : questions fréquentes – Oteria Conseil"
+  description="Réponses d'experts aux questions les plus posées sur la VMC double flux : entretien, bruit, gel, bypass été, durée de vie, compatibilité chauffage et différences avec la simple flux."
+  canonical="/expertises/vmc-double-flux/faq/"
+  keyword="FAQ VMC double flux"
+  cluster="VMC double flux"
+  breadcrumb={[{label: "Expertises", href: "/expertises/"}, {label: "VMC double flux", href: "/expertises/vmc-double-flux/"}]}
+>
+  <h2>Questions fréquentes sur la VMC double flux</h2>
+
+  <p>
+    Vous envisagez l'installation d'une VMC double flux dans vos locaux professionnels ? Nos experts en performance énergétique répondent aux interrogations les plus courantes de nos clients industriels et tertiaires. Chaque réponse s'appuie sur 19 ans d'expérience terrain et les données techniques des fabricants certifiés.
+  </p>
+
+  <div class="expertise-stats">
+    <div class="stat-item"><div class="stat-number">10</div><div class="stat-label">Questions traitées</div></div>
+    <div class="stat-item"><div class="stat-number">19 ans</div><div class="stat-label">Retour d'expérience</div></div>
+    <div class="stat-item"><div class="stat-number">97 %</div><div class="stat-label">Clients satisfaits</div></div>
+  </div>
+
+  <FaqAccordion items={faqItems} />
+
+  <div class="expertise-highlight">
+    <p>Vous avez une question qui n'est pas listée ici ? Nos experts sont disponibles pour vous répondre. Contactez Oteria Conseil pour un échange personnalisé sur votre projet de VMC double flux.</p>
+  </div>
+</ExpertisePage>

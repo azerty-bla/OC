@@ -1,0 +1,135 @@
+---
+import ExpertisePage from "../../../../layouts/ExpertisePage.astro";
+import "../../../../styles/global.css";
+import FaqAccordion from "../../../../components/FaqAccordion.astro";
+
+const faqItems = [
+  {
+    question: "Quelle est la différence entre un variateur de vitesse et un démarreur progressif ?",
+    answer: `<p>Le <strong>démarreur progressif</strong> (soft starter) se limite à gérer la phase de démarrage et d'arrêt du moteur en réduisant progressivement la tension. Une fois le moteur lancé, il tourne à sa vitesse nominale. Le <strong>variateur de vitesse</strong>, en revanche, contrôle la vitesse en permanence pendant toute la durée de fonctionnement.</p>
+<p>En termes d'économies d'énergie, le démarreur progressif n'offre aucun gain en régime établi, tandis que le variateur permet 30 à 50 % d'économies sur les charges à couple variable. Le démarreur progressif reste pertinent pour les applications à vitesse fixe nécessitant simplement un démarrage en douceur (pompes de grande puissance sans besoin de régulation, par exemple).</p>`
+  },
+  {
+    question: "Un variateur de vitesse est-il compatible avec mon moteur existant ?",
+    answer: `<p>Dans la grande majorité des cas, oui. Un variateur de fréquence est compatible avec tout moteur asynchrone triphasé standard (à cage d'écureuil). Il faut cependant vérifier quelques points :</p>
+<ul>
+<li><strong>Isolation du bobinage :</strong> les moteurs anciens (avant 2000) peuvent avoir une isolation insuffisante pour supporter les fronts de tension rapides (dV/dt) générés par l'onduleur. Un filtre sinus de sortie résout ce problème.</li>
+<li><strong>Ventilation :</strong> à basse vitesse, le ventilateur intégré au moteur perd en efficacité. Pour un fonctionnement prolongé en dessous de 50 % de la vitesse nominale, une ventilation forcée indépendante peut être nécessaire.</li>
+<li><strong>Dimensionnement :</strong> le variateur doit être choisi en fonction du courant nominal du moteur, non de sa puissance nominale seule.</li>
+</ul>`
+  },
+  {
+    question: "Qu'est-ce que les harmoniques et comment les gérer ?",
+    answer: `<p>Les variateurs de vitesse génèrent des courants harmoniques (principalement rangs 5, 7, 11, 13) lors du redressement de la tension réseau. Ces harmoniques peuvent perturber d'autres équipements sensibles, provoquer un échauffement des câbles et des transformateurs, et augmenter les pertes.</p>
+<p>Solutions de filtrage par ordre croissant d'efficacité :</p>
+<ul>
+<li><strong>Inductance de ligne (3 à 5 %) :</strong> réduit le THDi de 80 % à 35-40 %. Solution la plus économique.</li>
+<li><strong>Filtre passif LC :</strong> réduit le THDi à 10-15 %. Adapté pour les installations sensibles.</li>
+<li><strong>Redresseur actif (AFE) :</strong> THDi &lt; 5 %, facteur de puissance unitaire, régénération possible. Solution premium pour les fortes puissances.</li>
+</ul>`
+  },
+  {
+    question: "Quelle est la durée de vie d'un variateur de vitesse ?",
+    answer: `<p>Un variateur de vitesse correctement dimensionné et installé dans des conditions conformes (température, humidité, poussière) a une durée de vie de <strong>15 à 20 ans</strong>. Les composants les plus sensibles au vieillissement sont :</p>
+<ul>
+<li><strong>Condensateurs du bus DC :</strong> durée de vie de 7 à 12 ans selon la température ambiante (doublement de la durée de vie par 10°C de moins)</li>
+<li><strong>Ventilateurs de refroidissement :</strong> 5 à 8 ans, remplacement préventif recommandé</li>
+<li><strong>IGBT :</strong> très fiables, rarement en cause sauf surcharge répétée</li>
+</ul>
+<p>Un programme de maintenance préventive (remplacement des condensateurs et ventilateurs à mi-vie) permet d'atteindre et dépasser les 20 ans de service.</p>`
+  },
+  {
+    question: "Quelle maintenance requiert un variateur de vitesse ?",
+    answer: `<p>La maintenance d'un variateur est relativement légère comparée aux gains qu'il procure :</p>
+<ul>
+<li><strong>Annuelle :</strong> inspection visuelle, nettoyage des aérations, contrôle des serrages, vérification de l'absence d'alarmes dans l'historique</li>
+<li><strong>Tous les 3-5 ans :</strong> mesure de capacité des condensateurs, remplacement des ventilateurs si usés, mise à jour firmware si disponible</li>
+<li><strong>Tous les 7-10 ans :</strong> remplacement préventif des condensateurs du bus DC</li>
+</ul>
+<p>Coût annuel de maintenance : entre 100 et 500 € selon la puissance, soit moins de 1 % du coût d'investissement. Négligeable face aux économies d'énergie générées.</p>`
+  },
+  {
+    question: "Existe-t-il une vitesse minimale en dessous de laquelle le moteur ne peut pas tourner ?",
+    answer: `<p>Oui, il existe des limites pratiques à la réduction de vitesse :</p>
+<ul>
+<li><strong>En contrôle V/f :</strong> le couple disponible chute en dessous de 10-15 Hz (20-30 % de la vitesse nominale). Le fonctionnement stable est garanti jusqu'à environ 10 Hz.</li>
+<li><strong>En contrôle vectoriel :</strong> un couple nominal est disponible jusqu'à des vitesses très basses (1-2 Hz), voire à l'arrêt avec un contrôle vectoriel boucle fermée (encodeur).</li>
+<li><strong>Contrainte thermique :</strong> en dessous de 25-30 % de la vitesse nominale, la ventilation propre du moteur devient insuffisante. Une ventilation forcée est requise pour un fonctionnement prolongé.</li>
+</ul>`
+  },
+  {
+    question: "Un variateur économise-t-il plus sur une pompe ou sur un ventilateur ?",
+    answer: `<p>Les deux applications suivent la même loi physique (loi des affinités : puissance proportionnelle au cube de la vitesse), mais en pratique :</p>
+<ul>
+<li><strong>Ventilateurs :</strong> économies légèrement supérieures car la perte de charge du réseau aéraulique est quasi-intégralement dynamique (proportionnelle au carré du débit).</li>
+<li><strong>Pompes :</strong> les économies dépendent de la hauteur géométrique. Si la hauteur statique (pression à vaincre indépendamment du débit) est importante, les gains sont moindres car le moteur doit maintenir un minimum de puissance même à débit réduit.</li>
+</ul>
+<p>Ordre de grandeur : 40-60 % d'économies sur ventilateurs, 30-50 % sur pompes (selon le ratio hauteur statique/dynamique).</p>`
+  },
+  {
+    question: "Qu'est-ce que le freinage régénératif sur un variateur ?",
+    answer: `<p>Le <strong>freinage régénératif</strong> permet de récupérer l'énergie cinétique du moteur lors d'une décélération et de la réinjecter sur le réseau électrique, au lieu de la dissiper en chaleur dans une résistance de freinage.</p>
+<p>Cette fonctionnalité est pertinente pour :</p>
+<ul>
+<li>Les ascenseurs et monte-charges (récupération en descente)</li>
+<li>Les centrifugeuses (décélération fréquente de fortes inerties)</li>
+<li>Les grues et ponts roulants (descente de charges)</li>
+<li>Les bancs d'essai moteur</li>
+</ul>
+<p>Un variateur régénératif coûte 30 à 50 % plus cher qu'un variateur standard, mais permet des économies d'énergie supplémentaires de 10 à 30 % sur les applications à cycles fréquents.</p>`
+  },
+  {
+    question: "Quel indice de protection (IP) choisir pour mon variateur ?",
+    answer: `<p>Le choix de l'IP dépend de l'environnement d'installation :</p>
+<ul>
+<li><strong>IP20 :</strong> installation en armoire fermée, local technique propre. Solution la plus économique et offrant le meilleur refroidissement.</li>
+<li><strong>IP54 :</strong> installation murale dans un environnement modérément poussiéreux (atelier, chaufferie).</li>
+<li><strong>IP55/IP56 :</strong> environnement humide ou poussiéreux (industrie agroalimentaire, station de pompage).</li>
+<li><strong>IP66 :</strong> installation extérieure ou zones de lavage fréquent.</li>
+</ul>
+<p>Attention : un IP élevé réduit la capacité de refroidissement du variateur. Un déclassement en puissance de 10 à 20 % peut être nécessaire, ou le choix d'un modèle de puissance supérieure.</p>`
+  },
+  {
+    question: "Peut-on installer un variateur soi-même ou faut-il un professionnel ?",
+    answer: `<p>L'installation d'un variateur de vitesse implique des travaux sur une installation électrique en courant fort (400 V triphasé). Elle doit être réalisée par un électricien habilité (habilitation B2V minimum) conformément à la norme NF C 15-100.</p>
+<p>Au-delà de l'aspect sécuritaire, un paramétrage correct est indispensable pour :</p>
+<ul>
+<li>Optimiser les performances et les économies d'énergie</li>
+<li>Protéger le moteur (limites de courant, surveillance thermique)</li>
+<li>Respecter les normes CEM (câblage blindé, mises à la terre)</li>
+<li>Valider l'éligibilité aux primes CEE (facture d'un professionnel exigée)</li>
+</ul>
+<p>Pour bénéficier de la prime CEE, la facture d'un installateur professionnel est obligatoire. Oteria Conseil vous met en relation avec des installateurs qualifiés et supervise la bonne exécution des travaux.</p>`
+  }
+];
+---
+
+<ExpertisePage
+  title="Variateur de vitesse : questions fréquentes (FAQ)"
+  description="Réponses aux questions les plus posées sur le variateur de vitesse : compatibilité moteur, harmoniques, durée de vie, maintenance, différence avec un démarreur progressif."
+  canonical="/expertises/variateur-de-vitesse/faq/"
+  keyword="FAQ variateur de vitesse"
+  cluster="Variateur de vitesse"
+  breadcrumb={[{label: "Expertises", href: "/expertises/"}, {label: "Variateur de vitesse", href: "/expertises/variateur-de-vitesse/"}]}
+>
+  <h2 class="text-2xl md:text-3xl font-bold text-navy-900 mb-6">Questions fréquentes sur le variateur de vitesse</h2>
+
+  <p class="text-navy-700 mb-8">Vous envisagez l'installation d'un variateur de vitesse ou souhaitez approfondir vos connaissances techniques ? Nos experts répondent aux interrogations les plus courantes de nos clients industriels et tertiaires.</p>
+
+  <FaqAccordion items={faqItems} />
+
+  <div class="bg-navy-50 border-l-4 border-gold-500 p-6 rounded-r-lg mb-6 mt-8">
+    <p class="text-navy-800 font-semibold mb-2">Une question spécifique à votre installation ?</p>
+    <p class="text-navy-600 text-sm">Nos experts techniques répondent gratuitement à vos interrogations et évaluent la pertinence d'un variateur de vitesse pour votre application. Contactez-nous sans engagement.</p>
+  </div>
+
+  <Fragment slot="sidebar-links">
+    <ul class="space-y-2 text-sm">
+      <li><a href="/expertises/variateur-de-vitesse/" class="text-navy-600 hover:text-gold-600 no-underline">Variateur de vitesse (hub)</a></li>
+      <li><a href="/expertises/variateur-de-vitesse/prime-cee/" class="text-navy-600 hover:text-gold-600 no-underline">Prime CEE variateur de vitesse</a></li>
+      <li><a href="/expertises/variateur-de-vitesse/tarifs/" class="text-navy-600 hover:text-gold-600 no-underline">Prix et rentabilité</a></li>
+      <li><a href="/expertises/variateur-de-vitesse/industrie/" class="text-navy-600 hover:text-gold-600 no-underline">Variateur pour l'industrie</a></li>
+      <li><a href="/expertises/variateur-de-vitesse/ventilation/" class="text-navy-600 hover:text-gold-600 no-underline">Variateur pour la ventilation</a></li>
+    </ul>
+  </Fragment>
+</ExpertisePage>
