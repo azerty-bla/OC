@@ -3,7 +3,7 @@ import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig({
   site: "https://azerty-bla.github.io",
-  base: "/Oteria-Conseil.fr",
+  base: "/OC",
   trailingSlash: "always",
   server: { port: 4325 },
   vite: {
