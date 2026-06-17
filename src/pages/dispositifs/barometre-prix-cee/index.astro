@@ -1,0 +1,651 @@
+---
+import "../../../styles/global.css";
+import Base from "../../../layouts/Base.astro";
+
+const categories = [
+  {
+    name: "CEE Classique",
+    min: 7,
+    max: 9,
+    mid: 8,
+    unitMin: "0,007",
+    unitMax: "0,009",
+    concerne: "Entreprises, tertiaire, industrie, collectivités, copropriétés",
+    color: "#d4a024",
+    gaugeMax: 20,
+  },
+  {
+    name: "CEE Précarité énergétique",
+    min: 13,
+    max: 16,
+    mid: 14.5,
+    unitMin: "0,013",
+    unitMax: "0,016",
+    concerne: "Bailleurs sociaux et propriétaires bailleurs, pour les logements occupés par des ménages aux revenus modestes et très modestes (plafonds ANAH)",
+    color: "#243b53",
+    gaugeMax: 20,
+  },
+];
+
+const trend = [
+  { period: "2024 (moy.)", classique: 7.95, precarite: null, source: "Registre EMMY" },
+  { period: "Fin 2025", classique: 8.68, precarite: null, source: "EMMY (cours moy. pondéré)" },
+  { period: "2025 (réf.)", classique: 9.05, precarite: 16.3, source: "Appel d'offres ANAH" },
+  { period: "Juin 2026", classique: 9.0, precarite: 16.5, source: "Marché spot CEE" },
+];
+const trendMax = 18;
+---
+
+<Base
+  title="Baromètre du prix des CEE : cours par catégorie (kWh cumac)"
+  description="Prix actuel des CEE en €/MWh cumac par catégorie : classique, précarité énergétique, coup de pouce. Baromètre mis à jour, sources et méthode de calcul de la prime."
+  canonicalPath="/dispositifs/barometre-prix-cee/"
+>
+  <!-- Breadcrumb -->
+  <nav class="bg-white border-b border-navy-100" aria-label="Fil d'Ariane">
+    <div class="mx-auto max-w-7xl px-6 py-3">
+      <ol class="flex items-center gap-2 text-sm text-navy-600">
+        <li><a href="/" class="hover:text-gold-600 no-underline">Accueil</a></li>
+        <li class="before:content-['/'] before:mx-2"><a href="/dispositifs/" class="hover:text-gold-600 no-underline">Dispositifs CEE</a></li>
+        <li class="before:content-['/'] before:mx-2 text-navy-900 font-medium">Baromètre prix CEE</li>
+      </ol>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <section class="relative overflow-hidden" style="background-color: #102a43;">
+    <canvas id="network-canvas" class="absolute inset-0 w-full h-full opacity-[0.35]"></canvas>
+    <div class="relative mx-auto max-w-7xl px-6 py-16 md:py-24">
+      <p class="text-sm font-semibold uppercase tracking-widest mb-4" style="color: #f5c04a;">Dispositifs CEE — Données actualisées</p>
+      <h1 class="text-3xl md:text-4xl lg:text-5xl font-bold leading-tight max-w-4xl" style="color: #ffffff;">Baromètre du prix des CEE</h1>
+      <p class="mt-6 text-lg leading-relaxed max-w-2xl" style="color: #d9e2ec;">Le prix du kWh cumac varie chaque mois selon l'offre et la demande sur le marché des Certificats d'Économie d'Énergie. Voici les cours indicatifs par catégorie, juin 2026.</p>
+      <div class="mt-8 flex items-center gap-2">
+        <span class="relative flex h-2.5 w-2.5">
+          <span class="absolute inline-flex h-full w-full animate-ping rounded-full opacity-60" style="background-color: #48bb78;"></span>
+          <span class="relative inline-flex h-2.5 w-2.5 rounded-full" style="background-color: #48bb78;"></span>
+        </span>
+        <span class="text-sm" style="color: #9fb3c8;">Cours mis à jour — juin 2026</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Baromètre visuel : jauges par catégorie -->
+  <section class="py-16 md:py-20 bg-white">
+    <div class="mx-auto max-w-5xl px-6">
+      <div class="mb-10 text-center">
+        <h2 class="text-2xl md:text-3xl font-bold text-navy-900" style="font-family: var(--font-heading);">Cours indicatifs par catégorie</h2>
+        <p class="mt-3 text-navy-600 max-w-2xl mx-auto">Prix de marché en €/MWh cumac, arrêtés en juin 2026, à partir du registre EMMY et des dernières ventes de référence (appels d'offres ANAH).</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {categories.map((cat) => {
+          const fillPct = Math.round((cat.mid / cat.gaugeMax) * 100);
+          const minPct = Math.round((cat.min / cat.gaugeMax) * 100);
+          const maxPct = Math.round((cat.max / cat.gaugeMax) * 100);
+          return (
+            <div class="rounded-lg border border-navy-100 p-6 md:p-8">
+              <div class="flex items-start justify-between gap-4 mb-6">
+                <div>
+                  <p class="text-xs font-semibold uppercase tracking-wider text-navy-500">{cat.name}</p>
+                  <p class="mt-2 text-3xl md:text-4xl font-bold text-navy-900" style="font-family: var(--font-heading);">
+                    {cat.min}&ndash;{cat.max}<span class="text-base font-medium text-navy-500"> €/MWhc</span>
+                  </p>
+                  <p class="text-xs text-navy-500 mt-1">soit {cat.unitMin}&ndash;{cat.unitMax} € / kWh cumac</p>
+                </div>
+                <span class="flex-shrink-0 w-3 h-3 rounded-full mt-1" style={`background-color: ${cat.color};`} aria-hidden="true"></span>
+              </div>
+
+              <div
+                class="barometer-gauge"
+                role="img"
+                aria-label={`Jauge de prix ${cat.name} : entre ${cat.min} et ${cat.max} euros par mégawattheure cumac, sur une échelle de 0 à ${cat.gaugeMax}`}
+              >
+                <div class="barometer-gauge__track">
+                  <div class="barometer-gauge__range" style={`left: ${minPct}%; width: ${maxPct - minPct}%; background-color: ${cat.color};`}></div>
+                  <div class="barometer-gauge__marker" style={`left: ${fillPct}%; border-color: ${cat.color};`}></div>
+                </div>
+                <div class="flex justify-between text-[11px] text-navy-400 mt-2">
+                  <span>0</span>
+                  <span>{cat.gaugeMax / 2} €/MWhc</span>
+                  <span>{cat.gaugeMax}+</span>
+                </div>
+              </div>
+
+              <p class="text-sm text-navy-600 mt-6 leading-relaxed">{cat.concerne}</p>
+            </div>
+          );
+        })}
+      </div>
+
+      <p class="text-xs text-navy-400 mt-6 text-center">Jauge sur une échelle indicative de 0 à 20 €/MWh cumac — ne constitue pas une cotation officielle en temps réel.</p>
+    </div>
+  </section>
+
+  <!-- Article -->
+  <article class="pb-16 md:pb-24 bg-white">
+    <div class="mx-auto max-w-3xl px-6 expertise-content">
+
+      <h2>Le prix dépend de la catégorie, pas du secteur d'activité</h2>
+
+      <p>Contrairement à une idée reçue, le marché des CEE ne fixe pas un prix différent par secteur. Deux variables bien distinctes entrent en jeu :</p>
+
+      <div class="split-compare">
+        <div class="split-compare__item">
+          <span class="split-compare__tag">Le prix</span>
+          <p class="split-compare__lead">Catégorie du certificat</p>
+          <p class="split-compare__desc">Classique ou précarité énergétique — fixé par le marché, indépendamment du secteur du bénéficiaire des travaux.</p>
+        </div>
+        <div class="split-compare__sep" aria-hidden="true">×</div>
+        <div class="split-compare__item">
+          <span class="split-compare__tag">Le volume</span>
+          <p class="split-compare__lead">Secteur et type de travaux</p>
+          <p class="split-compare__desc">Le nombre de kWh cumac généré dépend de l'opération réalisée (fiches standardisées).</p>
+        </div>
+      </div>
+
+      <div class="expertise-highlight">
+        <p>Prime (€) = Volume généré par votre opération (kWh cumac, dépend de votre secteur et de vos travaux) / 1 000 x Prix de marché de la catégorie (€/MWh cumac)</p>
+      </div>
+
+      <h2>Évolution récente du cours moyen</h2>
+
+      <p>La tendance est à la hausse depuis 2024, portée par le démarrage de la <strong>6ᵉ période des CEE (2026-2030)</strong> :</p>
+
+      <div class="expertise-stats">
+        <div class="stat-item">
+          <div class="stat-number">1 050</div>
+          <div class="stat-label">TWh cumac d'obligation annuelle</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-number">+27 %</div>
+          <div class="stat-label">vs 5ᵉ période</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-number">280</div>
+          <div class="stat-label">TWh cumac réservés à la précarité</div>
+        </div>
+      </div>
+
+      <p>Cette hausse de l'obligation soutient mécaniquement la demande de certificats, donc les prix.</p>
+
+      <div class="trend-chart" role="img" aria-label="Graphique d'évolution du prix moyen des CEE classique et précarité énergétique, de 2024 à juin 2026, tendance haussière">
+        <div class="trend-chart__legend">
+          <span class="trend-chart__legend-item"><i style="background-color: #d4a024;"></i>CEE Classique</span>
+          <span class="trend-chart__legend-item"><i style="background-color: #243b53;"></i>CEE Précarité</span>
+        </div>
+        <div class="trend-chart__bars">
+          {trend.map((t) => (
+            <div class="trend-chart__group">
+              <div class="trend-chart__col">
+                <div class="trend-chart__bar trend-chart__bar--classique" style={`height: ${Math.round((t.classique / trendMax) * 100)}%;`}>
+                  <span class="trend-chart__value">{t.classique.toFixed(2).replace(".", ",")}</span>
+                </div>
+                {t.precarite && (
+                  <div class="trend-chart__bar trend-chart__bar--precarite" style={`height: ${Math.round((t.precarite / trendMax) * 100)}%;`}>
+                    <span class="trend-chart__value">{t.precarite.toFixed(1).replace(".", ",")}</span>
+                  </div>
+                )}
+              </div>
+              <p class="trend-chart__label">{t.period}</p>
+              <p class="trend-chart__source">{t.source}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <h2>Pourquoi le prix fluctue chaque mois</h2>
+
+      <div class="expertise-cards cols-3">
+        <div class="card">
+          <h4>Niveau d'obligation</h4>
+          <p>Plus le volume à atteindre par les fournisseurs d'énergie est élevé, plus la demande de certificats augmente.</p>
+        </div>
+        <div class="card">
+          <h4>Stock disponible</h4>
+          <p>Le volume de certificats disponibles sur le registre EMMY influence directement la tension sur les prix.</p>
+        </div>
+        <div class="card">
+          <h4>Calendrier réglementaire</h4>
+          <p>Approche de fin de période, révision des fiches, durcissement des forfaits accélèrent les variations.</p>
+        </div>
+        <div class="card">
+          <h4>Tension sur les dépôts</h4>
+          <p>Le rythme de dépôt des dossiers chez les obligés et délégataires fait varier la demande à court terme.</p>
+        </div>
+      </div>
+
+      <div class="expertise-band">
+        <h3>Pourquoi cette volatilité joue en votre faveur — si elle est anticipée</h3>
+        <p>Oteria Conseil négocie la valorisation de vos CEE au moment le plus favorable du calendrier, plutôt que de signer au premier prix proposé par un obligé. 19 ans d'expérience sur le marché pour anticiper les tendances et sécuriser le meilleur prix.</p>
+      </div>
+
+      <h2>La bonification Coup de Pouce</h2>
+
+      <div class="expertise-highlight">
+        <p>La bonification <strong>Coup de Pouce</strong> n'est pas un prix distinct : elle majore le volume de kWh cumac de l'opération (chauffage, isolation, rénovation d'ampleur), ensuite valorisé au prix classique ou précarité selon le profil du bénéficiaire.</p>
+      </div>
+
+      <!-- CTA -->
+      <div class="rounded-lg p-8 mt-12 text-center" style="background-color: #f0f4f8;">
+        <h3 class="text-xl font-bold text-navy-900 mb-3">Quel est le potentiel financier de vos travaux au prix actuel ?</h3>
+        <p class="text-navy-600 mb-6">Nos experts calculent votre volume de kWh cumac et le valorisent au meilleur prix de marché. Diagnostic gratuit sous 48h.</p>
+        <a href="/diagnostic-gratuit/" class="inline-flex items-center justify-center rounded-md px-8 py-4 text-base font-semibold no-underline transition-colors" style="background-color: #d4a024; color: #102a43;">
+          Demander un diagnostic gratuit
+        </a>
+      </div>
+
+      <p class="text-xs text-navy-400 mt-8">
+        Sources : registre national des CEE (Emmy), résultats des appels d'offres ANAH, données de marché spot CEE. Chiffres indicatifs arrêtés en juin 2026, susceptibles d'évoluer mensuellement.
+      </p>
+    </div>
+  </article>
+
+  <!-- Navigation dispositifs -->
+  <section class="py-12 border-t border-navy-100" style="background-color: #f0f4f8;">
+    <div class="mx-auto max-w-7xl px-6">
+      <h2 class="text-xl font-bold text-navy-900 mb-6">Approfondir le dispositif CEE</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <a href="/dispositifs/comprendre-les-cee/" class="block bg-white rounded-lg p-5 border border-navy-100 hover:border-gold-300 hover:shadow-md transition-all no-underline"><p class="text-sm font-bold text-navy-900">Comprendre les CEE</p><p class="text-xs text-navy-600 mt-1">Mécanisme complet</p></a>
+        <a href="/dispositifs/calcul-prime/" class="block bg-white rounded-lg p-5 border border-navy-100 hover:border-gold-300 hover:shadow-md transition-all no-underline"><p class="text-sm font-bold text-navy-900">Calcul de la prime</p><p class="text-xs text-navy-600 mt-1">Méthode et exemples</p></a>
+        <a href="/dispositifs/kwh-cumac/" class="block bg-white rounded-lg p-5 border border-navy-100 hover:border-gold-300 hover:shadow-md transition-all no-underline"><p class="text-sm font-bold text-navy-900">kWh cumac</p><p class="text-xs text-navy-600 mt-1">Définition et calcul</p></a>
+        <a href="/dispositifs/obliges/" class="block bg-white rounded-lg p-5 border border-navy-100 hover:border-gold-300 hover:shadow-md transition-all no-underline"><p class="text-sm font-bold text-navy-900">Les obligés</p><p class="text-xs text-navy-600 mt-1">Rôle et fonctionnement</p></a>
+        <a href="/dispositifs/demarches/" class="block bg-white rounded-lg p-5 border border-navy-100 hover:border-gold-300 hover:shadow-md transition-all no-underline"><p class="text-sm font-bold text-navy-900">Démarches</p><p class="text-xs text-navy-600 mt-1">Étapes pour obtenir la prime</p></a>
+        <a href="/dispositifs/legislation/" class="block bg-white rounded-lg p-5 border border-navy-100 hover:border-gold-300 hover:shadow-md transition-all no-underline"><p class="text-sm font-bold text-navy-900">Législation</p><p class="text-xs text-navy-600 mt-1">Cadre juridique</p></a>
+        <a href="/dispositifs/glossaire/" class="block bg-white rounded-lg p-5 border border-navy-100 hover:border-gold-300 hover:shadow-md transition-all no-underline"><p class="text-sm font-bold text-navy-900">Glossaire</p><p class="text-xs text-navy-600 mt-1">Tous les termes expliqués</p></a>
+        <a href="/dispositifs/faq/" class="block bg-white rounded-lg p-5 border border-navy-100 hover:border-gold-300 hover:shadow-md transition-all no-underline"><p class="text-sm font-bold text-navy-900">FAQ</p><p class="text-xs text-navy-600 mt-1">Questions fréquentes</p></a>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  /* Typographie du contenu (reprise de ExpertisePage.astro — cette page utilise Base.astro
+     directement, ces styles globaux ne sont donc pas chargés automatiquement) */
+  .expertise-content {
+    --content-max-w: 48rem;
+  }
+
+  .expertise-content > section {
+    padding-top: 4rem;
+    padding-bottom: 4rem;
+  }
+
+  @media (min-width: 768px) {
+    .expertise-content > section {
+      padding-top: 5rem;
+      padding-bottom: 5rem;
+    }
+  }
+
+  .expertise-content h2 {
+    font-family: var(--font-heading);
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--color-navy-900);
+    margin-top: 2.5rem;
+    margin-bottom: 0.75rem;
+    position: relative;
+    padding-bottom: 1rem;
+  }
+
+  @media (min-width: 768px) {
+    .expertise-content h2 {
+      font-size: 1.875rem;
+    }
+  }
+
+  .expertise-content h2::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 3rem;
+    height: 3px;
+    border-radius: 9999px;
+    background-color: #d4a024;
+  }
+
+  .expertise-content h3 {
+    font-family: var(--font-heading);
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--color-navy-900);
+    margin-top: 2rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .expertise-content p {
+    color: var(--color-navy-700);
+    line-height: 1.8;
+    max-width: var(--content-max-w);
+  }
+
+  .expertise-content ul,
+  .expertise-content ol {
+    max-width: var(--content-max-w);
+    padding-left: 0;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .expertise-content ul {
+    list-style: none;
+  }
+
+  .expertise-content ul li {
+    position: relative;
+    padding-left: 1.5rem;
+    margin-bottom: 0.625rem;
+    color: var(--color-navy-700);
+    line-height: 1.7;
+  }
+
+  .expertise-content ul li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0.7em;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: #d4a024;
+  }
+
+  .expertise-highlight {
+    background-color: var(--color-gold-50);
+    border-left: 4px solid var(--color-gold-600);
+    padding: 1.5rem 2rem;
+    border-radius: 0 0.5rem 0.5rem 0;
+    margin: 2rem 0;
+  }
+
+  .expertise-highlight p {
+    color: var(--color-navy-800);
+    font-weight: 500;
+    margin: 0;
+  }
+
+  .expertise-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 1.5rem;
+    margin: 2.5rem 0;
+  }
+
+  .expertise-stats .stat-item {
+    text-align: center;
+    padding: 1.5rem;
+    background-color: #ffffff;
+    border: 1px solid var(--color-navy-100);
+    border-radius: 0.5rem;
+  }
+
+  .expertise-stats .stat-number {
+    font-family: var(--font-heading);
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--color-navy-900);
+    line-height: 1.2;
+  }
+
+  .expertise-stats .stat-label {
+    font-size: 0.875rem;
+    color: var(--color-navy-600);
+    margin-top: 0.25rem;
+  }
+
+  .expertise-cards {
+    display: grid;
+    grid-template-columns: repeat(1, 1fr);
+    gap: 1.5rem;
+    margin: 2rem 0;
+  }
+
+  @media (min-width: 768px) {
+    .expertise-cards {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .expertise-cards.cols-3 {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  .expertise-cards .card {
+    background-color: #ffffff;
+    border: 1px solid var(--color-navy-100);
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+
+  .expertise-cards .card:hover {
+    border-color: var(--color-gold-300);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  }
+
+  .expertise-cards .card h4 {
+    font-family: var(--font-heading);
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--color-navy-900);
+    margin-bottom: 0.5rem;
+  }
+
+  .expertise-cards .card p {
+    font-size: 0.875rem;
+    color: var(--color-navy-600);
+    line-height: 1.6;
+  }
+
+  .expertise-band {
+    background-color: var(--color-navy-50);
+    padding: 3rem 0;
+    margin: 3rem calc(-50vw + 50%);
+    padding-left: calc(50vw - 50%);
+    padding-right: calc(50vw - 50%);
+  }
+
+  /* Comparatif prix / volume */
+  .split-compare {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 1.25rem;
+    margin: 1.75rem 0;
+  }
+
+  .split-compare__item {
+    background-color: #fafcfe;
+    border: 1px solid var(--color-navy-100);
+    border-radius: 0.5rem;
+    padding: 1.25rem 1.5rem;
+  }
+
+  .split-compare__tag {
+    display: inline-block;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #b8860b;
+    background-color: var(--color-gold-50);
+    padding: 0.2rem 0.6rem;
+    border-radius: 9999px;
+    margin-bottom: 0.625rem;
+  }
+
+  .split-compare__lead {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    font-size: 1.0625rem;
+    color: var(--color-navy-900);
+    margin: 0 0 0.5rem;
+  }
+
+  .split-compare__desc {
+    font-size: 0.875rem;
+    color: var(--color-navy-600);
+    line-height: 1.6;
+    margin: 0;
+    max-width: none;
+  }
+
+  .split-compare__sep {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--color-navy-300);
+  }
+
+  @media (max-width: 640px) {
+    .split-compare {
+      grid-template-columns: 1fr;
+    }
+    .split-compare__sep {
+      justify-self: center;
+    }
+  }
+
+  /* Baromètre — jauge de prix par catégorie */
+  .barometer-gauge__track {
+    position: relative;
+    height: 10px;
+    border-radius: 9999px;
+    background-color: var(--color-navy-50);
+    border: 1px solid var(--color-navy-100);
+    overflow: visible;
+  }
+
+  .barometer-gauge__range {
+    position: absolute;
+    top: 0;
+    height: 100%;
+    border-radius: 9999px;
+    opacity: 0.85;
+  }
+
+  .barometer-gauge__marker {
+    position: absolute;
+    top: 50%;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background-color: #ffffff;
+    border-width: 3px;
+    border-style: solid;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 1px 4px rgba(16, 42, 67, 0.25);
+  }
+
+  /* Graphique de tendance — barres CSS */
+  .trend-chart {
+    margin: 2rem 0 2.5rem;
+    border: 1px solid var(--color-navy-100);
+    border-radius: 0.5rem;
+    padding: 1.5rem 1.25rem 1rem;
+    background-color: #fafcfe;
+  }
+
+  .trend-chart__legend {
+    display: flex;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+    font-size: 0.75rem;
+    color: var(--color-navy-600);
+  }
+
+  .trend-chart__legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .trend-chart__legend-item i {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+  }
+
+  .trend-chart__bars {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.75rem;
+    align-items: end;
+    height: 200px;
+  }
+
+  .trend-chart__group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100%;
+  }
+
+  .trend-chart__col {
+    display: flex;
+    align-items: end;
+    gap: 4px;
+    flex: 1;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .trend-chart__bar {
+    width: 22px;
+    border-radius: 4px 4px 0 0;
+    position: relative;
+    min-height: 4px;
+    transition: height 0.3s ease;
+  }
+
+  .trend-chart__bar--classique {
+    background-color: #d4a024;
+  }
+
+  .trend-chart__bar--precarite {
+    background-color: #243b53;
+  }
+
+  .trend-chart__value {
+    position: absolute;
+    top: -1.25rem;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    color: var(--color-navy-700);
+    white-space: nowrap;
+  }
+
+  .trend-chart__label {
+    margin-top: 0.625rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--color-navy-800);
+    text-align: center;
+  }
+
+  .trend-chart__source {
+    margin-top: 0.125rem;
+    font-size: 0.625rem;
+    color: var(--color-navy-400);
+    text-align: center;
+  }
+
+  @media (max-width: 480px) {
+    .trend-chart__bars {
+      height: 160px;
+    }
+    .trend-chart__bar {
+      width: 16px;
+    }
+  }
+</style>
+
+<script is:inline>
+  const canvas = document.getElementById('network-canvas');
+  if (canvas) { const ctx = canvas.getContext('2d'); var particles = []; const PARTICLE_COUNT = 55; const CONNECTION_DIST = 150; function resize() { canvas.width = canvas.offsetWidth; canvas.height = canvas.offsetHeight; } function init() { resize(); particles = []; for (let i = 0; i < PARTICLE_COUNT; i++) { particles.push({ x: Math.random() * canvas.width, y: Math.random() * canvas.height, vx: (Math.random() - 0.5) * 0.5, vy: (Math.random() - 0.5) * 0.3 }); } } function draw() { ctx.clearRect(0, 0, canvas.width, canvas.height); for (let i = 0; i < particles.length; i++) { const p = particles[i]; p.x += p.vx; p.y += p.vy; if (p.x < 0 || p.x > canvas.width) p.vx *= -1; if (p.y < 0 || p.y > canvas.height) p.vy *= -1; ctx.beginPath(); ctx.arc(p.x, p.y, 2, 0, Math.PI * 2); ctx.fillStyle = '#d4a024'; ctx.fill(); for (let j = i + 1; j < particles.length; j++) { const p2 = particles[j]; const dist = Math.hypot(p.x - p2.x, p.y - p2.y); if (dist < CONNECTION_DIST) { ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(p2.x, p2.y); ctx.strokeStyle = `rgba(212, 160, 36, ${1 - dist / CONNECTION_DIST})`; ctx.lineWidth = 0.7; ctx.stroke(); } } } requestAnimationFrame(draw); } init(); draw(); window.addEventListener('resize', resize); }
+</script>
