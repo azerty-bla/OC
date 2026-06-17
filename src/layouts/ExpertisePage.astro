@@ -9,9 +9,11 @@ interface Props {
   cluster: string;
   breadcrumb: { label: string; href: string }[];
   relatedPages?: { title: string; href: string; description: string }[];
+  journeyPages?: { label: string; href: string }[];
 }
 
-const { title, description, canonical, keyword, cluster, breadcrumb, relatedPages = [] } = Astro.props;
+const { title, description, canonical, keyword, cluster, breadcrumb, relatedPages = [], journeyPages = [] } = Astro.props;
+const currentPath = Astro.url.pathname;
 ---
 
 <Base title={title} description={description} canonicalPath={canonical}>
@@ -62,63 +64,56 @@ const { title, description, canonical, keyword, cluster, breadcrumb, relatedPage
           </div>
         </div>
 
-        <!-- Right: Compact Contact Form -->
+        <!-- Right: CTA Card -->
         <div class="lg:col-span-2">
           <div class="bg-white rounded-lg p-6 shadow-2xl" id="hero-form">
             <p class="text-base font-bold text-navy-900 mb-1" style="font-family: var(--font-heading)">Diagnostic gratuit</p>
             <p class="text-xs text-navy-600 mb-4">Étude personnalisée sans engagement</p>
-            <form action="/diagnostic-gratuit/" method="GET" class="space-y-3">
-              <div class="grid grid-cols-2 gap-3">
-                <input
-                  type="text"
-                  name="raison_sociale"
-                  required
-                  placeholder="Raison sociale *"
-                  class="w-full rounded-md border border-navy-200 px-3 py-2.5 text-sm text-navy-900 placeholder:text-navy-500 focus:border-gold-500 focus:ring-1 focus:ring-gold-500 outline-none transition-colors"
-                />
-                <input
-                  type="text"
-                  name="nom"
-                  required
-                  placeholder="Nom *"
-                  class="w-full rounded-md border border-navy-200 px-3 py-2.5 text-sm text-navy-900 placeholder:text-navy-500 focus:border-gold-500 focus:ring-1 focus:ring-gold-500 outline-none transition-colors"
-                />
-              </div>
-              <div class="grid grid-cols-2 gap-3">
-                <input
-                  type="email"
-                  name="email"
-                  required
-                  placeholder="Email professionnel *"
-                  class="w-full rounded-md border border-navy-200 px-3 py-2.5 text-sm text-navy-900 placeholder:text-navy-500 focus:border-gold-500 focus:ring-1 focus:ring-gold-500 outline-none transition-colors"
-                />
-                <input
-                  type="tel"
-                  name="telephone"
-                  required
-                  placeholder="Téléphone *"
-                  class="w-full rounded-md border border-navy-200 px-3 py-2.5 text-sm text-navy-900 placeholder:text-navy-500 focus:border-gold-500 focus:ring-1 focus:ring-gold-500 outline-none transition-colors"
-                />
-              </div>
-              <textarea
-                name="message"
-                rows="2"
-                placeholder="Message : type de chauffage, surface, préférence horaire de contact *"
-                class="w-full rounded-md border border-navy-200 px-3 py-2.5 text-sm text-navy-900 placeholder:text-navy-500 focus:border-gold-500 focus:ring-1 focus:ring-gold-500 outline-none transition-colors resize-none"
-              ></textarea>
-              <button
-                type="submit"
-                class="w-full rounded-md px-4 py-2.5 text-sm font-semibold transition-colors cursor-pointer border-none"
-                style="background-color: #d4a024; color: #102a43;"
-              >
-                Demander un diagnostic →
-              </button>
-            </form>
+            <ul class="space-y-2 mb-5">
+              {["Réponse sous 48h ouvrées", "Sans engagement", "19 ans d'expertise en CEE"].map(item => (
+                <li class="flex items-center gap-2 text-sm text-navy-700">
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                    <circle cx="8" cy="8" r="7" stroke="#48bb78" stroke-width="1.5"/>
+                    <path d="M5 8.5l2 2 4-4" stroke="#48bb78" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                  {item}
+                </li>
+              ))}
+            </ul>
+            <a
+              href="/diagnostic-gratuit/"
+              class="block text-center w-full rounded-md px-4 py-2.5 text-sm font-semibold transition-colors no-underline"
+              style="background-color: #d4a024; color: #102a43;"
+            >
+              Demander un diagnostic →
+            </a>
           </div>
         </div>
       </div>
     </div>
   </section>
+
+  <!-- SOMMAIRE / JOURNEY NAV -->
+  {journeyPages.length > 0 && (
+    <nav class="expertise-journey" aria-label="Pages de cette expertise">
+      <div class="expertise-journey__c">
+        <span class="expertise-journey__pre" aria-hidden="true">Dans ce dossier</span>
+        <ol class="expertise-journey__track" role="list">
+          {journeyPages.map((page) => (
+            <li class={`expertise-journey__item${currentPath === page.href ? " is-active" : ""}`}>
+              <a
+                href={page.href}
+                class="expertise-journey__link"
+                aria-current={currentPath === page.href ? "page" : undefined}
+              >
+                {page.label}
+              </a>
+            </li>
+          ))}
+        </ol>
+      </div>
+    </nav>
+  )}
 
   <!-- MAIN CONTENT -->
   <article class="expertise-content">
@@ -169,25 +164,6 @@ const { title, description, canonical, keyword, cluster, breadcrumb, relatedPage
     </div>
   </section>
 
-  <!-- STICKY CTA BAR -->
-  <div
-    id="sticky-cta-bar"
-    class="fixed bottom-0 left-0 right-0 z-40 translate-y-full transition-transform duration-300"
-    style="background-color: #243b53;"
-  >
-    <div class="mx-auto max-w-7xl px-6 py-3 flex items-center justify-between">
-      <p class="text-sm font-medium hidden sm:block" style="color: #ffffff;">
-        <span style="color: #f5c04a;">Diagnostic gratuit</span> — Réponse sous 48h
-      </p>
-      <a
-        href="/diagnostic-gratuit/"
-        class="inline-flex items-center gap-2 rounded-md px-5 py-2 text-sm font-semibold no-underline transition-colors"
-        style="background-color: #d4a024; color: #102a43;"
-      >
-        Demander un diagnostic
-      </a>
-    </div>
-  </div>
 
 </Base>
 
@@ -454,48 +430,99 @@ const { title, description, canonical, keyword, cluster, breadcrumb, relatedPage
     margin: 1.5rem 0;
     border-radius: 0.5rem;
   }
+
+  /* Sommaire / journey nav */
+  .expertise-journey {
+    background-color: #ffffff;
+    border-bottom: 1px solid var(--color-navy-100);
+  }
+
+  .expertise-journey__c {
+    max-width: 80rem;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+  }
+
+  .expertise-journey__pre {
+    flex-shrink: 0;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--color-navy-500);
+  }
+
+  @media (max-width: 640px) {
+    .expertise-journey__pre {
+      display: none;
+    }
+  }
+
+  .expertise-journey__track {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    list-style: none;
+    padding: 0.75rem 0;
+    margin: 0;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .expertise-journey__track::-webkit-scrollbar {
+    display: none;
+  }
+
+  .expertise-journey__item {
+    position: relative;
+    flex-shrink: 0;
+  }
+
+  .expertise-journey__link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.5rem 1rem;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--color-navy-700);
+    background-color: var(--color-navy-50);
+    border: 1px solid transparent;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: background-color 0.15s, color 0.15s, border-color 0.15s, transform 0.1s;
+  }
+
+  .expertise-journey__link::after {
+    content: "→";
+    opacity: 0;
+    margin-left: -0.25rem;
+    transition: opacity 0.15s, margin-left 0.15s;
+  }
+
+  .expertise-journey__link:hover {
+    color: #102a43;
+    background-color: #fdf6e6;
+    border-color: #f0d693;
+    transform: translateY(-1px);
+  }
+
+  .expertise-journey__link:hover::after {
+    opacity: 1;
+    margin-left: 0;
+  }
+
+  .expertise-journey__item.is-active .expertise-journey__link {
+    color: #102a43;
+    background-color: #d4a024;
+  }
 </style>
-
-<!-- SCRIPT for sticky CTA bar -->
-<script>
-  document.addEventListener("DOMContentLoaded", () => {
-    const stickyBar = document.getElementById("sticky-cta-bar");
-    const heroForm = document.getElementById("hero-form");
-    const footer = document.querySelector("footer");
-
-    if (!stickyBar || !heroForm || !footer) return;
-
-    const heroObserver = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            stickyBar.classList.add("translate-y-full");
-            stickyBar.classList.remove("translate-y-0");
-          } else {
-            stickyBar.classList.remove("translate-y-full");
-            stickyBar.classList.add("translate-y-0");
-          }
-        });
-      },
-      { threshold: 0.5 }
-    );
-
-    const footerObserver = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            stickyBar.classList.add("translate-y-full");
-            stickyBar.classList.remove("translate-y-0");
-          }
-        });
-      },
-      { threshold: 0.3 }
-    );
-
-    heroObserver.observe(heroForm);
-    footerObserver.observe(footer);
-  });
-</script>
 
 <script is:inline>
   const canvas = document.getElementById('network-canvas');

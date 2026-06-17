@@ -9,9 +9,10 @@ interface Props {
   subheadline: string;
   stats?: { value: string; label: string }[];
   journeyStep?: number; // 1–5 : étape CEE active dans le navigator
+  showHeroForm?: boolean; // false = masque la carte formulaire du hero (composant conservé pour réutilisation future)
 }
 
-const { title, description, canonical, headline, subheadline, stats, journeyStep } = Astro.props;
+const { title, description, canonical, headline, subheadline, stats, journeyStep, showHeroForm = true } = Astro.props;
 
 const STEPS = [
   { n: 1, label: "Comprendre", href: "/dispositifs/comprendre-les-cee/" },
@@ -54,69 +55,38 @@ const STEPS = [
       </ul>
     </div>
 
-    <!-- Droite : form card -->
-    <div class="hub-hero__aside">
-      <div class="hub-fc" id="hero-form">
-        <div class="hub-fc__head">
-          <span class="hub-fc__badge">Gratuit · 2 min</span>
-          <p class="hub-fc__title">Votre étude CEE</p>
-          <p class="hub-fc__sub">Estimation personnalisée de vos primes</p>
+    <!-- Droite : form card (masquable via showHeroForm, voir CLAUDE.md) -->
+    {showHeroForm && (
+      <div class="hub-hero__aside">
+        <div class="hub-fc" id="hero-form">
+          <div class="hub-fc__head">
+            <span class="hub-fc__badge">Gratuit · 2 min</span>
+            <p class="hub-fc__title">Votre étude CEE</p>
+            <p class="hub-fc__sub">Estimation personnalisée de vos primes</p>
+          </div>
+
+          <div class="hub-fc__cta-wrap">
+            <ul class="hub-fc__list" role="list">
+              {["Réponse sous 48h ouvrées", "Sans engagement", "19 ans d'expérience en CEE"].map(item => (
+                <li>
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                    <circle cx="8" cy="8" r="7" stroke="#48bb78" stroke-width="1.5"/>
+                    <path d="M5 8.5l2 2 4-4" stroke="#48bb78" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                  {item}
+                </li>
+              ))}
+            </ul>
+            <a href="/diagnostic-gratuit/" class="hub-fc__cta">
+              Obtenir mon diagnostic
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </a>
+          </div>
         </div>
-
-        <form action="/diagnostic-gratuit/" method="GET" class="hub-fc__form" novalidate>
-          <input type="hidden" name="source" value="hub-hero" />
-
-          <div class="hub-fc__row">
-            <div class="hub-fc__field">
-              <label for="hf-co">Entreprise <span class="req" aria-hidden="true">*</span></label>
-              <input id="hf-co" type="text" name="raison_sociale" required autocomplete="organization" placeholder="Raison sociale" />
-            </div>
-            <div class="hub-fc__field">
-              <label for="hf-nom">Nom <span class="req" aria-hidden="true">*</span></label>
-              <input id="hf-nom" type="text" name="nom" required autocomplete="name" placeholder="Nom" />
-            </div>
-          </div>
-
-          <div class="hub-fc__row">
-            <div class="hub-fc__field">
-              <label for="hf-em">Email <span class="req" aria-hidden="true">*</span></label>
-              <input id="hf-em" type="email" name="email" required autocomplete="email" placeholder="vous@société.fr" />
-            </div>
-            <div class="hub-fc__field">
-              <label for="hf-ph">Téléphone <span class="req" aria-hidden="true">*</span></label>
-              <input id="hf-ph" type="tel" name="telephone" required autocomplete="tel" placeholder="06 00 00 00 00" />
-            </div>
-          </div>
-
-          <div class="hub-fc__field">
-            <label for="hf-ty">Type de projet</label>
-            <select id="hf-ty" name="type_projet">
-              <option value="">Sélectionner…</option>
-              <option value="industrie">Industrie / Process</option>
-              <option value="tertiaire">Tertiaire / Bureaux</option>
-              <option value="collectivite">Collectivité</option>
-              <option value="agriculture">Agriculture</option>
-              <option value="autre">Autre</option>
-            </select>
-          </div>
-
-          <button type="submit" class="hub-fc__cta">
-            Obtenir mon diagnostic
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-              <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </button>
-        </form>
-
-        <p class="hub-fc__legal">
-          <svg width="11" height="11" viewBox="0 0 11 11" fill="none" aria-hidden="true">
-            <circle cx="5.5" cy="5.5" r="4.5" stroke="#829ab1" stroke-width="1"/>
-            <path d="M5.5 5v3M5.5 3.5h.01" stroke="#829ab1" stroke-width="1" stroke-linecap="round"/>
-          </svg>
-          Données confidentielles · <a href="/politique-confidentialite/">RGPD</a> · Selon éligibilité, sous réserve d'instruction
-        </p>
       </div>
-    </div>
+    )}
 
   </div>
 </section>
@@ -288,17 +258,6 @@ const STEPS = [
   </div>
 </section>
 
-
-<!-- ═══════════════════════════════════════
-     STICKY BAR
-═══════════════════════════════════════ -->
-<div id="hub-sticky" class="hub-sticky" aria-hidden="true">
-  <div class="hub-c hub-sticky__inner">
-    <p><span class="hub-sticky__hl">Diagnostic CEE gratuit</span> — réponse sous 48h, sans engagement</p>
-    <a href="/diagnostic-gratuit/" class="hub-sticky__btn" tabindex="-1">Demander mon diagnostic</a>
-  </div>
-</div>
-
 </Base>
 
 
@@ -455,6 +414,14 @@ const STEPS = [
   display: flex; flex-direction: column; gap: .875rem;
 }
 
+.hub-fc__cta-wrap {
+  padding: 1.5rem 1.75rem 1.75rem;
+  display: flex; flex-direction: column; gap: 1.25rem;
+}
+
+.hub-fc__list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: .625rem; }
+.hub-fc__list li { display: flex; align-items: center; gap: .625rem; font-size: .8125rem; color: #486581; }
+
 .hub-fc__field { display: flex; flex-direction: column; gap: .3rem; }
 
 .hub-fc__field label {
@@ -492,6 +459,7 @@ const STEPS = [
   background: #d4a024; border: none; border-radius: .5rem;
   cursor: pointer; font-family: var(--font-heading);
   transition: background .15s, transform .1s; letter-spacing: .01em;
+  text-decoration: none;
 }
 .hub-fc__cta:hover { background: #7a530d; color: #fff; } /* #fff sur #7a530d = 6:1 ✓ */
 .hub-fc__cta:active { transform: scale(.99); }
@@ -797,8 +765,8 @@ const STEPS = [
   letter-spacing: .01em; line-height: 1.4;
 }
 .hub-formula__accent { color: #f5c04a; }
-.hub-formula__note {
-  position: relative; font-size: .75rem; color: #9fb3c8; margin-top: .75rem;
+.hub-formula p.hub-formula__note {
+  position: relative; font-size: .75rem; color: #d9e2ec; margin-top: .75rem;
 }
 
 
@@ -888,61 +856,4 @@ const STEPS = [
   box-shadow: 0 32px 80px rgba(0,0,0,.25), 0 0 0 1px rgba(255,255,255,.06);
 }
 
-
-/* ── STICKY BAR ── */
-.hub-sticky {
-  position: fixed; bottom: 0; left: 0; right: 0; z-index: 40;
-  background: #243b53; border-top: 1px solid rgba(255,255,255,.08);
-  transform: translateY(100%); transition: transform .3s cubic-bezier(.4,0,.2,1);
-}
-.hub-sticky.is-visible { transform: translateY(0); }
-
-.hub-sticky__inner {
-  display: flex; align-items: center; justify-content: space-between;
-  gap: 1.5rem; padding-block: .875rem;
-}
-.hub-sticky__inner p { font-size: .875rem; color: #d9e2ec; margin: 0; display: none; }
-@media (min-width: 640px) { .hub-sticky__inner p { display: block; } }
-
-.hub-sticky__hl { color: #f5c04a; font-weight: 700; }
-.hub-sticky__btn {
-  display: inline-flex; align-items: center;
-  padding: .625rem 1.25rem; background: #d4a024; color: #102a43;
-  font-size: .875rem; font-weight: 700; border-radius: .375rem;
-  text-decoration: none; white-space: nowrap; transition: background .15s;
-}
-.hub-sticky__btn:hover { background: #f5c04a; }
 </style>
-
-
-<script>
-  document.addEventListener("DOMContentLoaded", () => {
-    const sticky = document.getElementById("hub-sticky");
-    const heroForm = document.getElementById("hero-form");
-    const footer = document.querySelector("footer");
-    if (!sticky || !heroForm) return;
-
-    const show = () => {
-      sticky.classList.add("is-visible");
-      sticky.setAttribute("aria-hidden", "false");
-      (sticky.querySelector(".hub-sticky__btn") as HTMLElement)?.removeAttribute("tabindex");
-    };
-    const hide = () => {
-      sticky.classList.remove("is-visible");
-      sticky.setAttribute("aria-hidden", "true");
-      (sticky.querySelector(".hub-sticky__btn") as HTMLElement)?.setAttribute("tabindex", "-1");
-    };
-
-    new IntersectionObserver(
-      entries => entries.forEach(e => (e.isIntersecting ? hide() : show())),
-      { threshold: 0.3 }
-    ).observe(heroForm);
-
-    if (footer) {
-      new IntersectionObserver(
-        entries => entries.forEach(e => { if (e.isIntersecting) hide(); }),
-        { threshold: 0.2 }
-      ).observe(footer);
-    }
-  });
-</script>

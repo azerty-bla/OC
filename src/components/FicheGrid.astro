@@ -1,0 +1,90 @@
+---
+interface Fiche {
+  code: string;
+  title: string;
+  description: string;
+}
+
+interface Group {
+  title: string;
+  fiches: Fiche[];
+}
+
+interface Props {
+  groups: Group[];
+}
+
+const { groups } = Astro.props;
+---
+
+{groups.map((group) => (
+  <Fragment>
+    <h3>{group.title}</h3>
+    <div class="fiche-grid">
+      {group.fiches.map((fiche) => (
+        <div class="fiche-card">
+          <span class="fiche-card__code">{fiche.code}</span>
+          <h4 class="fiche-card__title">{fiche.title}</h4>
+          <p class="fiche-card__desc">{fiche.description}</p>
+        </div>
+      ))}
+    </div>
+  </Fragment>
+))}
+
+<style>
+  .fiche-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    margin: 1.5rem 0 2.5rem;
+  }
+
+  @media (min-width: 640px) {
+    .fiche-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .fiche-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  .fiche-card {
+    background-color: #ffffff;
+    border: 1px solid var(--color-navy-100);
+    border-radius: 0.5rem;
+    padding: 1.25rem;
+    cursor: default;
+  }
+
+  .fiche-card__code {
+    display: inline-block;
+    font-family: var(--font-heading);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    color: #7a530d;
+    background-color: var(--color-gold-50);
+    padding: 0.1875rem 0.5rem;
+    border-radius: 0.25rem;
+    margin-bottom: 0.625rem;
+  }
+
+  .fiche-card__title {
+    font-family: var(--font-heading);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--color-navy-900);
+    margin: 0 0 0.375rem;
+  }
+
+  .fiche-card__desc {
+    font-size: 0.8125rem;
+    color: var(--color-navy-600);
+    line-height: 1.55;
+    margin: 0;
+  }
+</style>
