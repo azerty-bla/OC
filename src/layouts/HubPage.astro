@@ -260,6 +260,71 @@ const STEPS = [
 
 </Base>
 
+<script>
+(function () {
+  const SUPA_URL = 'https://fuxjohuaexiwmggqlndi.supabase.co';
+  const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ1eGpvaHVhZXhpd21nZ3FsbmRpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgyNTI4NzQsImV4cCI6MjA5MzgyODg3NH0.RUs4F5QYNV1EuvRkRajfS1XBxVWkN_03whfHCSY3cj8';
+  const STRAPI = 'https://glowing-broccoli-25ba25fccf.strapiapp.com';
+  const STRAPI_TOKEN = 'c4c0b700a9ed03ac4657026f68deba9b4440154f1d8a4fb2a243e3ed0c554bc11dbbb00859291b3394341390b29ecba20ca345de6bc1954d54c036fab52284872bea2a325aaf50dbe9e0c06ed38b661155262b8ba2f312ae78c8c5c2147f7da39f61e88419a58467f1aaa85c97022b9fb16c376e61f87c9947c82204af50add0';
+
+  const SUCCESS_HTML = `
+    <div style="text-align:center;padding:2.5rem 1rem;">
+      <svg width="52" height="52" viewBox="0 0 52 52" fill="none" style="margin:0 auto 1rem;display:block;" aria-hidden="true">
+        <circle cx="26" cy="26" r="24" stroke="#48bb78" stroke-width="2"/>
+        <path d="M15 26l8 8 14-15" stroke="#48bb78" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <p style="font-weight:700;font-size:1rem;color:#102a43;margin:0 0 0.5rem;">Demande envoyée !</p>
+      <p style="font-size:0.8125rem;color:#486581;margin:0;">Nos experts vous recontactent sous 48h ouvrées.</p>
+    </div>`;
+
+  document.querySelectorAll('.hub-fc__form').forEach((form) => {
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = form.querySelector('button[type="submit"]');
+      const fd = new FormData(form as HTMLFormElement);
+      const data = {
+        raison_sociale: String(fd.get('raison_sociale') ?? ''),
+        nom: String(fd.get('nom') ?? ''),
+        email: String(fd.get('email') ?? ''),
+        telephone: String(fd.get('telephone') ?? ''),
+        type_projet: String(fd.get('type_projet') ?? ''),
+        source: String(fd.get('source') ?? 'hub-footer'),
+        site_origine: location.hostname,
+      };
+
+      if (btn) { (btn as HTMLButtonElement).disabled = true; btn.textContent = 'Envoi en cours…'; }
+
+      void fetch(`${STRAPI}/api/oteria-conseil-heroes`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${STRAPI_TOKEN}` },
+        body: JSON.stringify({ data }),
+      }).catch(() => {});
+
+      try {
+        const res = await fetch(`${SUPA_URL}/functions/v1/form-webhook`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${SUPA_KEY}` },
+          body: JSON.stringify({ collection: 'oteria-conseil-heroes', data }),
+        });
+        if (!res.ok) throw new Error('Erreur serveur');
+        const card = form.closest('.hub-fcta__card, .hub-fc');
+        if (card) card.innerHTML = SUCCESS_HTML;
+      } catch {
+        if (btn) { (btn as HTMLButtonElement).disabled = false; btn.textContent = 'Obtenir mon diagnostic'; }
+        let err = form.querySelector('.hub-fc__err');
+        if (!err) {
+          err = document.createElement('p');
+          err.className = 'hub-fc__err';
+          (err as HTMLElement).style.cssText = 'color:#e53e3e;font-size:0.8rem;margin-top:0.5rem;text-align:center;';
+          form.appendChild(err);
+        }
+        err.textContent = 'Une erreur est survenue, veuillez réessayer.';
+      }
+    });
+  });
+})();
+</script>
+
 
 <style is:global>
 /* ════════════════════════════════════════════════
