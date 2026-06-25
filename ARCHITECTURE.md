@@ -300,6 +300,12 @@ Chaque cluster possède un hub + sous-pages variables selon pertinence :
 │   │   ├── /industrie/
 │   │   └── /data-centers/
 │   │
+│   ├── /hp-bp-flottante/                               HP/BP flottante (froid commercial) ✅ V1
+│   │   ├── /hp-flottante/
+│   │   ├── /bp-flottante/
+│   │   ├── /prime-cee/
+│   │   └── /faq/
+│   │
 │   │  ─── ISOLATION & ENVELOPPE ───
 │   ├── /isolation-thermique/                           Isolation bâtiment
 │   │   ├── /prime-cee/
@@ -351,11 +357,7 @@ Chaque cluster possède un hub + sous-pages variables selon pertinence :
 │   │   ├── /collectivites/
 │   │   └── /agriculture/
 │   │
-│   ├── /deshumidificateur/                             Déshumidificateurs
-│   │   ├── /prime-cee/
-│   │   ├── /tarifs/
-│   │   ├── /faq/
-│   │   └── /agriculture/
+│   │  ⚠️ Cluster déshumidificateur RETIRÉ (intent majoritairement B2C, volume B2B insuffisant — seules les fiches agriculture AGRI-TH-117/119 subsistent dans /dispositifs/fiches-cee/agriculture/)
 │   │
 │   │  ─── RÉGULATION & HYDRAULIQUE ───
 │   ├── /regulation-chauffage/                          Régulation & optimisation chauffage
@@ -623,14 +625,14 @@ Un cluster est publié EN ENTIER (hub + toutes ses sous-pages) sur une période 
 
 | Phase | Mois | Contenu | Pages estimées |
 |---|---|---|---|
-| **P1 — Socle** | M1-M2 | Accueil, légal, /secteurs/ (10 pages), /dispositifs/ socle (comprendre-les-cee, calcul-prime, kwh-cumac, obliges, demarches, legislation, glossaire, FAQ = 8 pages) + **2 clusters prioritaires** (à définir) | ~35-40 |
-| **P2 — Premiers clusters** | M3-M4 | **3-4 clusters** (à définir selon priorités) + fiches CEE associées (5-6 fiches) | ~40-50 |
-| **P3 — Croissance** | M5-M6 | **3-4 clusters** + /achat-energie/ socle (hub + 8 pages core) + fiches CEE | ~45-55 |
-| **P4 — Expansion** | M7-M8 | **3-4 clusters** + /mobilite-electrique/ complet + fiches CEE | ~45-55 |
-| **P5 — Densification** | M9-M10 | **3-4 clusters** + /achat-energie/ suite + /guides/ | ~45-55 |
-| **P6 — Maturation** | M11-M12 | **3-4 clusters** + /dispositifs/ suite (fiches additionnelles) | ~40-50 |
-| **P7 — Couverture large** | M13-M14 | **3-4 clusters** (niches, process, spécifique agriculture) | ~35-45 |
-| **P8 — Finition** | M15-M18 | Derniers clusters + pages manquantes + optimisations (enrichissement des clusters P1-P2 après données GSC) | ~35-45 |
+| **P1 — Socle** ✅ **DÉPLOYÉ** | M1-M2 | Accueil, légal, /qui-sommes-nous/, /parcours-cee/, /diagnostic-gratuit/, /contact-installateur/, /secteurs/ (6 pages), /dispositifs/ socle (comprendre-les-cee, calcul-prime, kwh-cumac, obliges, demarches, legislation, glossaire, barometre-prix-cee, faq, fiches-cee = 11 pages) + **8 clusters** : VMC double flux, Variateur de vitesse, Destratificateur, Air comprimé, GTB/GTC, Isolation thermique, PAC, HP/BP flottante | ~83 |
+| **P2 — Froid & Énergie** | M3-M4 | **3 clusters** : Osmose inverse, Froid commercial, Récupération de chaleur + **/achat-energie/ socle** (hub + courtier-electricite + courtier-gaz + prix-electricite + prix-gaz = 5 pages core) + fiches CEE associées (IND-UT-117, IND-UT-137, BAT-TH-113…) | ~45-55 |
+| **P3 — Croissance** | M5-M6 | **3-4 clusters** : Climatisation, Audit énergétique, CPE, Chaudière biomasse + /achat-energie/ suite | ~45-55 |
+| **P4 — Expansion** | M7-M8 | **3-4 clusters** : Free cooling, Froid industriel + /mobilite-electrique/ complet (11 pages) + fiches CEE | ~45-55 |
+| **P5 — Réglementation** | M9-M10 | **/reglementation/** complet (décret tertiaire, BACS, ISO 50001, BEGES, bilan carbone, taxonomie, OPERAT) + **2-3 clusters** : Récupération chaleur, Monitoring, Moteurs IE4 + /guides/ | ~45-55 |
+| **P6 — Maturation** | M11-M12 | **3-4 clusters** : Régulation chauffage, Équilibrage hydraulique, GTB sous-pages manquantes + /dispositifs/ suite (fiches additionnelles) | ~40-50 |
+| **P7 — Couverture large** | M13-M14 | **3-4 clusters** : Process industriels, Serres agricoles, Pré-refroidisseurs lait, Matelas isolants + pages comparatives /achat-energie/ | ~35-45 |
+| **P8 — Finition** | M15-M18 | Photovoltaïque, Réseau de chaleur, Rénovation globale + /zones-intervention/ + optimisations GSC (enrichissement clusters P1-P2) | ~35-45 |
 
 ### Flexibilité des phases
 
@@ -640,29 +642,31 @@ Un cluster est publié EN ENTIER (hub + toutes ses sous-pages) sur une période 
 
 Classement par **score d'opportunité** = Volume ÷ KD. Un cluster facile avec bon volume passe devant un cluster à fort volume mais KD élevé.
 
-#### P1 — Quick wins à fort volume (M1-M3)
+#### P1 — Quick wins à fort volume ✅ DÉPLOYÉ
+
+| Cluster | Keyword principal | Volume | KD | CPC | Score | Statut |
+|---|---|---|---|---|---|---|
+| **VMC** | vmc double flux | 27 100 | 27 | 0.26€ | ★★★★★ | ✅ V1 |
+| **Variateurs** | variateur de vitesse | 2 400 | 14 | 0.28€ | ★★★★★ | ✅ V1 |
+| **Destratificateur** | destratificateur | 3 600 | 15 | 0.72€ | ★★★★★ | ✅ V1 |
+| **Air comprimé** | air comprimé | 2 400 | 19 | 0.54€ | ★★★★☆ | ✅ V1 |
+| **PAC** | pompe à chaleur | 60 500 | 39 | 1.94€ | ★★★★☆ | ✅ V1 (avancé) |
+| **GTB/GTC** | gtb | 5 400 | 33 | 0.90€ | ★★★★☆ | ✅ V1 (avancé) |
+| **Isolation** | isolation thermique | 9 900 | 37 | 0.61€ | ★★★☆☆ | ✅ V1 (avancé) |
+| **HP/BP flottante** | hp flottante | — | — | — | — | ✅ V1 (hors plan initial) |
+
+> Note : PAC, GTB/GTC, Isolation et HP/BP flottante ont été intégrés dès la V1, avançant le planning d'environ une phase. Courtage énergie prévu en P1 est repoussé en P2 (CPC élevé, mais cluster plus long à construire).
+
+#### P2 — Froid & Courtage (prochaine étape)
 
 | Cluster | Keyword principal | Volume | KD | CPC | Score |
 |---|---|---|---|---|---|
-| **VMC** | vmc double flux | 27 100 | 27 | 0.26€ | ★★★★★ |
-| **Variateurs** | variateur de vitesse | 2 400 | 14 | 0.28€ | ★★★★★ |
-| **Destratificateur** | destratificateur | 3 600 | 15 | 0.72€ | ★★★★★ |
-| **Air comprimé** | air comprimé | 2 400 | 19 | 0.54€ | ★★★★☆ |
+| **Osmose inverse** | osmose inverse | 4 400 | 20 | 0.43€ | ★★★★☆ |
+| **Froid commercial** | froid commercial | 590 | 10 | 1.52€ | ★★★★☆ |
+| **Récupération de chaleur** | chaleur fatale | 140 | 28 | — | ★★★☆☆ |
 | **Courtage énergie** | courtier énergie | 720 | 37 | 4.09€ | ★★★★☆ (CPC!) |
 
-> Rationale P1 : VMC est le meilleur ratio volume/KD de tout le dataset. Destratificateur et Variateurs ont des KD < 15 = positionnement rapide garanti. Le courtage entre en P1 pour le CPC (10-22€ par clic, revenu lead-gen maximal).
-
-#### P2 — Piliers à volume (M3-M5)
-
-| Cluster | Keyword principal | Volume | KD | CPC | Score |
-|---|---|---|---|---|---|
-| **PAC** | pompe a chaleur | 60 500 | 39 | 1.94€ | ★★★★☆ |
-| **GTB/GTC** | gtb | 5 400 | 33 | 0.90€ | ★★★★☆ |
-| **Osmose inverse** | osmose inverse | 4 400 | 20 | 0.43€ | ★★★★☆ |
-| **Calorifugeage** | calorifugeage | 3 600 | 28 | 0.45€ | ★★★☆☆ |
-| **Isolation** | isolation thermique | 9 900 | 37 | 0.61€ | ★★★☆☆ |
-
-> Rationale P2 : PAC doit mûrir (KD 39 = 3-4 mois avant résultats). GTB = actualité décret BACS. Osmose inverse = KD 20, cluster dédi�� facile. Isolation = gros volume transactionnel B2B (industrie + tertiaire + collectivités).
+> Rationale P2 : Osmose inverse = KD 20, cluster facile à déployer. Froid commercial = KD 10, positionnement quasi-garanti. Récupération de chaleur = complémentaire naturel de l'air comprimé et du froid (maillage fort). Courtage = machine à leads (CPC 10-22€), prioritaire pour la monétisation.
 
 #### P3 — Volume + Autorité thématique (M5-M7)
 
@@ -1215,12 +1219,14 @@ C'est faisable avec du contenu MDX assisté IA + relecture humaine. Mais la qual
 
 | Phase | Durée | Pages/mois | Focus |
 |---|---|---|---|
-| P1 (Quick wins) | M1-M3 | 25 | 5 clusters (VMC, Variateurs, Destrat, Air comprimé, Courtage) + pages structurelles |
-| P2 (Piliers) | M3-M5 | 25 | PAC, GTB, Osmose, Calorifugeage, Isolation |
-| P3 (Volume) | M5-M8 | 20 | Climatisation, Audit, CPE, IRVE, Chaudière |
-| P4 (CEE + Réglementation) | M8-M10 | 20 | /dispositifs/ complet, /reglementation/, Free cooling, Froid |
-| P5 (Densification) | M10-M13 | 15 | Récup chaleur, Déshumidification, Monitoring, Moteurs, Régulation, Hydraulique |
-| P6-P8 (Long tail) | M13-M18 | 10-15 | PV, Réseau chaleur, Process, Serres, Décarbonation + enrichissement P1-P2 |
+| P1 ✅ | M1-M2 | ~40/mois | 8 clusters + /dispositifs/ + /secteurs/ + utilitaires (~83 pages) |
+| P2 | M3-M4 | 25 | Osmose inverse, Froid commercial, Récupération de chaleur + /achat-energie/ socle |
+| P3 | M5-M6 | 20 | Climatisation, Audit, CPE, Chaudière biomasse + /achat-energie/ suite |
+| P4 | M7-M8 | 20 | Free cooling, Froid industriel + /mobilite-electrique/ complet |
+| P5 | M9-M10 | 15 | /reglementation/ complet + Récup chaleur, Monitoring, Moteurs + /guides/ |
+| P6 | M11-M12 | 15 | Régulation chauffage, Équilibrage hydraulique + /dispositifs/ fiches additionnelles |
+| P7 | M13-M14 | 10-15 | Process, Serres, Pré-refroidisseurs, Matelas isolants + comparatives /achat-energie/ |
+| P8 | M15-M18 | 10-15 | Photovoltaïque, Réseau chaleur, Rénovation globale + /zones-intervention/ + enrichissement GSC |
 
 **Règle** : un cluster est publié EN ENTIER ou pas du tout. Pas de hub sans sous-pages — ça envoie un signal de thin content à Google. Minimum : hub + /prime-cee/ + /tarifs/ + 2 sous-pages = 5 pages avant publication.
 
