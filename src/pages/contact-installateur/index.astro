@@ -277,12 +277,18 @@ import Base from "../../layouts/Base.astro";
     e.preventDefault();
     const btn = form.querySelector('button[type="submit"]');
     const fd = new FormData(form);
+    const device = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ? 'Mobile' : 'Desktop';
+    const tracking = (window as any).__ocTracking?.() ?? null;
+    const userMsg = String(fd.get('message') ?? '');
+    let meta = `\n\n--- Informations ---\nPage: ${location.href}\nDevice: ${device}\nReferrer: ${document.referrer || 'direct'}`;
+    if (tracking) meta += `\nTemps sur site: ${tracking.timeOnSite}\nPages visitées (${tracking.pageCount}): ${tracking.visitedPages}`;
     const data = {
       raison_sociale: String(fd.get('raison_sociale') ?? ''),
       nom: String(fd.get('nom') ?? ''),
       email: String(fd.get('email') ?? ''),
       telephone: String(fd.get('telephone') ?? ''),
-      message: String(fd.get('message') ?? '').slice(0, 5000),
+      message: (userMsg ? userMsg + meta : meta).slice(0, 5000),
+      page_origine: location.href.slice(0, 300),
       site_origine: location.hostname,
     };
 

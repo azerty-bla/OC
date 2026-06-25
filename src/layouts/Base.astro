@@ -316,6 +316,27 @@ const base = import.meta.env.BASE_URL; // "/OC/" en prod GitHub Pages, "/" en de
     </footer>
 
     <script>
+      // === Session tracking (pages visitées, temps sur site) ===
+      (function () {
+        if (!sessionStorage.getItem('oc_start')) {
+          sessionStorage.setItem('oc_start', String(Date.now()));
+        }
+        const pages: string[] = JSON.parse(sessionStorage.getItem('oc_pages') || '[]');
+        const cur = location.pathname;
+        if (!pages.includes(cur)) { pages.push(cur); sessionStorage.setItem('oc_pages', JSON.stringify(pages)); }
+        (window as any).__ocTracking = function () {
+          const secs = Math.round((Date.now() - parseInt(sessionStorage.getItem('oc_start') || String(Date.now()))) / 1000);
+          const visited: string[] = JSON.parse(sessionStorage.getItem('oc_pages') || '[]');
+          return {
+            timeOnSite: `${Math.floor(secs / 60)}min ${secs % 60}s`,
+            visitedPages: visited.join(' → '),
+            pageCount: visited.length,
+          };
+        };
+      })();
+    </script>
+
+    <script>
       document.addEventListener('DOMContentLoaded', () => {
         // === Desktop dropdowns (hover) ===
         const dropdowns = document.querySelectorAll('[data-dropdown]');
