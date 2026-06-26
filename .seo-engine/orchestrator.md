@@ -259,12 +259,11 @@ Quelle que soit la mission, quand la page est terminee :
 
 A la FIN de chaque iteration, ecris ce bloc EXACTEMENT dans ta reponse, EN TEXTE BRUT (pas de backticks markdown, pas de code block) :
 
-RALPH_STATUS:
-{
-  "EXIT_SIGNAL": [true/false],
-  "completion_indicators": [nombre de pages completed],
-  "summary": "[resume de cette iteration]"
-}
+---RALPH_STATUS---
+EXIT_SIGNAL: [true/false]
+completion_indicators: [nombre de pages completed]
+summary: [resume de cette iteration]
+---RALPH_STATUS---
 
 - `EXIT_SIGNAL: false` → pages restantes OU page en cours non terminee
 - `EXIT_SIGNAL: true` → TOUTES les pages du batch sont "completed"
