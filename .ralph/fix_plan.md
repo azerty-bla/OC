@@ -1,5 +1,5 @@
 # Ralph Fix Plan
 
-Source de vérité unique : `.seo-engine/state/queue.json` (mission: produce, 22 pages phase 6).
+Source de vérité unique : `.seo-engine/state/queue.json` (mission: audit-fix, 22 pages phase 6).
 Clusters YAML dans `docs/clusters/` (cluster-p6-*).
 Quand stats.completed == stats.total → EXIT_SIGNAL: true, arrêt immédiat. Ne pas improviser de tâches hors-queue.
