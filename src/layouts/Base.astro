@@ -508,22 +508,25 @@ const base = import.meta.env.BASE_URL; // "/OC/" en prod GitHub Pages, "/" en de
 
         // ── Téléphone : mise en forme 06 12 34 56 78 + contrôle 10 chiffres ──
         // +33 / 0033 ramenés à 0 ; une saisie internationale en cours n'est pas reformatée.
+        // « +33 (0)6… », « +33 06… », « 0033 (0)6… » : le 0 après l'indicatif est absorbé.
+        const FR_INTL = /^(0033|33)(0\d{9}|[1-9]\d{8})$/;
         function phoneDigits(v: string): string {
           let d = (v || '').replace(/\D/g, '');
-          if (/^0033\d{9}$/.test(d)) d = '0' + d.slice(4);
-          else if (/^33\d{9}$/.test(d)) d = '0' + d.slice(2);
+          if (FR_INTL.test(d)) d = '0' + d.slice(-9);
           return d;
         }
+        const formatPhone = (v: string) => phoneDigits(v).slice(0, 10).replace(/(\d{2})(?=\d)/g, '$1 ').trim();
         function checkPhone(field: HTMLInputElement) {
           const ok = !field.value.trim() || /^0\d{9}$/.test(phoneDigits(field.value));
           field.setCustomValidity(ok ? '' : 'Numéro à 10 chiffres.');
         }
         document.querySelectorAll<HTMLInputElement>('form input[type="tel"]').forEach((tel) => {
-          if (!tel.maxLength || tel.maxLength < 20) tel.maxLength = 20;
+          // 25 : « 0033 (0)6 12 34 56 78 » fait 21 caractères (la valeur envoyée est remise au format 06 12 34 56 78)
+          if (!tel.maxLength || tel.maxLength < 25) tel.maxLength = 25;
           tel.addEventListener('input', () => {
             const raw = tel.value;
-            const intlTyping = /^\s*(\+|00)/.test(raw) && !/^(0033|33)\d{9}$/.test(raw.replace(/\D/g, ''));
-            if (!intlTyping) tel.value = phoneDigits(raw).slice(0, 10).replace(/(\d{2})(?=\d)/g, '$1 ').trim();
+            const intlTyping = /^\s*(\+|00)/.test(raw) && !FR_INTL.test(raw.replace(/\D/g, ''));
+            if (!intlTyping) tel.value = formatPhone(raw);
             checkPhone(tel);
           });
         });
@@ -591,11 +594,17 @@ const base = import.meta.env.BASE_URL; // "/OC/" en prod GitHub Pages, "/" en de
             let firstInvalid: HTMLElement | null = null;
 
             fields.forEach((field) => {
-              if (field instanceof HTMLInputElement && field.type === 'tel') checkPhone(field);
-              // Même règle d'e-mail que le CRM (le contrôle natif accepte « a@b.c », refusé en 400)
+              if (field instanceof HTMLInputElement && field.type === 'tel') {
+                checkPhone(field);
+                // Numéro valide (collé, autofill…) : envoyé au format 06 12 34 56 78
+                if (field.value.trim() && field.validity.valid) field.value = formatPhone(field.value);
+              }
+              // Même règle d'e-mail que le CRM (le contrôle natif accepte « a@b.c », refusé en 400 ;
+              // 254 caractères max : un collage ou un autofill peut dépasser le maxlength)
               if (field instanceof HTMLInputElement && field.type === 'email') {
-                const okMail = !field.value.trim() || /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(field.value.trim());
-                field.setCustomValidity(okMail ? '' : 'Adresse email invalide.');
+                const mail = field.value.trim();
+                const okMail = !mail || /^(?=.{1,254}$)[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(mail);
+                field.setCustomValidity(okMail ? '' : (mail.length > 254 ? 'E-mail trop long (254 caractères max.)' : 'Adresse email invalide.'));
               }
               if (!field.checkValidity()) {
                 showError(field);
