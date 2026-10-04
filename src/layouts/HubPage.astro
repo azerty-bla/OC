@@ -210,17 +210,17 @@ const STEPS = [
           <div class="hub-fc__row">
             <div class="hub-fc__field">
               <label for="fc-co">Entreprise <span class="req" aria-hidden="true">*</span></label>
-              <input id="fc-co" type="text" name="raison_sociale" required autocomplete="organization" placeholder="Raison sociale" />
+              <input id="fc-co" type="text" name="raison_sociale" required maxlength="200" autocomplete="organization" placeholder="Raison sociale" />
             </div>
             <div class="hub-fc__field">
               <label for="fc-nom">Nom <span class="req" aria-hidden="true">*</span></label>
-              <input id="fc-nom" type="text" name="nom" required autocomplete="name" placeholder="Nom" />
+              <input id="fc-nom" type="text" name="nom" required maxlength="100" autocomplete="name" placeholder="Nom" />
             </div>
           </div>
           <div class="hub-fc__row">
             <div class="hub-fc__field">
               <label for="fc-em">Email <span class="req" aria-hidden="true">*</span></label>
-              <input id="fc-em" type="email" name="email" required autocomplete="email" placeholder="vous@société.fr" />
+              <input id="fc-em" type="email" name="email" required maxlength="254" autocomplete="email" placeholder="vous@société.fr" />
             </div>
             <div class="hub-fc__field">
               <label for="fc-ph">Téléphone <span class="req" aria-hidden="true">*</span></label>
@@ -298,6 +298,17 @@ const STEPS = [
         site_origine: location.hostname,
       };
 
+      // CRM : longueurs max (collage / autofill) et type de projet recopié en clair dans le message
+      // (la fiche CRM n'affiche pas type_projet). Sauvegardes Strapi / Firebase inchangées.
+      const tySel = form.querySelector('select[name="type_projet"]') as HTMLSelectElement | null;
+      const tyLabel = tySel && tySel.value ? tySel.options[tySel.selectedIndex].text.trim() : '';
+      const crmData = {
+        ...data,
+        raison_sociale: data.raison_sociale.trim().slice(0, 200),
+        nom: data.nom.trim().slice(0, 100),
+        message: ((tyLabel ? `Type de projet : ${tyLabel}` : '') + meta).slice(0, 5000),
+      };
+
       if (btn) { (btn as HTMLButtonElement).disabled = true; btn.textContent = 'Envoi en cours…'; }
 
       void fetch(`${STRAPI}/api/oteria-conseil-heroes`, {
@@ -316,11 +327,20 @@ const STEPS = [
         const res = await fetch(`${SUPA_URL}/functions/v1/form-webhook`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${SUPA_KEY}` },
-          body: JSON.stringify({ collection: 'oteria-conseil-heroes', data }),
+          body: JSON.stringify({ collection: 'oteria-conseil-heroes', data: crmData }),
         });
         if (!res.ok) throw new Error('Erreur serveur');
         const card = form.closest('.hub-fcta__card, .hub-fc');
-        if (card) card.innerHTML = SUCCESS_HTML;
+        if (card) {
+          card.innerHTML = SUCCESS_HTML;
+          // Confirmation ramenée à l'écran, sous l'en-tête sticky
+          const header = document.querySelector('header');
+          const offset = (header ? header.getBoundingClientRect().height : 0) + 16;
+          const rect = card.getBoundingClientRect();
+          if (rect.top < offset || rect.bottom > window.innerHeight) {
+            window.scrollTo({ top: window.scrollY + rect.top - offset, behavior: 'smooth' });
+          }
+        }
       } catch {
         if (btn) { (btn as HTMLButtonElement).disabled = false; btn.textContent = 'Obtenir mon diagnostic'; }
         let err = form.querySelector('.hub-fc__err');
