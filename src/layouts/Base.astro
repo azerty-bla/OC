@@ -502,8 +502,31 @@ const base = import.meta.env.BASE_URL; // "/OC/" en prod GitHub Pages, "/" en de
           if (v.valueMissing) return 'Ce champ est requis.';
           if (v.typeMismatch && field.type === 'email') return 'Adresse email invalide.';
           if (v.typeMismatch || v.patternMismatch) return 'Format invalide.';
+          if (v.customError) return field.validationMessage;
           return 'Ce champ est invalide.';
         }
+
+        // ── Téléphone : mise en forme 06 12 34 56 78 + contrôle 10 chiffres ──
+        // +33 / 0033 ramenés à 0 ; une saisie internationale en cours n'est pas reformatée.
+        function phoneDigits(v: string): string {
+          let d = (v || '').replace(/\D/g, '');
+          if (/^0033\d{9}$/.test(d)) d = '0' + d.slice(4);
+          else if (/^33\d{9}$/.test(d)) d = '0' + d.slice(2);
+          return d;
+        }
+        function checkPhone(field: HTMLInputElement) {
+          const ok = !field.value.trim() || /^0\d{9}$/.test(phoneDigits(field.value));
+          field.setCustomValidity(ok ? '' : 'Numéro à 10 chiffres.');
+        }
+        document.querySelectorAll<HTMLInputElement>('form input[type="tel"]').forEach((tel) => {
+          if (!tel.maxLength || tel.maxLength < 20) tel.maxLength = 20;
+          tel.addEventListener('input', () => {
+            const raw = tel.value;
+            const intlTyping = /^\s*(\+|00)/.test(raw) && !/^(0033|33)\d{9}$/.test(raw.replace(/\D/g, ''));
+            if (!intlTyping) tel.value = phoneDigits(raw).slice(0, 10).replace(/(\d{2})(?=\d)/g, '$1 ').trim();
+            checkPhone(tel);
+          });
+        });
 
         function wrap(field: HTMLInputElement | HTMLTextAreaElement) {
           if (field.parentElement?.classList.contains('field-wrap')) return;
@@ -558,11 +581,22 @@ const base = import.meta.env.BASE_URL; // "/OC/" en prod GitHub Pages, "/" en de
           form.setAttribute('novalidate', '');
           form.style.overflow = 'visible';
 
-          form.addEventListener('submit', (e) => {
+          // Validation en phase de capture sur document : elle passe AVANT les gestionnaires
+          // d'envoi des pages (enregistrés sur le formulaire, souvent avant celui-ci).
+          // Avant, preventDefault ne bloquait rien : le formulaire invalide partait quand même,
+          // le CRM le refusait (400) et le visiteur ne voyait qu'une erreur générique.
+          document.addEventListener('submit', (e) => {
+            if (e.target !== form) return;
             const fields = form.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>('input, textarea');
             let firstInvalid: HTMLElement | null = null;
 
             fields.forEach((field) => {
+              if (field instanceof HTMLInputElement && field.type === 'tel') checkPhone(field);
+              // Même règle d'e-mail que le CRM (le contrôle natif accepte « a@b.c », refusé en 400)
+              if (field instanceof HTMLInputElement && field.type === 'email') {
+                const okMail = !field.value.trim() || /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(field.value.trim());
+                field.setCustomValidity(okMail ? '' : 'Adresse email invalide.');
+              }
               if (!field.checkValidity()) {
                 showError(field);
                 if (!firstInvalid) firstInvalid = field;
@@ -573,9 +607,11 @@ const base = import.meta.env.BASE_URL; // "/OC/" en prod GitHub Pages, "/" en de
 
             if (firstInvalid) {
               e.preventDefault();
-              firstInvalid.focus();
+              e.stopImmediatePropagation();
+              e.stopPropagation();
+              (firstInvalid as HTMLElement).focus();
             }
-          });
+          }, true);
 
           form.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>('input, textarea').forEach((field) => {
             field.addEventListener('blur', () => {
@@ -583,6 +619,8 @@ const base = import.meta.env.BASE_URL; // "/OC/" en prod GitHub Pages, "/" en de
               else clearError(field);
             });
             field.addEventListener('input', () => {
+              // L'erreur e-mail « format CRM » est recalculée à l'envoi : la lever pendant la correction
+              if (field instanceof HTMLInputElement && field.type === 'email') field.setCustomValidity('');
               if (field.checkValidity()) clearError(field);
             });
           });
