@@ -3,6 +3,9 @@ interface Fiche {
   code: string;
   title: string;
   description: string;
+  version?: string;
+  pdf?: string;
+  link?: { href: string; label: string };
 }
 
 interface Group {
@@ -26,6 +29,13 @@ const { groups } = Astro.props;
           <span class="fiche-card__code">{fiche.code}</span>
           <h4 class="fiche-card__title">{fiche.title}</h4>
           <p class="fiche-card__desc">{fiche.description}</p>
+          {fiche.version && <p class="fiche-card__version">{fiche.version}</p>}
+          {(fiche.pdf || fiche.link) && (
+            <p class="fiche-card__links">
+              {fiche.pdf && <a href={fiche.pdf} target="_blank" rel="noopener">Texte officiel (PDF)</a>}
+              {fiche.link && <a href={fiche.link.href}>{fiche.link.label}</a>}
+            </p>
+          )}
         </div>
       ))}
     </div>
@@ -86,5 +96,25 @@ const { groups } = Astro.props;
     color: var(--color-navy-600);
     line-height: 1.55;
     margin: 0;
+  }
+
+  .fiche-card__version {
+    font-size: 0.75rem;
+    color: var(--color-navy-500);
+    margin: 0.5rem 0 0;
+  }
+
+  .fiche-card__links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 0.875rem;
+    font-size: 0.8125rem;
+    margin: 0.625rem 0 0;
+  }
+
+  .fiche-card__links a {
+    color: var(--color-navy-700);
+    text-decoration: underline;
+    text-underline-offset: 2px;
   }
 </style>

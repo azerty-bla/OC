@@ -1,5 +1,6 @@
 ---
 import Base from "./Base.astro";
+import { getPageDates, formatDateFr } from "../lib/pageDates.mjs";
 
 interface Props {
   title: string;
@@ -10,9 +11,43 @@ interface Props {
   stats?: { value: string; label: string }[];
   journeyStep?: number; // 1–5 : étape CEE active dans le navigator
   showHeroForm?: boolean; // false = masque la carte formulaire du hero (composant conservé pour réutilisation future)
+  breadcrumb?: { label: string; href: string }[]; // ancêtres (hors Accueil et page courante) ; déduits du chemin si absent
 }
 
-const { title, description, canonical, headline, subheadline, stats, journeyStep, showHeroForm = true } = Astro.props;
+const { title, description, canonical, headline, subheadline, stats, journeyStep, showHeroForm = true, breadcrumb } = Astro.props;
+
+// JSON-LD : WebPage (dates réelles tirées de git) + BreadcrumbList
+const siteUrl = "https://oteria-conseil.fr";
+const pageUrl = `${siteUrl}${canonical}`;
+const pageDates = getPageDates(canonical);
+const SECTION_LABELS: Record<string, string> = { dispositifs: "Dispositifs CEE", expertises: "Expertises" };
+const ancestors = breadcrumb ?? canonical
+  .split("/")
+  .filter(Boolean)
+  .slice(0, -1)
+  .map((seg, i, segs) => ({
+    label: SECTION_LABELS[seg] ?? seg.replace(/-/g, " ").replace(/^./, (c) => c.toUpperCase()),
+    href: `/${segs.slice(0, i + 1).join("/")}/`,
+  }));
+const schemaData = [
+  {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": title,
+    "description": description,
+    "url": pageUrl,
+    ...(pageDates ? { "datePublished": pageDates.published, "dateModified": pageDates.modified } : {})
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Accueil", "item": `${siteUrl}/` },
+      ...ancestors.map((item, i) => ({ "@type": "ListItem", "position": i + 2, "name": item.label, "item": `${siteUrl}${item.href}` })),
+      { "@type": "ListItem", "position": ancestors.length + 2, "name": headline, "item": pageUrl }
+    ]
+  }
+];
 
 const STEPS = [
   { n: 1, label: "Comprendre", href: "/dispositifs/comprendre-les-cee/" },
@@ -24,6 +59,7 @@ const STEPS = [
 ---
 
 <Base title={title} description={description} canonicalPath={canonical}>
+<script type="application/ld+json" set:html={JSON.stringify(schemaData)} />
 
 <!-- ═══════════════════════════════════════
      HERO — grid bg + rings + form card
@@ -41,6 +77,9 @@ const STEPS = [
         CEE · Dispositifs
       </p>
       <h1 id="hub-h1" class="hub-hero__h1">{headline}</h1>
+      {pageDates && (
+        <p class="hub-updated">Mis à jour le <time datetime={pageDates.modified}>{formatDateFr(pageDates.modified)}</time></p>
+      )}
       <p class="hub-hero__lead">{subheadline}</p>
       <ul class="hub-trust" role="list">
         {["Diagnostic gratuit, sans engagement", "Réponse sous 48h ouvrées", "19 ans d'expérience en CEE"].map(item => (
@@ -458,6 +497,11 @@ const STEPS = [
   margin: 0 0 1.25rem;
 }
 
+.hub-updated {
+  font-size: .8125rem;
+  color: #9fb3c8;
+  margin: -.5rem 0 1.25rem;
+}
 .hub-hero__lead {
   font-size: 1.0625rem;
   line-height: 1.75;

@@ -626,7 +626,7 @@ Un cluster est publié EN ENTIER (hub + toutes ses sous-pages) sur une période 
 | Phase | Mois | Contenu | Pages estimées |
 |---|---|---|---|
 | **P1 — Socle** ✅ **DÉPLOYÉ** | M1-M2 | Accueil, légal, /qui-sommes-nous/, /parcours-cee/, /diagnostic-gratuit/, /contact-installateur/, /secteurs/ (6 pages), /dispositifs/ socle (comprendre-les-cee, calcul-prime, kwh-cumac, obliges, demarches, legislation, glossaire, barometre-prix-cee, faq, fiches-cee = 11 pages) + **8 clusters** : VMC double flux, Variateur de vitesse, Destratificateur, Air comprimé, GTB/GTC, Isolation thermique, PAC, HP/BP flottante | ~83 |
-| **P2 — Froid & Énergie** | M3-M4 | **3 clusters** : Osmose inverse, Froid commercial, Récupération de chaleur + **/achat-energie/ socle** (hub + courtier-electricite + courtier-gaz + prix-electricite + prix-gaz = 5 pages core) + fiches CEE associées (IND-UT-117, IND-UT-137, BAT-TH-113…) | ~45-55 |
+| **P2 — Froid & Énergie** | M3-M4 | **3 clusters** : Osmose inverse, Froid commercial, Récupération de chaleur + **/achat-energie/ socle** (hub + courtier-electricite + courtier-gaz + prix-electricite + prix-gaz = 5 pages core) + fiches CEE associées (IND-UT-137, BAT-TH-163/164… ; IND-UT-117 abrogée le 01/08/2025, BAT-TH-113 abrogée le 01/01/2026) | ~45-55 |
 | **P3 — Croissance** | M5-M6 | **3-4 clusters** : Climatisation, Audit énergétique, CPE, Chaudière biomasse + /achat-energie/ suite | ~45-55 |
 | **P4 — Expansion** | M7-M8 | **3-4 clusters** : Free cooling, Froid industriel + /mobilite-electrique/ complet (11 pages) + fiches CEE | ~45-55 |
 | **P5 — Réglementation** | M9-M10 | **/reglementation/** complet (décret tertiaire, BACS, ISO 50001, BEGES, bilan carbone, taxonomie, OPERAT) + **2-3 clusters** : Récupération chaleur, Monitoring, Moteurs IE4 + /guides/ | ~45-55 |
@@ -854,7 +854,7 @@ De même, `/prime-cee/` est correct (c'est une requête réelle). Mais attention
 | "fiches cee tertiaire" (navigational) | `/dispositifs/fiches-operations/` | Index de toutes les fiches, filtrées par secteur |
 
 **Maillage anti-cannibalization :**
-- `/expertises/pompe-a-chaleur/prime-cee/` → lien vers fiche technique : "Consultez le détail de la fiche BAT-TH-113"
+- `/expertises/pompe-a-chaleur/prime-cee/` → lien vers fiche technique : "Consultez le détail des fiches BAT-TH-163 et BAT-TH-164" (BAT-TH-113 abrogée le 01/01/2026)
 - `/dispositifs/fiches-operations/bat-th-113/` → lien vers usage : "Voir comment bénéficier de cette prime pour votre PAC"
 - Le canonical de chaque page reste sur elle-même (pas de canonical croisé)
 

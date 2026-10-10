@@ -1,5 +1,6 @@
 ---
 import Base from "./Base.astro";
+import { getPageDates, formatDateFr } from "../lib/pageDates.mjs";
 
 interface Props {
   title: string;
@@ -17,6 +18,7 @@ const currentPath = Astro.url.pathname;
 const siteUrl = "https://oteria-conseil.fr";
 const pageUrl = `${siteUrl}${canonical}`;
 const fullTitle = title;
+const pageDates = getPageDates(canonical);
 const breadcrumbItems = [
   { "@type": "ListItem", "position": 1, "name": "Accueil", "item": `${siteUrl}/` },
   ...breadcrumb.map((item, i) => ({ "@type": "ListItem", "position": i + 2, "name": item.label, "item": `${siteUrl}${item.href}` })),
@@ -28,7 +30,8 @@ const schemaData = [
     "@type": "WebPage",
     "name": fullTitle,
     "description": description,
-    "url": pageUrl
+    "url": pageUrl,
+    ...(pageDates ? { "datePublished": pageDates.published, "dateModified": pageDates.modified } : {})
   },
   {
     "@context": "https://schema.org",
@@ -76,6 +79,11 @@ const schemaData = [
           <h1 class="text-3xl md:text-4xl lg:text-5xl font-bold leading-tight mb-6" style="color: #ffffff; font-family: var(--font-heading);">
             {title}
           </h1>
+          {pageDates && (
+            <p class="text-sm -mt-2 mb-5" style="color: #9fb3c8;">
+              Mis à jour le <time datetime={pageDates.modified}>{formatDateFr(pageDates.modified)}</time>
+            </p>
+          )}
           <p class="text-lg leading-relaxed max-w-2xl" style="color: #d9e2ec;">
             {description}
           </p>

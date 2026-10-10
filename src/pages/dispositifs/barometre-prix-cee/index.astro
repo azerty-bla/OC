@@ -5,11 +5,12 @@ import Base from "../../../layouts/Base.astro";
 const categories = [
   {
     name: "CEE Classique",
-    min: 7,
-    max: 9,
-    mid: 8,
-    unitMin: "0,007",
-    unitMax: "0,009",
+    min: 8.5,
+    max: 8.8,
+    mid: 8.7,
+    unitMin: "0,0085",
+    unitMax: "0,0088",
+    note: "Prix moyen pondéré mensuel EMMY entre 8,48 et 8,82 €/MWhc de janvier à septembre 2026 (8,82 en septembre)",
     concerne: "Entreprises, tertiaire, industrie, collectivités, copropriétés",
     color: "#d4a024",
     gaugeMax: 20,
@@ -17,10 +18,11 @@ const categories = [
   {
     name: "CEE Précarité énergétique",
     min: 13,
-    max: 16,
-    mid: 14.5,
+    max: 18,
+    mid: 15.5,
     unitMin: "0,013",
-    unitMax: "0,016",
+    unitMax: "0,018",
+    note: "Prix moyen pondéré EMMY entre 10,83 et 15,60 €/MWhc de janvier à juin 2026 (12,91 en juin, dernier mois publié) ; les transactions de l'été se sont traitées autour de 17 à 18 €/MWhc",
     concerne: "Bailleurs sociaux et propriétaires bailleurs, pour les logements occupés par des ménages aux revenus modestes et très modestes (plafonds ANAH)",
     color: "#243b53",
     gaugeMax: 20,
@@ -28,17 +30,18 @@ const categories = [
 ];
 
 const trend = [
-  { period: "2024 (moy.)", classique: 7.95, precarite: null, source: "Registre EMMY" },
-  { period: "Fin 2025", classique: 8.68, precarite: null, source: "EMMY (cours moy. pondéré)" },
-  { period: "2025 (réf.)", classique: 9.05, precarite: 16.3, source: "Appel d'offres ANAH" },
-  { period: "Juin 2026", classique: 9.0, precarite: 16.5, source: "Marché spot CEE" },
+  { period: "Janv. 2026", classique: 8.48, precarite: 10.83, source: "Registre EMMY" },
+  { period: "Mai 2026", classique: 8.60, precarite: 15.60, source: "Registre EMMY" },
+  { period: "Juin 2026", classique: 8.48, precarite: 12.91, source: "Registre EMMY" },
+  { period: "Sept. 2026", classique: 8.82, precarite: null, source: "EMMY (précarité non publiée)" },
 ];
 const trendMax = 18;
+const fr = (n) => String(n).replace(".", ",");
 ---
 
 <Base
   title="Baromètre du prix des CEE : cours par catégorie (kWh cumac)"
-  description="Prix actuel des CEE en €/MWh cumac par catégorie : classique, précarité, coup de pouce. Baromètre mis à jour, sources et méthode de calcul de la prime."
+  description="Prix des CEE en octobre 2026 en €/MWh cumac : classique et précarité, d'après le registre EMMY. Évolution 2026, sources et calcul de la prime."
   canonicalPath="/dispositifs/barometre-prix-cee/"
 >
   <!-- Breadcrumb -->
@@ -56,15 +59,15 @@ const trendMax = 18;
   <section class="relative overflow-hidden" style="background-color: #102a43;">
     <canvas id="network-canvas" class="absolute inset-0 w-full h-full opacity-[0.35]"></canvas>
     <div class="relative mx-auto max-w-7xl px-6 py-16 md:py-24">
-      <p class="text-sm font-semibold uppercase tracking-widest mb-4" style="color: #f5c04a;">Dispositifs CEE — Données actualisées</p>
+      <p class="text-sm font-semibold uppercase tracking-widest mb-4" style="color: #f5c04a;">Dispositifs CEE — Données actualisées en octobre 2026</p>
       <h1 class="text-3xl md:text-4xl lg:text-5xl font-bold leading-tight max-w-4xl" style="color: #ffffff;">Baromètre du prix des CEE</h1>
-      <p class="mt-6 text-lg leading-relaxed max-w-2xl" style="color: #d9e2ec;">Le prix du kWh cumac varie chaque mois selon l'offre et la demande sur le marché des Certificats d'Économie d'Énergie. Voici les cours indicatifs par catégorie, juin 2026.</p>
+      <p class="mt-6 text-lg leading-relaxed max-w-2xl" style="color: #d9e2ec;">Le prix du kWh cumac varie chaque mois selon l'offre et la demande sur le marché des Certificats d'Économie d'Énergie. Voici les cours indicatifs par catégorie, actualisés en octobre 2026 à partir des prix publiés par le registre national EMMY.</p>
       <div class="mt-8 flex items-center gap-2">
         <span class="relative flex h-2.5 w-2.5">
           <span class="absolute inline-flex h-full w-full animate-ping rounded-full opacity-60" style="background-color: #48bb78;"></span>
           <span class="relative inline-flex h-2.5 w-2.5 rounded-full" style="background-color: #48bb78;"></span>
         </span>
-        <span class="text-sm" style="color: #9fb3c8;">Cours mis à jour — juin 2026</span>
+        <span class="text-sm" style="color: #9fb3c8;">Cours mis à jour — octobre 2026</span>
       </div>
     </div>
   </section>
@@ -74,7 +77,7 @@ const trendMax = 18;
     <div class="mx-auto max-w-5xl px-6">
       <div class="mb-10 text-center">
         <h2 class="text-2xl md:text-3xl font-bold text-navy-900" style="font-family: var(--font-heading);">Cours indicatifs par catégorie</h2>
-        <p class="mt-3 text-navy-600 max-w-2xl mx-auto">Prix de marché en €/MWh cumac, arrêtés en juin 2026, à partir du registre EMMY et des dernières ventes de référence (appels d'offres ANAH).</p>
+        <p class="mt-3 text-navy-600 max-w-2xl mx-auto">Prix de marché en €/MWh cumac, arrêtés en octobre 2026, à partir des prix moyens pondérés mensuels publiés par le registre national EMMY.</p>
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -88,7 +91,7 @@ const trendMax = 18;
                 <div>
                   <p class="text-xs font-semibold uppercase tracking-wider text-navy-600">{cat.name}</p>
                   <p class="mt-2 text-3xl md:text-4xl font-bold text-navy-900" style="font-family: var(--font-heading);">
-                    {cat.min}&ndash;{cat.max}<span class="text-base font-medium text-navy-600"> €/MWhc</span>
+                    {fr(cat.min)}&ndash;{fr(cat.max)}<span class="text-base font-medium text-navy-600"> €/MWhc</span>
                   </p>
                   <p class="text-xs text-navy-600 mt-1">soit {cat.unitMin}&ndash;{cat.unitMax} € / kWh cumac</p>
                 </div>
@@ -98,7 +101,7 @@ const trendMax = 18;
               <div
                 class="barometer-gauge"
                 role="img"
-                aria-label={`Jauge de prix ${cat.name} : entre ${cat.min} et ${cat.max} euros par mégawattheure cumac, sur une échelle de 0 à ${cat.gaugeMax}`}
+                aria-label={`Jauge de prix ${cat.name} : entre ${fr(cat.min)} et ${fr(cat.max)} euros par mégawattheure cumac, sur une échelle de 0 à ${cat.gaugeMax}`}
               >
                 <div class="barometer-gauge__track">
                   <div class="barometer-gauge__range" style={`left: ${minPct}%; width: ${maxPct - minPct}%; background-color: ${cat.color};`}></div>
@@ -111,7 +114,8 @@ const trendMax = 18;
                 </div>
               </div>
 
-              <p class="text-sm text-navy-600 mt-6 leading-relaxed">{cat.concerne}</p>
+              <p class="text-xs text-navy-600 mt-6 leading-relaxed">{cat.note}</p>
+              <p class="text-sm text-navy-600 mt-3 leading-relaxed">{cat.concerne}</p>
             </div>
           );
         })}
@@ -149,7 +153,7 @@ const trendMax = 18;
 
       <h2>Évolution récente du cours moyen</h2>
 
-      <p>La tendance est à la hausse depuis 2024, portée par le démarrage de la <strong>6ᵉ période des CEE (2026-2030)</strong> :</p>
+      <p>En 2026, le CEE classique reste stable autour de 8,5 à 8,8 €/MWh cumac, tandis que le CEE précarité est nettement plus volatil et orienté à la hausse (10,83 €/MWhc en janvier, 15,60 en mai, 12,91 en juin selon le registre EMMY). Toile de fond : la <strong>6ᵉ période des CEE (2026-2030)</strong> :</p>
 
       <div class="expertise-stats">
         <div class="stat-item">
@@ -168,7 +172,7 @@ const trendMax = 18;
 
       <p>Cette hausse de l'obligation soutient mécaniquement la demande de certificats, donc les prix.</p>
 
-      <div class="trend-chart" role="img" aria-label="Graphique d'évolution du prix moyen des CEE classique et précarité énergétique, de 2024 à juin 2026, tendance haussière">
+      <div class="trend-chart" role="img" aria-label="Graphique d'évolution du prix moyen des CEE classique et précarité énergétique, de janvier à septembre 2026 : classique stable, précarité en hausse">
         <div class="trend-chart__legend">
           <span class="trend-chart__legend-item"><i style="background-color: #d4a024;"></i>CEE Classique</span>
           <span class="trend-chart__legend-item"><i style="background-color: #243b53;"></i>CEE Précarité</span>
@@ -235,7 +239,7 @@ const trendMax = 18;
       </div>
 
       <p class="text-xs text-navy-400 mt-8">
-        Sources : registre national des CEE (Emmy), résultats des appels d'offres ANAH, données de marché spot CEE. Chiffres indicatifs arrêtés en juin 2026, susceptibles d'évoluer mensuellement.
+        Sources : <a href="https://www.emmy.fr/public/donnees-mensuelles?preca=false" rel="noopener" target="_blank">registre national des CEE EMMY — données mensuelles</a> (prix moyens pondérés des cessions, CEE classiques et précarité). Les données précarité de juillet à septembre 2026 n'étaient pas encore publiées par le registre lors de cette mise à jour ; la borne haute de la fourchette précarité reflète les transactions de marché de l'été. Chiffres indicatifs arrêtés en octobre 2026, susceptibles d'évoluer mensuellement.
       </p>
     </div>
   </article>

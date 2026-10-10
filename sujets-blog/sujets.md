@@ -16,7 +16,7 @@
 > Angle éditorial : pédagogique et opérationnel — "comment ça fonctionne, comment en bénéficier, étapes concrètes"
 > Vocabulaire Oteria : "Aide CEE" (pas prime CEE), "Diagnostic gratuit" (pas devis), "Professionnel qualifié" (pas installateur RGE), "Récupération d'énergie" (pas chaleur fatale)
 > Ton : Expert accessible, orienté action — "Voici comment en bénéficier concrètement"
-> Anti-cannibalisation inter-sites : hp-flottante.fr couvre IND-UT-134/135 en profondeur (angle : HP/BP flottante pur) ; gtb-ingenierie.fr couvre BAT-TH-116 (angle : ingénierie GTB) ; isolation-tuyauterie.fr couvre BAT-TH-146/calorifugeage réseaux ; france-calorifugeage.fr couvre calorifugeage bâtiment ; eco-cee.fr couvre les primes CEE grand public. Oteria traite ces thèmes via l'angle ACCOMPAGNEMENT/CONSEIL : "comment monter votre dossier", "quel prestataire choisir", "étapes pour en bénéficier" — jamais en duplicate de la fiche technique approfondie
+> Anti-cannibalisation inter-sites : hp-flottante.fr couvre BAT-TH-134/135, BAT-TH-145 et IND-UT-115/116 en profondeur (angle : HP/BP flottante pur) ; gtb-ingenierie.fr couvre BAT-TH-116 (angle : ingénierie GTB) ; isolation-tuyauterie.fr couvre le calorifugeage des réseaux (BAT-TH-146 abrogée le 01/08/2025) ; france-calorifugeage.fr couvre calorifugeage bâtiment ; eco-cee.fr couvre les primes CEE grand public. Oteria traite ces thèmes via l'angle ACCOMPAGNEMENT/CONSEIL : "comment monter votre dossier", "quel prestataire choisir", "étapes pour en bénéficier" — jamais en duplicate de la fiche technique approfondie
 > Money keywords piliers : (1) "accompagnement CEE entreprise" (2) "diagnostic énergétique professionnel gratuit" (3) "courtage énergie PME" (4) "bornes IRVE entreprise aide" (5) "audit énergétique réglementaire" (6) "prime CEE industrie" (7) "prime CEE tertiaire" (8) "prime CEE collectivités" — chacun a son sujet pilier en top de liste + plusieurs satellites
 
 ## À traiter (400 sujets)
@@ -35,7 +35,7 @@
 - [ ] Isolation des murs tertiaire par l'extérieur ou l'intérieur : fiche BAT-EN-102
 - [ ] Bornes IRVE en entreprise : quelles aides disponibles en 2026 ?
 - [ ] Financer ses bornes IRVE avec les CEE : montage et conditions
-- [ ] Calorifugeage réseau hydraulique : fiche BAT-TH-146, prime CEE 2026
+- [ ] Calorifugeage réseau hydraulique : fin de BAT-TH-146 (abrogée le 1er août 2025), quelles options en 2026 ?
 - [ ] Chaudière biomasse tertiaire : fiche BAT-TH-157, prime CEE 2026
 - [ ] Prime CEE HP flottante groupe froid : fiche IND-UT-134 en 2026
 - [ ] CEE collectivités locales 2026 : quels travaux financer ?
@@ -44,7 +44,7 @@
 - [ ] CEE copropriété 2026 : quelles aides pour votre immeuble collectif ?
 - [ ] Décret tertiaire et CEE : comment financer vos travaux de mise en conformité
 - [ ] Déclarer ses consommations sur OPERAT avant septembre 2026 : guide
-- [ ] Déshumidificateur serre CEE : fiches AGRI-TH-117 et AGRI-TH-119 en 2026
+- [ ] Déshumidificateur serre : fin des fiches AGRI-TH-117 et AGRI-TH-119 (abrogées le 3 juin 2026), quelles options ?
 - [ ] CEE agriculture 2026 : fiches AGRI pour serres, élevage et ateliers
 - [ ] Chaleur fatale data center : obligation légale et prime CEE depuis 2025
 - [ ] Récupération chaleur fatale industrie : fiches CEE et montants 2026
@@ -60,7 +60,7 @@
 - [ ] Borne IRVE copropriété : aide Advenir et TVA à 5,5 % en 2026
 - [ ] Nouvelle fiche CEE rénovation globale tertiaire 2026 : ce qui change
 - [ ] Financer une rénovation globale tertiaire : CEE, décret et cumul des aides
-- [ ] Calorifugeage réseau vapeur : quelles fiches CEE après IND-UT-121 ?
+- [ ] Calorifugeage réseau vapeur : quelles fiches CEE après IND-UT-121 (abrogée le 1er août 2025) ? (IND-UT-131 reste en vigueur)
 - [ ] PAC haute température industrie : quelles fiches CEE et quels montants ?
 - [ ] CEE hôtellerie restauration 2026 : travaux éligibles et démarches
 - [ ] CEE agroalimentaire 2026 : opérations prioritaires et accompagnement
@@ -244,7 +244,7 @@
 
 ### Froid commercial et réfrigération
 
-- [ ] CEE froid commercial GMS : quelles fiches restent actives après BAT-EQ-111 ?
+- [ ] CEE froid commercial GMS : fiches actives en 2026 (BAT-EQ-124/125 fermeture des meubles, BAT-TH-134/145 HP/BP flottante)
 - [ ] Régulation électronique groupe froid commercial : prime CEE disponible en 2026
 - [ ] Fluides frigorigènes HFO vs HFC : quelle stratégie face au règlement F-gas ?
 - [ ] Tour aéroréfrigérante : récupération de chaleur fatale et prime CEE

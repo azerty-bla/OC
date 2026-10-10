@@ -1,6 +1,7 @@
 import { defineConfig } from "astro/config";
 import tailwindcss from "@tailwindcss/vite";
 import sitemap from "@astrojs/sitemap";
+import { getPageDates } from "./src/lib/pageDates.mjs";
 
 export default defineConfig({
   site: "https://oteria-conseil.fr",
@@ -27,6 +28,9 @@ export default defineConfig({
         ) {
           item.priority = 0.9;
         }
+        // lastmod = date réelle de la dernière modification de la page (git), pas la date de build
+        const dates = getPageDates(item.url);
+        if (dates) item.lastmod = dates.modified;
         return item;
       },
     }),
