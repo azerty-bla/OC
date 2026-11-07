@@ -20,6 +20,11 @@ Tu recois :
 
 Avant d'ecrire :
 - Relis la strategie dans le side-car (`strat.hn_structure`, `strat.word_count_target`, `strat.internal_links_targets`, `strat.angle`)
+- **Lis les donnees de recherche** dans le side-car (section `research`) :
+  - `research.verified_facts` : **les seuls chiffres, dates, montants et references que la page peut contenir**. Chaque fait porte sa source (`source_url`) et la phrase exacte de celle-ci (`extrait`), controlees par script ; l'extrait dit aussi pour qui, par quel canal, pour quelle periode et sous quelles conditions vaut le chiffre (`price_ranges` et `regulations` : meme regle s'ils sont remplis)
+  - `research.verified_external_sources` : les adresses lues par script, a utiliser pour les liens externes (priorite aux sources d'autorite ≥ 3)
+  - `research.information_gain_opportunities` : les lacunes des concurrents que tu dois combler
+  - `research.unverified_data` : les donnees non confirmees — **jamais dans la page**, ni marquees, ni remplacees par un autre chiffre
 - Identifie le format de sortie depuis `config.project.type` :
   - Type contient `astro` → fichier `.mdx`
   - Type contient `html` → fichier `.html`
@@ -61,6 +66,14 @@ Ecris le contenu en suivant le plan Hn du side-car. Regles :
 - Respecte exactement la hierarchie Hn definie dans la strategie
 - **Reponse directe** : apres le H1 et l'intro (2-3 phrases), reponds a la question de l'utilisateur en 40-60 mots factuels. Optimise pour les AI Overviews et featured snippets.
 
+**Optimisation AI Overviews / SGE :**
+- Chaque section H2 doit contenir au moins UN element citable par les AI de Google :
+  - Une **definition concise** (20-30 mots, commencant par "[Sujet] est/designe/consiste...")
+  - Un **chiffre ou statistique** precise avec source
+  - Une **liste a puces** de 3-5 items
+- Formule les phrases cles de maniere autonome : elles doivent avoir du sens hors contexte (citables dans un snippet)
+- Evite les pronoms en debut de section — utilise le sujet complet pour que chaque section soit auto-suffisante
+
 **SEO — integration naturelle des mots-cles (zero stuffing) :**
 
 Placements obligatoires du mot-cle primaire (et UNIQUEMENT ceux-la) :
@@ -92,10 +105,11 @@ Techniques anti-stuffing obligatoires :
 - Repartis-les naturellement (1 lien tous les 200-400 mots environ)
 - Si la page est un satellite, assure-toi qu'un lien vers le pillar du cluster est inclus dans le contenu
 
-**Liens externes (sources) :**
-- Lis `strat.external_sources` dans le side-car pour les sources identifiees par le pole strat
+**Liens externes (sources — privilegier les sources de la recherche) :**
+- **Utilise en priorite `research.verified_external_sources`** : ce sont des adresses lues par script, avec un score d'autorite. Privilegier les sources de score ≥ 3.
+- Lis aussi `strat.external_sources` pour les sources identifiees par le pole strat
 - Inclus 2-3 liens vers ces sources de qualite (sites officiels, etudes, institutions)
-- Si une source a `url: "[URL A VERIFIER]"` : cite la source par son label dans le texte mais ne cree PAS de lien hypertexte. Ajoute un commentaire `<!-- URL A VERIFIER: [label] -->` pour que l'utilisateur puisse completer
+- Une source sans adresse lue (`url: "[URL A VERIFIER]"` dans la strategie, lecture en echec) n'est ni liee, ni citee comme preuve ; aucun commentaire `URL A VERIFIER` dans la page (il bloque `validate-facts`)
 - Renforce l'E-E-A-T et la fiabilite du contenu
 - Pas de liens vers des concurrents directs
 - Integre-les naturellement quand tu cites un fait, une reglementation, ou une source
@@ -124,16 +138,24 @@ Lis `.seo-engine/references/content-guidelines.md`, sections "Lisibilite" et "La
 **Phrases et formulations bannies :**
 Lis la liste complete dans `.seo-engine/references/content-guidelines.md`, section "Formulations bannies". N'utilise aucune de ces formulations. Toute phrase qui sonne comme du contenu genere par IA est interdite.
 
-**Donnees et chiffres :**
-- N'invente JAMAIS de statistiques, prix, pourcentages ou dates
-- Si une donnee est necessaire, utilise des fourchettes qualitatives ("une reduction significative") ou signale `[DONNEE A VERIFIER]`
-- Les references reglementaires doivent etre exactes (numeros de decrets, fiches CEE, normes)
+**Donnees et chiffres (seulement ceux de la recherche, controles par script) :**
+- N'invente JAMAIS de statistiques, prix, pourcentages, dates ou references, et n'en ecris aucun de memoire
+- **Chaque chiffre de la page vient d'un fait de `research.verified_facts`**, avec ses qualificatifs : « jusqu'a », « a partir de », « environ », HT ou TTC, la periode et les conditions de l'extrait. « Jusqu'a 180 € sous conditions » n'est pas « 180 € offerts »
+- **Lis l'extrait avant d'employer son chiffre** : pour qui (nouveaux clients, particuliers, professionnels), par quel canal (bienvenue, parrainage, lien affilie), pour quelle periode. Ne reporte jamais un chiffre sur un autre canal, un autre public ou une autre periode
+- Une offre temporaire (du … au …) se date dans le texte et ne va jamais dans le title, le H1 ou la meta description
+- **Calculs** (« soit 180 € par an », exemple chiffre) : chaque entree est un fait verifie, ou une hypothese d'exemple ecrite comme telle dans le texte (« pour un depot de 100 € ») ; declare chaque calcul dans le side-car, `copy.calculations` : `{ "resultat": "180 €", "formule": "15 × 12", "faits": ["F3"], "hypotheses": [] }`. Le script refait le calcul. Une hypothese d'exemple porte sur la situation du lecteur (montant depose, consommation, surface), jamais sur une offre (prime, tarif, taux, plafond) : celle-ci vient d'un fait
+- Si un chiffre manque dans la recherche : formulation sans chiffre (« une prime variable selon la campagne », « des frais reduits ») — jamais `[DONNEE A VERIFIER]`, jamais un autre chiffre
+- Les references (numeros de decrets, articles, fiches CEE, normes, codes promo) suivent la meme regle : elles viennent d'un fait verifie, ou d'un lien vers la page du site qui les porte
+- Un denombrement de la page elle-meme (« les 12 banques comparees ») correspond a ce qu'elle presente (12 lignes de tableau, 12 sections)
 
 **Schema markup :**
 - Lis `strat.schema_types` dans le side-car pour savoir quels schemas inclure
 - Si le layout du projet genere le schema automatiquement (via frontmatter), assure-toi que les champs requis sont dans le frontmatter (author, publishDate, updatedDate)
 - Si le projet n'a pas de generation auto de schema : inclus le JSON-LD dans le contenu (`<script type="application/ld+json">`)
 - L'Article/BlogPosting DOIT avoir : author, datePublished, dateModified, headline, description
+- Si des H2/H3 sont formules comme des questions : ajouter le schema FAQPage correspondant
+- Si le contenu est procedural (etapes a suivre) : ajouter le schema HowTo
+- **JAMAIS de schema Product** — ce site ne vend rien
 - Regarde la page de reference pour savoir comment le schema est gere dans ce projet
 
 **Attribution auteur :**
@@ -190,23 +212,38 @@ Reprends les classes CSS, la structure HTML, le header et le footer de la page d
 
 ### 4. Auto-relecture qualite (obligatoire avant ecriture)
 
-Avant d'ecrire le fichier sur disque, effectue cette relecture systematique :
+Avant d'ecrire le fichier sur disque, effectue cette relecture systematique dans l'ordre :
 
-**Keyword stuffing :**
+**Passe 1 — Accents (CRITIQUE) :**
+- Relis chaque mot du texte. CHAQUE mot portant un accent en francais DOIT avoir son accent.
+- Homophones a accent obligatoire : "a" (verbe) vs "à" (preposition), "ou" (conjonction) vs "où" (adverbe), "la" (article) vs "là" (adverbe), "du" (article) vs "dû" (participe de devoir), "sur" (preposition) vs "sûr" (adjectif).
+- Mots frequemment oublies par les LLM : énergie, différent, nécessaire, intéressant, développement, qualité, sécurité, spécifique, problème, système, méthode, résultat, expérience, bénéfice, référence, réglementation, stratégie, critère, caractère, général, région, période, modèle, activité, capacité, société, priorité, rénovation, efficacité, disponibilité, rentabilité.
+- Mots avec cédille : français, façade, leçon, reçu, aperçu, déçu, garçon, conçu.
+- Mots avec accent circonflexe : rôle, contrôle, bâtiment, château, grâce.
+- **Test** : lis chaque phrase et demande-toi si tous les accents sont la. Un seul accent manquant est une faute d'orthographe — c'est CRITIQUE pour la credibilite E-E-A-T.
+
+**Passe 2 — Accords et grammaire (CRITIQUE) :**
+- Verifie les accords du participe passe : avec avoir → accord avec le COD si place avant. Avec etre → accord avec le sujet.
+- Verifie les accords adjectifs/noms : genre ET nombre.
+- Verifie les homophones grammaticaux : a/à, ou/où, ce/se, ces/ses/c'est/s'est, on/ont, son/sont, et/est.
+- Verifie la conjugaison : subjonctif apres "il faut que/bien que/pour que", futur irregulier, conditionnel.
+- Aucun mot invente. Chaque terme doit exister en francais. Pas de neologismes, pas de calques anglais non etablis.
+
+**Passe 3 — Keyword stuffing :**
 - Surligne mentalement toutes les occurrences du mot-cle primaire. Si tu en comptes plus de 1 par paragraphe (hors intro), reduis.
 - Verifie qu'aucune section n'a une densite locale > 3%.
 - Verifie qu'il n'y a pas 3 phrases consecutives avec le mot-cle.
 
-**Naturalite :**
+**Passe 4 — Naturalite :**
 - Relis le texte comme un lecteur humain. Chaque phrase sonne-t-elle naturellement ?
 - Les transitions entre sections sont-elles logiques ou plaquees ?
 - Y a-t-il des phrases creuses, des tautologies, des evidences inutiles ?
 
-**Langue francaise :**
-- Verifie les accords (participe passe, adjectifs, pluriels).
-- Verifie les homophones grammaticaux (a/à, ou/où, ce/se, etc.).
-- Verifie la conjugaison (subjonctif apres "il faut que", futur irregulier, conditionnel).
-- Aucun mot invente.
+**Passe 5 — Coherence avec la recherche :**
+- Chaque chiffre, date et reference du texte correspond-il a un fait de `research.verified_facts` (note son identifiant), avec ses qualificatifs et dans le contexte de son extrait ?
+- Chaque calcul est-il declare dans `copy.calculations` ?
+- Aucun marqueur `[DONNEE A VERIFIER]` : une information absente de la recherche s'ecrit sans chiffre
+- `validate-facts.js` le controle au gate copy → audit : ce qu'il signale se corrige, cela ne se discute pas
 
 Si des problemes sont detectes, corrige-les AVANT d'ecrire sur disque.
 
@@ -237,9 +274,9 @@ Ecris le fichier sur disque.
 1. Le nombre de mots doit etre dans la fourchette ±10% de `strat.word_count_target`
 2. Tous les liens internes de `strat.internal_links_targets` doivent etre places
 3. Le H1 et la structure Hn doivent correspondre a `strat.hn_structure`
-4. Aucune donnee inventee
+4. Aucune donnee inventee ni de memoire : chaque chiffre, date et reference vient d'un fait verifie par script (`validate-facts.js`)
 5. Aucune phrase bannie
-6. Le fichier doit etre complet et auto-suffisant (pas de "[a completer]" ou de sections vides)
+6. Le fichier doit etre complet et auto-suffisant (pas de "[a completer]", de "[A VERIFIER]" ni de sections vides)
 7. Le mot-cle primaire apparait dans les 100 premiers mots
 8. Attribution auteur presente (frontmatter ou byline)
 9. Schema markup conforme a `strat.schema_types`

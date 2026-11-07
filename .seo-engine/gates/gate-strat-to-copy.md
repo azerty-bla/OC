@@ -1,6 +1,6 @@
-# Gate : Strategie → Redaction
+# Gate : Strategie → Recherche (ou Redaction si research non applicable)
 
-Tous les criteres doivent etre PASS pour autoriser le passage au pole copy.
+Tous les criteres doivent etre PASS pour autoriser le passage au pole suivant.
 
 ## Checklist
 
@@ -13,6 +13,7 @@ Tous les criteres doivent etre PASS pour autoriser le passage au pole copy.
 - [ ] `strat.internal_links_targets` contient au moins `config.seo.min_internal_links` liens (defaut: 2)
 - [ ] Chaque lien dans `strat.internal_links_targets` a `verified_exists: true`
 - [ ] `strat.secondary_keywords` contient au moins 2 mots-cles secondaires
+- [ ] `strat.semantic_entities` contient au moins 10 entites semantiques (termes du champ thematique, co-occurrences attendues)
 - [ ] `strat.angle` est defini et non vide
 - [ ] `strat.information_gain` est defini et non vide
 - [ ] `strat.schema_types` est defini et contient au moins un type de page ("Article" ou "BlogPosting") et "BreadcrumbList"

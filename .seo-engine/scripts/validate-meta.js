@@ -2,15 +2,16 @@
 
 const fs = require('fs');
 const path = require('path');
+const { normalize, textIncludesKeyword, parseArgs, htmlTitle, metaContent, linkHref } = require('./utils');
 
-const filePath = process.argv[2];
-const configPath = process.argv[3] || '.seo-engine/config.json';
-const sidecarFlag = process.argv.indexOf('--sidecar');
-const sidecarPath = sidecarFlag !== -1 ? process.argv[sidecarFlag + 1] : null;
+const args = parseArgs();
+const filePath = args.file;
+const sidecarPath = args.sidecar;
+const configPath = args.config;
 
 if (!filePath) {
-  console.error(JSON.stringify({ status: 'error', message: 'Usage: node validate-meta.js <file> [config] [--sidecar path]' }));
-  process.exit(1);
+  console.error(JSON.stringify({ status: 'error', message: 'Usage: node validate-meta.js --file <path> [--sidecar <path>] [--config <path>]' }));
+  process.exit(2);
 }
 
 let sidecarKeyword = null;
@@ -22,7 +23,7 @@ if (sidecarPath) {
 }
 
 let config = { seo: { title_length: [50, 60], description_length: [150, 160] } };
-if (configPath && !configPath.startsWith('--')) {
+if (configPath) {
   try {
     config = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
   } catch (e) {}
@@ -36,10 +37,11 @@ try {
   content = fs.readFileSync(filePath, 'utf-8');
 } catch (e) {
   console.log(JSON.stringify({ validator: 'validate-meta', file: filePath, status: 'error', checks: [{ name: 'file_readable', status: 'fail', message: `Fichier illisible: ${e.message}` }] }, null, 2));
-  process.exit(1);
+  process.exit(2);
 }
 const ext = path.extname(filePath).toLowerCase();
 const checks = [];
+const warnings = [];
 
 function addCheck(name, pass, message) {
   checks.push({ name, status: pass ? 'pass' : 'fail', message });
@@ -60,10 +62,9 @@ function parseFrontmatterField(fm, key) {
       }
       return parts.join(value === '>' ? ' ' : '\n');
     }
-    if ((value.startsWith('"') && value.endsWith('"')) ||
-        (value.startsWith("'") && value.endsWith("'"))) {
-      return value.slice(1, -1);
-    }
+    // YAML : '' vaut une apostrophe entre apostrophes, \" un guillemet entre guillemets.
+    if (value.length >= 2 && value.startsWith("'") && value.endsWith("'")) return value.slice(1, -1).replace(/''/g, "'");
+    if (value.length >= 2 && value.startsWith('"') && value.endsWith('"')) return value.slice(1, -1).replace(/\\"/g, '"');
     return value;
   }
   return null;
@@ -136,16 +137,14 @@ if (ext === '.mdx' || ext === '.md') {
         : 'Champ keywords manquant ou vide');
 
     if (title && keywords && keywords.length > 0) {
-      const kwLower = keywords[0].toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-      const titleLower = title.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-      const kwInTitle = titleLower.includes(kwLower);
+      const kwInTitle = textIncludesKeyword(title, keywords[0]);
       addCheck('keyword_in_title', kwInTitle,
         kwInTitle ? 'Mot-cle primaire present dans le title' : `Mot-cle primaire ("${keywords[0]}") absent du title`);
     }
 
     const slug = fmSlug || path.basename(filePath, ext);
     if (slug && keywords && keywords.length > 0) {
-      const kw = keywords[0].toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+      const kw = normalize(keywords[0]);
       const slugNorm = slug.toLowerCase();
       const kwWords = kw.split(/\s+/).filter(w => w.length > 3);
       const kwInSlug = kwWords.length > 0 && kwWords.some(w => slugNorm.includes(w));
@@ -161,43 +160,39 @@ if (ext === '.mdx' || ext === '.md') {
   }
 
 } else if (ext === '.html' || ext === '.htm') {
-  const titleMatch = content.match(/<title>([\s\S]*?)<\/title>/i);
-  if (!titleMatch || !titleMatch[1].trim()) {
+  // Lecture par attributs (valeur lue jusqu'au guillemet qui l'ouvre, entités décodées) : une apostrophe dans la
+  // description (« barres d'appui ») ne la coupe plus, et &#39; / &rsquo; comptent pour un caractère.
+  const title = htmlTitle(content);
+  if (!title) {
     addCheck('title_exists', false, 'Balise <title> manquante ou vide');
   } else {
-    const title = titleMatch[1].trim();
     addCheck('title_exists', true, `Title: "${title}"`);
     addCheck('title_length', title.length >= titleMin && title.length <= titleMax,
       `Title: ${title.length} caracteres (cible: ${titleMin}-${titleMax})`);
   }
 
-  const descMatch = content.match(/<meta\s+name=["']description["']\s+content=["'](.*?)["']/i)
-    || content.match(/<meta\s+content=["'](.*?)["']\s+name=["']description["']/i);
-  if (!descMatch || !descMatch[1].trim()) {
+  const descRaw = metaContent(content, 'description');
+  const desc = descRaw == null ? '' : descRaw.replace(/\s+/g, ' ').trim();
+  if (!desc) {
     addCheck('description_exists', false, 'Meta description manquante ou vide');
   } else {
-    const desc = descMatch[1].trim();
     addCheck('description_exists', true, `Description: "${desc.substring(0, 50)}..."`);
     addCheck('description_length', desc.length >= descMin && desc.length <= descMax,
       `Description: ${desc.length} caracteres (cible: ${descMin}-${descMax})`);
   }
 
-  const canonicalMatch = content.match(/<link\s+rel=["']canonical["']\s+href=["'](.*?)["']/i)
-    || content.match(/<link\s+href=["'](.*?)["']\s+rel=["']canonical["']/i);
-  addCheck('canonical_exists', !!canonicalMatch,
-    canonicalMatch ? `Canonical: ${canonicalMatch[1]}` : 'Balise canonical manquante');
+  const canonical = linkHref(content, 'canonical');
+  addCheck('canonical_exists', !!canonical,
+    canonical ? `Canonical: ${canonical}` : 'Balise canonical manquante');
 
-  if (canonicalMatch && config.project?.domain) {
-    const validDomain = canonicalMatch[1].includes(config.project.domain);
+  if (canonical && config.project?.domain) {
+    const validDomain = canonical.includes(config.project.domain);
     addCheck('canonical_domain', validDomain,
-      validDomain ? 'Canonical sur le bon domaine' : `Canonical "${canonicalMatch[1]}" ne correspond pas au domaine "${config.project.domain}"`);
+      validDomain ? 'Canonical sur le bon domaine' : `Canonical "${canonical}" ne correspond pas au domaine "${config.project.domain}"`);
   }
 
-  if (sidecarKeyword && titleMatch && titleMatch[1].trim()) {
-    const title = titleMatch[1].trim();
-    const kwLower = sidecarKeyword.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-    const titleLower = title.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-    const kwInTitle = titleLower.includes(kwLower);
+  if (sidecarKeyword && title) {
+    const kwInTitle = textIncludesKeyword(title, sidecarKeyword);
     addCheck('keyword_in_title', kwInTitle,
       kwInTitle ? 'Mot-cle primaire present dans le title' : `Mot-cle primaire ("${sidecarKeyword}") absent du title`);
   }
@@ -217,8 +212,10 @@ const result = {
   validator: 'validate-meta',
   file: filePath,
   status: hasFail ? 'fail' : 'pass',
-  checks
+  checks,
+  ...(warnings.length > 0 ? { warnings } : {})
 };
 
 console.log(JSON.stringify(result, null, 2));
-process.exit(hasFail ? 1 : 0);
+// exitCode plutôt que process.exit : une sortie de plus de 64 Ko serait tronquée sur un pipe.
+process.exitCode = hasFail ? 1 : 0;

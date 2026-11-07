@@ -12,7 +12,7 @@ Lis ces fichiers dans cet ordre :
 
 1. **`.seo-engine/config.json`** → projet (stack, domaine, monetisation, langue, auteur)
 2. **`.seo-engine/state/queue.json`** → batch en cours, type de mission
-3. Lis `queue.mission` pour determiner le type de mission : `produce`, `audit-fix`, ou `improve`
+3. Lis `queue.mission` pour determiner le type de mission : `produce`, `audit-fix`, `improve` ou `visuals`
 4. Identifie la **page en cours** : premier slug dans `queue.pages` avec `status != "completed"`
 5. **`.seo-engine/state/pages/[slug].json`** → side-car de cette page
 6. Si le side-car n'existe pas, cree-le (voir templates dans `state/`). Remplis `created` et `updated` avec la date du jour (YYYY-MM-DD).
@@ -42,7 +42,7 @@ Utilise le template `state/page.template.json` comme base. Remplis les champs su
 }
 ```
 
-Les sections `strat`, `copy` et `audit` sont deja initialisees dans le template. Le pole strat remplira la section `strat`.
+Les sections `strat`, `research`, `copy` et `audit` sont deja initialisees dans le template. Le pole strat remplira la section `strat`, le pole research remplira la section `research`.
 
 #### Cycle produce :
 
@@ -52,23 +52,41 @@ Les sections `strat`, `copy` et `audit` sont deja initialisees dans le template.
 3. Execute l'analyse strategique
 4. Ecris les resultats dans le side-car (section `strat`)
 5. **Verifie le gate** `.seo-engine/gates/gate-strat-to-copy.md`
-6. Si PASS → `strat.completed = true`, `phase = "copy"`
-7. Si FAIL → corrige et re-verifie (maximum 3 tentatives). Si le gate echoue apres 3 tentatives, note les criteres echoues dans le side-car et passe quand meme — le pole audit rattrapera.
+6. Si PASS → `strat.completed = true`, `phase = "research"`
+7. Si FAIL → corrige et re-verifie (maximum 3 tentatives). Si le gate echoue apres 3 tentatives, note les criteres echoues dans le side-car et passe a la phase suivante — le pole audit doit les corriger ; rien n'est jamais force (voir gate-publish).
+
+**Phase "research"** :
+1. Lis `.seo-engine/poles/pole-research.md` et suis ses instructions
+2. Lis la strategie depuis le side-car (`strat.primary_keyword`, `strat.secondary_keywords`, `strat.semantic_entities`, `strat.search_intent`, `strat.angle`)
+3. Construis la matrice de requetes (minimum 8 requetes, idealement 12-20)
+4. Execute les recherches web (WebSearch) et lis les pages qui portent un fait avec `source-check.js` (texte integral ; WebFetch ne fournit ni citation ni chiffre)
+5. Collecte et verifie les donnees : source qui fait foi, phrase exacte, contexte du chiffre, fraicheur ; puis `validate-facts.js --phase research` sur tous les faits
+6. Ecris les resultats dans le side-car (section `research`)
+7. **Verifie le gate** `.seo-engine/gates/gate-research-to-copy.md`
+8. Si PASS → `research.completed = true`, `phase = "copy"`
+9. Si FAIL → complete les recherches et re-verifie (maximum 3 tentatives). Si le gate echoue apres 3 tentatives, note les criteres manquants dans le side-car et passe en copy avec les seuls faits acceptes par `validate-facts.js` (aucun fait rejete ne reste dans `verified_facts`) : la page ne contiendra aucun autre chiffre. Jamais de donnee marquee `[A VERIFIER]`.
 
 **Phase "copy"** :
 1. Lis `.seo-engine/poles/pole-copy.md` et suis ses instructions
 2. Lis la strategie depuis le side-car
-3. Lis les docs projet (`PROJECT_RULES.md`, `CONTENT_GUIDELINES.md`) si existants
-4. Lis une page existante comme reference de format
-5. Redige le contenu complet et ecris-le sur disque
-6. Mets a jour le side-car : `copy.file_path`, `copy.word_count`
-7. **Verifie le gate** `.seo-engine/gates/gate-copy-to-audit.md`
-8. Si PASS → `copy.completed = true`, `phase = "audit"`
-9. Si FAIL → corrige et re-verifie (maximum 3 tentatives). Si le gate echoue apres 3 tentatives, passe en audit — les problemes restants seront corriges en phase audit.
+3. **Lis les donnees de recherche** depuis le side-car (section `research`) : faits verifies, fourchettes de prix, reglementations, sources externes verifiees
+4. Lis les docs projet (`PROJECT_RULES.md`, `CONTENT_GUIDELINES.md`) si existants
+5. Lis une page existante comme reference de format
+6. Redige le contenu complet en t'appuyant sur les faits verifies de la recherche et ecris-le sur disque
+7. Mets a jour le side-car : `copy.file_path`, `copy.word_count`
+8. **Verifie le gate** `.seo-engine/gates/gate-copy-to-audit.md`
+9. Si PASS → `copy.completed = true`, `phase = "visuals"` (ou `"audit"` si `config.visuals.enabled` vaut `false`)
+10. Si FAIL → corrige et re-verifie (maximum 3 tentatives). Si le gate echoue apres 3 tentatives, passe a la phase suivante — les problemes restants seront corriges en phase audit.
+
+**Phase "visuals"** :
+1. Lis `.seo-engine/poles/pole-visuals.md` et suis ses sections 1 a 5 : plan, contre-passe, elements dans `state/visuals/visuals.json`, prompts mis en file, schemas SVG dessines et controles
+2. Rien n'est genere ni integre ici : la generation, la validation humaine et l'integration se font en mission `visuals`, en fin de batch
+3. **Verifie le gate** `.seo-engine/gates/gate-visuals.md` (partie « Apres le plan »)
+4. Si PASS → `visuals.completed = true`, `phase = "audit"`. Si FAIL → corrige (maximum 3 tentatives), puis passe en audit en notant les criteres echoues
 
 **Phase "audit"** :
 1. Lis `.seo-engine/poles/pole-audit.md` et suis ses instructions
-2. Execute les validators : `node .seo-engine/scripts/validate-all.js [fichier] --config .seo-engine/config.json --sidecar .seo-engine/state/pages/[slug].json --root .`
+2. Execute les validators : `node .seo-engine/scripts/validate-all.js --file [fichier] --config .seo-engine/config.json --sidecar .seo-engine/state/pages/[slug].json --root .`, puis le controle des faits (hors validate-all) : `node .seo-engine/scripts/validate-facts.js --file [fichier] --config .seo-engine/config.json --sidecar .seo-engine/state/pages/[slug].json --root .`
 3. Execute l'audit LLM (editorial, SEO, E-E-A-T)
 4. Si erreurs : corrige directement → re-execute validators → repete
 5. Si mission `produce` et page satellite : mets a jour la page parent/hub du cluster avec un lien vers cette page
@@ -109,7 +127,8 @@ Utilise le template `state/page.template.json` comme base. Remplis les champs su
     "llm_results": {},
     "fixes_applied": [],
     "errors_remaining": 0,
-    "forced_pass": false,
+    "blocked_reason": null,
+    "exceptions": [],
     "suggestions": []
   }
 }
@@ -120,7 +139,7 @@ Utilise le template `state/page.template.json` comme base. Remplis les champs su
 1. Lis le fichier existant (`queue.pages[current].file_path`)
 2. **Capture l'etat initial** dans le side-car (`original_state`) pour traçabilite
 3. **Identifie le mot-cle principal** de la page (depuis le frontmatter `keywords[0]` ou le H1). Ecris-le dans `strat.primary_keyword` du side-car pour que les validators (densite, keyword_in_first_100_words) fonctionnent.
-4. Execute les validators : `node .seo-engine/scripts/validate-all.js [fichier] --config .seo-engine/config.json --sidecar .seo-engine/state/pages/[slug].json --root .`
+4. Execute les validators : `node .seo-engine/scripts/validate-all.js --file [fichier] --config .seo-engine/config.json --sidecar .seo-engine/state/pages/[slug].json --root .`, puis `node .seo-engine/scripts/validate-facts.js --file [fichier] --config .seo-engine/config.json --sidecar .seo-engine/state/pages/[slug].json --root .` (tout chiffre ajoute ou modifie doit etre prouve ; les chiffres deja publies qu'il signale vont au skill verif-faits)
 5. Execute l'audit LLM (pole-audit.md)
 6. Pour chaque erreur CRITIQUE ou IMPORTANT :
    - Corrige directement dans le fichier
@@ -200,7 +219,8 @@ Utilise le template `state/page.template.json` comme base. Remplis les champs su
     "llm_results": {},
     "fixes_applied": [],
     "errors_remaining": 0,
-    "forced_pass": false,
+    "blocked_reason": null,
+    "exceptions": [],
     "suggestions": []
   }
 }
@@ -217,6 +237,7 @@ Utilise le template `state/page.template.json` comme base. Remplis les champs su
    - L'E-E-A-T est-il suffisant ? (auteur, sources, experience)
    - Le maillage interne est-il complet ?
    - Quelle information unique cette page pourrait-elle apporter ? (information gain)
+   - Manque-t-il un visuel qui ferait voir ou comprendre plus vite (criteres du pole visuels) ?
 4. Ecris l'analyse dans le side-car (section `analysis`)
 5. **Copie `analysis.current_keyword` dans `strat.primary_keyword`** pour que les validators (densite, keyword_in_first_100_words) fonctionnent en phase audit
 6. `analysis.completed = true`, `phase = "improve"`
@@ -230,10 +251,23 @@ Utilise le template `state/page.template.json` comme base. Remplis les champs su
    - Ameliore le title/description si sous-optimises
    - Ajoute le schema markup si manquant
 2. Note chaque changement dans `improvements.changes_made`
-3. `improvements.completed = true`, `phase = "audit"`
+3. `improvements.completed = true`, `phase = "visuals"` si des visuels manquent (meme phase que produce), sinon `phase = "audit"`
 
 **Phase "audit"** :
 Meme cycle que produce : validators + audit LLM → corrections → gate-publish. Le critere "page parent/hub mise a jour" de gate-publish ne s'applique pas aux missions improve et audit-fix (la page existe deja).
+
+---
+
+### Mission "visuals" — Generation, validation et integration des images
+
+Pour un batch qui vient d'etre produit (elements en file dans `state/visuals/visuals.json`), ou pour equiper des pages existantes. Suis `.seo-engine/poles/pole-visuals.md`.
+
+1. **Pages existantes sans plan visuel** : pour chaque page de `queue.pages`, sections 1 a 5 du pole (plan, contre-passe, prompts, SVG). Aucune autre modification de contenu.
+2. **Generation et audit** (section 6) : `generate-visuals.js` en arriere-plan, lecture et notation de chaque image, iterations jusqu'a `ready` ou `failed`.
+3. **Validation humaine** (section 7) : planche numerotee de tous les elements `ready` du batch, en une seule fois, meme s'il y en a des dizaines. Point d'arret : `EXIT_SIGNAL: false`, resume « validation des visuels attendue : <chemin de la planche> ».
+4. Reponse de l'utilisateur appliquee (`review-visuals.js --reject …`), elements a retravailler repasses par 2 et 3.
+5. **Integration** (section 8) puis `validate-all` sur chaque page touchee. Gate `gates/gate-visuals.md` (partie « Avant integration »).
+6. Page terminee quand tous ses elements sont `integrated`, `exported`, `removed`, `failed` ou `to-source`.
 
 ---
 
@@ -251,7 +285,10 @@ Quelle que soit la mission, quand la page est terminee :
 
 3. Cherche la prochaine page non-completed dans `queue.pages`
    - Si trouvee → recommence le cycle
-   - Si aucune → batch termine
+   - Si aucune → batch termine. **Avant de declarer le batch termine**, lance l'audit anti-spam du site :
+     `node .seo-engine/scripts/audit-spam.js --config .seo-engine/config.json --root .`
+     S'il reste des visuels `queued`, `generated` ou `ready` dans `state/visuals/visuals.json`, annonce-le : ils passent par la mission `visuals` (generation, planche de validation, integration) avant la mise en ligne.
+     Gate `gates/gate-release.md` : tout controle ❌ doit etre corrige (ou la page concernee retiree du lot : `draft: true` en Astro, `<meta name="robots" content="noindex">` + retrait du sitemap en HTML) avant EXIT_SIGNAL.
 
 ---
 
@@ -282,13 +319,16 @@ Relis `queue.json` et verifie que `stats.completed == stats.total`. Cite le rati
 - **Pas de lien vers une page non publiee.** Verifie que chaque cible de lien interne existe sur disque.
 - **Adapte le format au projet.** Lis `config.project.type` : "astro" → MDX. "html" → HTML. Lis les pages existantes pour les conventions.
 - **Mets a jour le side-car a chaque etape.** C'est ta memoire entre les iterations.
+- **Versioning** : a chaque modification du side-car qui change le contenu (phase copy, audit fix, improve), incremente `version` et ajoute une entree dans `changelog` : `{"version": N, "date": "YYYY-MM-DD", "phase": "copy|audit|improve", "summary": "..."}`. La date `updated` est mise a jour en meme temps.
+- **Images** : jamais d'image integree sans validation humaine sur la planche numerotee ; jamais de mention « image generee » (legende, alt, metadonnee).
 - **Ne modifie JAMAIS config.json, les poles, ou les gates.** Tu ne modifies que `state/` et les fichiers de contenu.
-- **Document sharding.** Ne charge que le pole necessaire a la phase en cours. Pas besoin de lire pole-copy pendant la phase audit.
+- **Document sharding.** Ne charge que le pole necessaire a la phase en cours. Pas besoin de lire pole-copy pendant la phase audit, ni pole-research pendant la phase copy.
 - **Sauvegarde le side-car AVANT chaque correction.** Si le contexte se coupe pendant une correction, l'etat est preserve.
 - **Verifie le side-car apres chaque ecriture.** Relis le fichier JSON et confirme qu'il est parsable. Si le JSON est invalide, re-ecris-le correctement avant de continuer.
-- **Maximum 3 iterations d'audit par page.** Si apres 3 passages de correction le gate ne passe pas, note les erreurs restantes dans `audit.errors_remaining`, marque `audit.forced_pass = true`, et passe a la page suivante.
+- **Maximum 3 iterations d'audit par page.** Si apres 3 passages de correction le gate ne passe pas, la page passe en `status: "blocked"` (jamais `completed`) avec `audit.errors_remaining` classes par cause (`page` / `validator_bug` / `exception`, cf. gate-publish), puis passe a la page suivante. **Aucun passage force** : une exception exige l'accord explicite de l'utilisateur, consigne dans `audit.exceptions[]`. **Ne modifie jamais un validateur** dans la copie du projet : un bug se decrit et se corrige dans SEOWK. Les validateurs tournent sur la page complete, jamais sur un extrait.
 - **Reprise apres crash.** Au redemarrage, verifie que le fichier de contenu en cours est complet (pas de coupure au milieu d'une phrase, pas de bloc HTML/MDX non ferme). Si le fichier est tronque, restaure depuis le side-car ou regenere la partie manquante.
-- **Fraicheur (missions audit-fix et improve).** Apres chaque modification de contenu, mets a jour `updatedDate` dans le frontmatter (MDX) ou `dateModified` dans le JSON-LD (HTML) avec la date du jour.
+- **Fraicheur (missions audit-fix et improve).** Apres chaque modification **substantielle** de contenu (donnee, paragraphe, section, recommandation), mets a jour `updatedDate` dans le frontmatter (MDX) ou `dateModified` dans le JSON-LD (HTML) avec la date du jour. **Jamais** pour une coquille, un lien ou une mise en forme, et jamais seule : changer la date sans changer le fond est de la fausse fraicheur (spam policies, controle `fake_freshness`).
+- **Spam policies Google.** Lis `references/spam-policies.md` avant toute mission. Pas de pages en serie par entite sans contenu propre, pas de fausse experience (« nous avons teste ») sans preuve, pas de fiche auteur sans identite reelle, pas de FAQ recyclee, liens affilies en `rel="sponsored"`, publication etalee (`spam.max_pages_per_release`). `validate-spam` (page) et `audit-spam` (site) font foi.
 
 ---
 
@@ -297,9 +337,55 @@ Relis `queue.json` et verifie que `stats.completed == stats.total`. Cite le rati
 - `queue.json` n'existe pas → arrete-toi, dis a l'utilisateur de creer le batch
 - Cluster YAML n'existe pas (mission produce) → dis de lancer `/architect` d'abord
 - `astro build` echoue → lis l'erreur, corrige, relance
-- Validator echoue apres 3 tentatives de correction sur le meme check → note dans le side-car, passe a la page suivante (ne bloque pas le batch)
+- Validator echoue apres 3 tentatives de correction sur le meme check → page `blocked` (pas `completed`), cause classee dans le side-car, passe a la page suivante ; le bilan final liste les pages bloquees
 - Cannibalization detectee (mission produce) → signale dans le side-car, EXIT_SIGNAL: false, attends confirmation
 - Fichier introuvable (mission audit-fix/improve) → note dans le side-car, passe a la page suivante
+
+---
+
+## 6b. Mode dry-run
+
+Si l'utilisateur passe `--dry-run` au lancement du batch :
+- Les validators s'executent normalement : `node .seo-engine/scripts/validate-all.js --file [fichier] --config .seo-engine/config.json --sidecar [sidecar] --root . --dry-run`
+- L'audit LLM s'execute normalement
+- **Aucun fichier de contenu n'est modifie sur disque**
+- **Le side-car est mis a jour** (pour documenter ce qui aurait ete fait)
+- Le rapport final indique `"dry_run": true` et liste les corrections qui seraient appliquees
+- Utile pour evaluer l'etat d'un batch sans appliquer de changements
+
+---
+
+## 6c. Detection de dependances dans le batch (mission produce)
+
+Avant de commencer la production d'un batch, analyser les liens internes entre les pages du batch :
+
+1. Pour chaque page du batch, lire `strat.internal_links_targets`
+2. Si la page A linke vers la page B, et B est aussi dans le batch, alors B doit etre produite AVANT A
+3. Construire un graphe de dependances et ordonner les pages en consequence (tri topologique)
+4. Si un cycle est detecte (A → B → A), ignorer le cycle et produire dans l'ordre original avec un avertissement
+
+Cela evite les faux positifs de liens casses pendant la production : si A est produite avant B, le validator de liens signalera B comme inexistante.
+
+**Implementation** : au debut du batch (premiere iteration), reordonner `queue.pages` selon les dependances detectees. Documenter le reordonnancement dans le summary Ralph.
+
+---
+
+## 6d. Resume IA des changements (missions audit-fix et improve)
+
+A la fin de chaque page en mission `audit-fix` ou `improve`, generer un resume concis des changements effectues :
+
+1. Comparer l'etat initial (`original_state`) avec l'etat final
+2. Lister les corrections appliquees (`audit.fixes_applied` ou `improvements.changes_made`)
+3. Generer un resume en 3-5 lignes maximum, lisible par un humain non technique :
+   - Ce qui a ete corrige (ex: "Title raccourci de 72 a 58 caracteres")
+   - Ce qui a ete ajoute (ex: "Section FAQ ajoutee avec 4 questions")
+   - Ce qui a ete supprime (ex: "3 formulations bannies retirees")
+   - Score avant/apres si disponible
+
+4. Ecrire le resume dans le side-car : `audit.summary` (missions audit-fix) ou `improvements.summary` (missions improve)
+5. Inclure le resume dans le `RALPH_STATUS.summary` pour que l'utilisateur voie les changements sans lire le diff
+
+L'utilisateur ne doit JAMAIS avoir a lire un diff brut. Le resume IA est obligatoire.
 
 ---
 

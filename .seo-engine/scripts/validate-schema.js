@@ -2,20 +2,22 @@
 
 const fs = require('fs');
 const path = require('path');
+const { parseArgs } = require('./utils');
 
-const filePath = process.argv[2];
-const configFlag = process.argv.indexOf('--config');
-const schemaConfigPath = configFlag !== -1 ? process.argv[configFlag + 1] : null;
+const args = parseArgs();
+const filePath = args.file;
+const sidecarPath = args.sidecar;
+const configPath = args.config;
 
 if (!filePath) {
-  console.error(JSON.stringify({ status: 'error', message: 'Usage: node validate-schema.js <file> [--config path]' }));
-  process.exit(1);
+  console.error(JSON.stringify({ status: 'error', message: 'Usage: node validate-schema.js --file <path> [--sidecar <path>] [--config <path>]' }));
+  process.exit(2);
 }
 
 let requiredSchema = [];
 try {
-  if (schemaConfigPath) {
-    const cfg = JSON.parse(fs.readFileSync(schemaConfigPath, 'utf-8'));
+  if (configPath) {
+    const cfg = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
     requiredSchema = cfg.seo?.required_schema || [];
   }
 } catch (e) {}
@@ -25,7 +27,7 @@ try {
   content = fs.readFileSync(filePath, 'utf-8');
 } catch (e) {
   console.log(JSON.stringify({ validator: 'validate-schema', file: filePath, status: 'error', schema_types: [], images: { total: 0, missing_alt: 0 }, checks: [{ name: 'file_readable', status: 'fail', message: `Fichier illisible: ${e.message}` }] }, null, 2));
-  process.exit(1);
+  process.exit(2);
 }
 const ext = path.extname(filePath).toLowerCase();
 const checks = [];
@@ -104,6 +106,34 @@ if (allTypes.length > 0) {
   addCheck('has_breadcrumb', hasBreadcrumb,
     hasBreadcrumb ? 'BreadcrumbList present' : 'BreadcrumbList manquant — recommande pour la navigation');
 
+  // --- FAQPage detection ---
+  const hasFAQ = allTypes.includes('FAQPage');
+  // --- HowTo detection ---
+  const hasHowTo = allTypes.includes('HowTo');
+
+  // Check if content has question-like H2/H3 (suggesting FAQ schema would be beneficial)
+  let hasQuestionHeadings = false;
+  let hasProceduralContent = false;
+  if (ext === '.mdx' || ext === '.md') {
+    const headingMatches = content.match(/^#{2,3}\s+.+/gm) || [];
+    hasQuestionHeadings = headingMatches.some(h => /\?\s*$/.test(h) || /^#{2,3}\s+(comment|pourquoi|quand|quel|quelle|quels|quelles|combien|est-ce que|faut-il|peut-on|doit-on)\b/i.test(h));
+    hasProceduralContent = headingMatches.some(h => /^#{2,3}\s+(etape|step|\d+[\.\)]\s)/i.test(h)) || /^#{2,3}\s+comment\s/im.test(content);
+  } else {
+    const headingMatches = content.match(/<h[23][^>]*>[\s\S]*?<\/h[23]>/gi) || [];
+    const headingTexts = headingMatches.map(h => h.replace(/<[^>]+>/g, '').trim());
+    hasQuestionHeadings = headingTexts.some(t => /\?\s*$/.test(t) || /^(comment|pourquoi|quand|quel|quelle|quels|quelles|combien|est-ce que|faut-il|peut-on|doit-on)\b/i.test(t));
+    hasProceduralContent = headingTexts.some(t => /^(etape|step|\d+[\.\)]\s)/i.test(t));
+  }
+
+  if (hasQuestionHeadings && !hasFAQ) {
+    addCheck('faq_schema_opportunity', false,
+      'H2/H3 contiennent des questions mais pas de schema FAQPage — opportunite de donnees structurees');
+  }
+  if (hasProceduralContent && !hasHowTo) {
+    addCheck('howto_schema_opportunity', false,
+      'Contenu procedural detecte mais pas de schema HowTo — opportunite de donnees structurees');
+  }
+
   for (const block of jsonLdBlocks) {
     const items = block['@graph'] || [block];
     for (const item of (Array.isArray(items) ? items : [items])) {
@@ -116,8 +146,18 @@ if (allTypes.length > 0) {
 
         if (authorValid && typeof item.author === 'object') {
           const hasSameAs = !!(item.author.sameAs && (Array.isArray(item.author.sameAs) ? item.author.sameAs.length > 0 : true));
-          addCheck('author_has_sameas', hasSameAs,
-            hasSameAs ? 'Author avec sameAs (profils professionnels)' : 'Author sans sameAs — recommande pour E-E-A-T (LinkedIn, site perso)');
+          // Auteur collectif (Organization, rédaction) : sameAs sert à relier une personne à ses profils publics ; pour une
+          // organisation, son identité est portée par sa page « qui sommes-nous » (url). Exiger un profil externe pousserait
+          // à en inventer un. Organization + url → passe ; Organization sans url ni sameAs → échec ; Person → sameAs exigé.
+          const authorTypes = [].concat(item.author['@type'] || []);
+          const isOrg = authorTypes.some(t => /Organization$|^(NewsMediaOrganization|Corporation|GovernmentOrganization|NGO)$/.test(t));
+          const orgUrl = isOrg && typeof item.author.url === 'string' && item.author.url.trim() ? item.author.url.trim() : '';
+          if (hasSameAs) addCheck('author_has_sameas', true, 'Author avec sameAs (profils professionnels)');
+          else if (orgUrl) addCheck('author_has_sameas', true, `Auteur collectif (${authorTypes.join(', ')}) identifié par sa page ${orgUrl} — sameAs non exigé`);
+          else if (isOrg) addCheck('author_has_sameas', false, 'Auteur collectif (Organization) sans url ni sameAs — ajouter url vers la page « qui sommes-nous »');
+          // Rédaction déclarée en Person : reste en échec (une équipe n'est pas une personne), avec la correction à faire.
+          else if (/[ée]quipe|r[ée]daction|editorial|[ée]ditorial|team|staff/i.test(String(item.author.name || ''))) addCheck('author_has_sameas', false, `Auteur collectif « ${item.author.name} » déclaré en Person — le typer Organization avec url vers la page « qui sommes-nous » (ou nommer une personne réelle avec sameAs)`);
+          else addCheck('author_has_sameas', false, 'Author sans sameAs — recommande pour E-E-A-T (LinkedIn, site perso)');
         }
 
         const hasDatePublished = !!item.datePublished;
@@ -129,25 +169,10 @@ if (allTypes.length > 0) {
           hasDateModified ? `dateModified: ${item.dateModified}` : 'Article sans dateModified — recommande pour la fraicheur');
       }
 
+      // JAMAIS de schema Product — on ne vend rien
       if (itemTypes.includes('Product')) {
-        const hasOffers = !!item.offers;
-        addCheck('product_has_offers', hasOffers,
-          hasOffers ? 'Product a des offers' : 'Product sans offers — requis pour les rich results shopping');
-
-        if (hasOffers) {
-          const offer = Array.isArray(item.offers) ? item.offers[0] : item.offers;
-          const hasPrice = !!(offer.price || offer.lowPrice);
-          addCheck('product_has_price', hasPrice,
-            hasPrice ? 'Product offers avec price' : 'Product offers sans price — requis pour les rich results');
-
-          const hasCurrency = !!offer.priceCurrency;
-          addCheck('product_has_currency', hasCurrency,
-            hasCurrency ? `priceCurrency: ${offer.priceCurrency}` : 'Product sans priceCurrency');
-
-          const hasAvailability = !!offer.availability;
-          addCheck('product_has_availability', hasAvailability,
-            hasAvailability ? 'Product avec availability' : 'Product sans availability — recommande');
-        }
+        addCheck('no_product_schema', false,
+          'Schema Product detecte — ce site ne vend rien, supprimer le schema Product');
       }
     }
   }
@@ -213,4 +238,5 @@ const result = {
 };
 
 console.log(JSON.stringify(result, null, 2));
-process.exit(hasFail ? 1 : 0);
+// exitCode plutôt que process.exit : une sortie de plus de 64 Ko serait tronquée sur un pipe.
+process.exitCode = hasFail ? 1 : 0;

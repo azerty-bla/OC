@@ -2,16 +2,17 @@
 
 const fs = require('fs');
 const path = require('path');
+const { normalize: baseNormalize, parseArgs, htmlTitle, metaContent } = require('./utils');
 
-const filePath = process.argv[2];
+const args = parseArgs();
+const filePath = args.file;
+const projectRoot = args.root;
+const configPath = args.config;
 
 if (!filePath) {
-  console.error(JSON.stringify({ status: 'error', message: 'Usage: node validate-duplicates.js <file> [project-root] [config]' }));
-  process.exit(1);
+  console.error(JSON.stringify({ status: 'error', message: 'Usage: node validate-duplicates.js --file <path> [--root <path>] [--config <path>]' }));
+  process.exit(2);
 }
-
-const projectRoot = process.argv[3] || '.';
-const configPath = process.argv[4] || '.seo-engine/config.json';
 
 let contentDir = 'src/content';
 let pagesDir = 'src/pages';
@@ -31,7 +32,7 @@ try {
     validator: 'validate-duplicates', file: filePath, status: 'error',
     checks: [{ name: 'file_readable', status: 'fail', message: `Fichier illisible: ${e.message}` }]
   }, null, 2));
-  process.exit(1);
+  process.exit(2);
 }
 
 const checks = [];
@@ -40,8 +41,7 @@ function addCheck(name, pass, message) {
 }
 
 function normalize(text) {
-  return text.toLowerCase()
-    .normalize('NFD').replace(/[̀-ͯ]/g, '')
+  return baseNormalize(text)
     .replace(/[^a-z0-9\s]/g, '')
     .replace(/\s+/g, ' ')
     .trim();
@@ -49,7 +49,7 @@ function normalize(text) {
 
 function extractMeta(raw, ext) {
   const meta = { title: '', description: '', h1: '' };
-  const fmMatch = raw.match(/^---\n([\s\S]*?)\n---/);
+  const fmMatch = raw.match(/^---\r?\n([\s\S]*?)\r?\n---/);
   if (fmMatch) {
     const fm = fmMatch[1];
     const t = fm.match(/^title:\s*["']?(.+?)["']?\s*$/m);
@@ -60,23 +60,29 @@ function extractMeta(raw, ext) {
   if (ext === '.mdx' || ext === '.md') {
     const h = raw.match(/^#\s+(.+)$/m);
     if (h) meta.h1 = h[1].replace(/[*_`]/g, '').trim();
+    else {
+      // H1 rendu par le layout depuis le frontmatter (config.seo.h1_from_frontmatter)
+      const fh = (fmMatch ? fmMatch[1] : '').match(/^h1:\s*["']?(.+?)["']?\s*$/m);
+      if (fh) meta.h1 = fh[1].trim();
+    }
   } else {
     const h = raw.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i);
     if (h) meta.h1 = h[1].replace(/<[^>]+>/g, '').trim();
     if (!meta.title) {
-      const t = raw.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
-      if (t) meta.title = t[1].trim();
+      const t = htmlTitle(raw);
+      if (t) meta.title = t;
     }
     if (!meta.description) {
-      const d = raw.match(/<meta\s+name=["']description["']\s+content=["']([^"']+)["']/i);
-      if (d) meta.description = d[1];
+      // Valeur lue jusqu'au guillemet ouvrant : une apostrophe ne tronque plus la description comparée.
+      const d = metaContent(raw, 'description');
+      if (d) meta.description = d.replace(/\s+/g, ' ').trim();
     }
   }
   return meta;
 }
 
 function extractParagraphs(raw, ext) {
-  let text = raw.replace(/^---[\s\S]*?---\n?/, '');
+  let text = raw.replace(/^---\r?\n[\s\S]*?\r?\n---\r?\n?/, '');
   if (ext === '.mdx' || ext === '.md') {
     text = text.replace(/```[\s\S]*?```/g, '');
     text = text.replace(/^import\s+.*$/gm, '');
@@ -89,7 +95,7 @@ function extractParagraphs(raw, ext) {
     }).filter(p => p.length > 80);
   }
   const paragraphs = [];
-  const pRegex = /<p[^>]*>([\s\S]*?)<\/p>/gi;
+  const pRegex = /<p(?:\s[^>]*)?>([\s\S]*?)<\/p>/gi;
   let m;
   while ((m = pRegex.exec(text)) !== null) {
     const clean = m[1].replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
@@ -123,6 +129,8 @@ function findContentFiles(dir, validExts) {
     const entries = fs.readdirSync(dir, { withFileTypes: true });
     for (const entry of entries) {
       const fullPath = path.join(dir, entry.name);
+      // Dossiers cachés (.seo-engine, .claude, .backups…) et dépendances : jamais des pages du site
+      if (entry.isDirectory() && (entry.name.startsWith('.') || ['node_modules', 'dist'].includes(entry.name))) continue;
       if (entry.isDirectory()) results.push(...findContentFiles(fullPath, validExts));
       else if (validExts.includes(path.extname(entry.name).toLowerCase())) results.push(fullPath);
     }
@@ -229,4 +237,5 @@ console.log(JSON.stringify({
   duplicates,
   checks
 }, null, 2));
-process.exit(hasFail ? 1 : 0);
+// exitCode plutôt que process.exit : une sortie de plus de 64 Ko serait tronquée sur un pipe.
+process.exitCode = hasFail ? 1 : 0;

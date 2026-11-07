@@ -3,24 +3,24 @@
 /**
  * validate-writing.js
  * Keyword stuffing detection, banned formulations, common French language
- * errors, and number formatting. Deterministic checks that complement the
- * LLM-based audit (pole-audit B2, F0).
+ * errors, readability scoring, entity coverage, and number formatting.
  */
 
 const fs = require('fs');
 const path = require('path');
+const { normalize, countKeyword, textIncludesKeyword, parseArgs, decodeEntities, mainHtml, markSentenceBreaks, splitSentences, wordRegex } = require('./utils');
 
-const filePath = process.argv[2];
-const sidecarPath = process.argv[3];
-const configFlag = process.argv.indexOf('--config');
-const configPath = configFlag !== -1 ? process.argv[configFlag + 1] : null;
+const args = parseArgs();
+const filePath = args.file;
+const sidecarPath = args.sidecar;
+const configPath = args.config;
 
 if (!filePath) {
   console.error(JSON.stringify({
     status: 'error',
-    message: 'Usage: node validate-writing.js <file> [sidecar] [--config path]'
+    message: 'Usage: node validate-writing.js --file <path> [--sidecar <path>] [--config <path>]'
   }));
-  process.exit(1);
+  process.exit(2);
 }
 
 let content;
@@ -33,18 +33,23 @@ try {
     status: 'error',
     checks: [{ name: 'file_readable', status: 'fail', message: `Fichier illisible: ${e.message}` }]
   }, null, 2));
-  process.exit(1);
+  process.exit(2);
 }
 
 const ext = path.extname(filePath).toLowerCase();
 const checks = [];
+const warnings = [];
 
 let primaryKeyword = null;
-if (sidecarPath && !sidecarPath.startsWith('--')) {
+let semanticEntities = [];
+if (sidecarPath) {
   try {
     const sidecar = JSON.parse(fs.readFileSync(sidecarPath, 'utf-8'));
     primaryKeyword = sidecar.strat?.primary_keyword || sidecar.analysis?.current_keyword || null;
-  } catch (e) {}
+    semanticEntities = sidecar.strat?.semantic_entities || [];
+  } catch (e) {
+    warnings.push(`Sidecar illisible: ${e.message}`);
+  }
 }
 
 let maxSectionDensity = 3;
@@ -52,14 +57,14 @@ if (configPath) {
   try {
     const cfg = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
     maxSectionDensity = cfg.seo?.max_section_keyword_density_percent ?? 3;
-  } catch (e) {}
+  } catch (e) {
+    warnings.push(`Config illisible: ${e.message}`);
+  }
 }
 
 function addCheck(name, pass, message) {
   checks.push({ name, status: pass ? 'pass' : 'fail', message });
 }
-
-const normalize = s => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
 
 let bodyContent = '';
 let headings = [];
@@ -72,8 +77,9 @@ if (ext === '.mdx' || ext === '.md') {
     headings.push({ level: match[1].length, text: match[2].trim(), index: match.index });
   }
 } else if (ext === '.html' || ext === '.htm') {
-  const bodyMatch = content.match(/<body[^>]*>([\s\S]*)<\/body>/i);
-  bodyContent = bodyMatch ? bodyMatch[1] : content;
+  // Contenu principal seulement (<main>, sinon <article>, sinon <body> sans en-tête, menu ni pied) : le texte du menu
+  // et du pied de page, commun à tout le site, n'est ni une phrase ni un paragraphe de la page.
+  bodyContent = mainHtml(content);
   const headingRegex = /<h([1-6])[^>]*>([\s\S]*?)<\/h\1>/gi;
   let match;
   while ((match = headingRegex.exec(bodyContent)) !== null) {
@@ -81,10 +87,14 @@ if (ext === '.mdx' || ext === '.md') {
   }
 }
 
-const plainText = bodyContent
+const isHtml = ext === '.html' || ext === '.htm';
+// Fin de bloc = fin de phrase (titres, li, td, th, dt, dd… ; en Markdown titres, listes, tableaux, paragraphes).
+const withBreaks = isHtml
+  ? markSentenceBreaks(bodyContent)
+  : bodyContent.replace(/^(\s*(?:#{1,6}\s|[-*+]\s|\d+[.)]\s|\|).*)$/gm, '$1\u2029').replace(/\n[ \t]*\n/g, '\n\u2029\n');
+let cleanText = withBreaks
   .replace(/```[\s\S]*?```/g, ' ')
-  .replace(/<script[\s\S]*?<\/script>/gi, ' ')
-  .replace(/<style[\s\S]*?<\/style>/gi, ' ')
+  .replace(/<(script|style|noscript|svg|template)\b[\s\S]*?<\/\1>/gi, ' ')
   .replace(/<[^>]+>/g, ' ')
   .replace(/!\[.*?\]\(.*?\)/g, '')
   .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
@@ -92,9 +102,10 @@ const plainText = bodyContent
   .replace(/import\s+.*?from\s+['"].*?['"]/g, '')
   .replace(/export\s+.*?;/g, '')
   .replace(/<[A-Z]\w+[^>]*\/>/g, '')
-  .replace(/<[A-Z]\w+[^>]*>[\s\S]*?<\/[A-Z]\w+>/g, '')
-  .replace(/\s+/g, ' ')
-  .trim();
+  .replace(/<[A-Z]\w+[^>]*>[\s\S]*?<\/[A-Z]\w+>/g, '');
+if (isHtml) cleanText = decodeEntities(cleanText);
+const sentenceText = cleanText.replace(/[^\S\u2029]+/g, ' ');
+const plainText = cleanText.replace(/\s+/g, ' ').trim();
 
 const words = plainText.split(/\s+/).filter(w => w.length > 0);
 const wordCount = words.length;
@@ -102,7 +113,7 @@ const wordCount = words.length;
 let paragraphs;
 if (ext === '.html' || ext === '.htm') {
   paragraphs = [];
-  const pRegex = /<p[^>]*>([\s\S]*?)<\/p>/gi;
+  const pRegex = /<p(?:\s[^>]*)?>([\s\S]*?)<\/p>/gi;
   let pm;
   while ((pm = pRegex.exec(bodyContent)) !== null) {
     const text = pm[1].replace(/<[^>]+>/g, '').trim();
@@ -116,29 +127,22 @@ if (ext === '.html' || ext === '.htm') {
       !p.startsWith('import') && !p.startsWith('export') && !p.startsWith('<'));
 }
 
-const sentences = plainText.split(/(?<=[.!?])\s+/)
+const sentences = splitSentences(sentenceText)
   .filter(s => s.trim().length > 5)
   .filter(s => s.split(/\s+/).filter(w => w.length > 0).length >= 3);
 
 // =================================================================
-// KEYWORD STUFFING CHECKS
+// KEYWORD STUFFING CHECKS (using word boundary matching)
 // =================================================================
 if (primaryKeyword && primaryKeyword.length > 0) {
   const kwNorm = normalize(primaryKeyword);
 
-  // Keyword per paragraph: max 1 (except intro paragraph)
   if (paragraphs.length > 0) {
     let stuffedParagraphs = 0;
     const stuffedDetails = [];
 
     for (let i = 0; i < paragraphs.length; i++) {
-      const pNorm = normalize(paragraphs[i]);
-      let count = 0;
-      let pos = 0;
-      while ((pos = pNorm.indexOf(kwNorm, pos)) !== -1) {
-        count++;
-        pos += kwNorm.length;
-      }
+      const count = countKeyword(paragraphs[i], primaryKeyword);
       if (i > 0 && count >= 2) {
         stuffedParagraphs++;
         stuffedDetails.push(`P${i + 1}: ${count}x`);
@@ -151,13 +155,12 @@ if (primaryKeyword && primaryKeyword.length > 0) {
         : `${stuffedParagraphs} paragraphe(s) avec 2+ occurrences: ${stuffedDetails.slice(0, 5).join(', ')}`);
   }
 
-  // Consecutive sentences: max 2 in a row
   if (sentences.length > 2) {
     let maxConsecutive = 0;
     let current = 0;
 
     for (const s of sentences) {
-      if (normalize(s).includes(kwNorm)) {
+      if (textIncludesKeyword(s, primaryKeyword)) {
         current++;
         maxConsecutive = Math.max(maxConsecutive, current);
       } else {
@@ -171,7 +174,6 @@ if (primaryKeyword && primaryKeyword.length > 0) {
         : `${maxConsecutive} phrases consecutives contiennent "${primaryKeyword}" (max: 2)`);
   }
 
-  // Section density: max 3% per section
   if (headings.length > 0) {
     const contentForSections = ext === '.html' || ext === '.htm'
       ? bodyContent
@@ -202,14 +204,7 @@ if (primaryKeyword && primaryKeyword.length > 0) {
       const sectionWords = sectionText.split(/\s+/).filter(w => w.length > 0);
       if (sectionWords.length < 20) continue;
 
-      const sectionNorm = normalize(sectionText);
-      let kwCount = 0;
-      let pos = 0;
-      while ((pos = sectionNorm.indexOf(kwNorm, pos)) !== -1) {
-        kwCount++;
-        pos += kwNorm.length;
-      }
-
+      const kwCount = countKeyword(sectionText, primaryKeyword);
       const density = (kwCount / sectionWords.length) * 100;
       if (density > maxSectionDensity) {
         highDensitySections++;
@@ -224,11 +219,10 @@ if (primaryKeyword && primaryKeyword.length > 0) {
         : `${highDensitySections} section(s) > ${maxSectionDensity}%: ${highDensityDetails.join('; ')}`);
   }
 
-  // Keyword in >50% of paragraphs
   if (paragraphs.length >= 4) {
     let paraWithKw = 0;
     for (const p of paragraphs) {
-      if (normalize(p).includes(kwNorm)) paraWithKw++;
+      if (textIncludesKeyword(p, primaryKeyword)) paraWithKw++;
     }
     const ratio = paraWithKw / paragraphs.length;
     addCheck('keyword_paragraph_ratio', ratio <= 0.5,
@@ -240,35 +234,283 @@ if (primaryKeyword && primaryKeyword.length > 0) {
 }
 
 // =================================================================
+// ACCENT VERIFICATION (French) — Comprehensive 3-layer detection
+// =================================================================
+const accentPairs = [
+  // === É at start ===
+  ["ecart", "écart"], ["echange", "échange"], ["echantillon", "échantillon"],
+  ["echeance", "échéance"], ["echelle", "échelle"], ["eclairage", "éclairage"],
+  ["ecole", "école"], ["ecologie", "écologie"], ["ecologique", "écologique"],
+  ["economie", "économie"], ["economique", "économique"], ["ecosysteme", "écosystème"],
+  ["ecoute", "écoute"], ["ecran", "écran"], ["ecriture", "écriture"],
+  ["edifice", "édifice"], ["edition", "édition"], ["education", "éducation"],
+  ["egalite", "égalité"], ["eglise", "église"], ["elaboration", "élaboration"],
+  ["elan", "élan"], ["electrique", "électrique"], ["electricite", "électricité"],
+  ["element", "élément"], ["elementaire", "élémentaire"],
+  ["election", "élection"], ["eleve", "élève"], ["elevage", "élevage"],
+  ["eligibilite", "éligibilité"], ["eligible", "éligible"],
+  ["elimination", "élimination"], ["eloignement", "éloignement"],
+  ["emission", "émission"], ["emouvant", "émouvant"],
+  ["energie", "énergie"], ["energetique", "énergétique"], ["enormement", "énormément"],
+  ["epargne", "épargne"], ["epaisseur", "épaisseur"], ["epoque", "époque"],
+  ["equipement", "équipement"], ["equipe", "équipe"],
+  ["equilibre", "équilibre"], ["equivalent", "équivalent"],
+  ["etablissement", "établissement"], ["etage", "étage"],
+  ["etanche", "étanche"], ["etancheite", "étanchéité"],
+  ["etape", "étape"], ["etat", "état"],
+  ["etendue", "étendue"], ["eternite", "éternité"],
+  ["etude", "étude"], ["etudiant", "étudiant"],
+  ["evaluation", "évaluation"], ["evenement", "événement"],
+  ["eventuel", "éventuel"], ["evolution", "évolution"], ["eviter", "éviter"],
+  // === DÉ- prefix ===
+  ["decennie", "décennie"], ["deces", "décès"],
+  ["decision", "décision"], ["declaration", "déclaration"],
+  ["decouverte", "découverte"], ["decret", "décret"],
+  ["definition", "définition"], ["degradation", "dégradation"],
+  ["demarche", "démarche"], ["demenagement", "déménagement"],
+  ["deperdition", "déperdition"], ["deplacement", "déplacement"],
+  ["deploiement", "déploiement"], ["depense", "dépense"], ["depot", "dépôt"],
+  ["derogation", "dérogation"], ["desaccord", "désaccord"],
+  ["desormais", "désormais"], ["desir", "désir"], ["designation", "désignation"],
+  ["detail", "détail"], ["deterioration", "détérioration"],
+  ["determination", "détermination"],
+  ["developpement", "développement"], ["developper", "développer"],
+  // === RÉ- prefix ===
+  ["reaction", "réaction"], ["realiser", "réaliser"], ["realite", "réalité"],
+  ["reclamation", "réclamation"], ["recuperation", "récupération"],
+  ["redaction", "rédaction"], ["reduction", "réduction"],
+  ["reforme", "réforme"], ["reference", "référence"],
+  ["reflexion", "réflexion"], ["regime", "régime"],
+  ["region", "région"], ["reglementation", "réglementation"],
+  ["regulier", "régulier"], ["regulierement", "régulièrement"],
+  ["rehabilitation", "réhabilitation"],
+  ["remuneration", "rémunération"], ["renovation", "rénovation"],
+  ["repartition", "répartition"], ["repertoire", "répertoire"],
+  ["repercussion", "répercussion"], ["repetition", "répétition"],
+  ["reponse", "réponse"], ["representation", "représentation"],
+  ["reputation", "réputation"], ["reservation", "réservation"],
+  ["residence", "résidence"], ["resistance", "résistance"],
+  ["resolution", "résolution"], ["resultat", "résultat"], ["resume", "résumé"],
+  ["reunion", "réunion"], ["revelation", "révélation"],
+  ["revision", "révision"], ["revolution", "révolution"],
+  ["reussite", "réussite"],
+  // === PRÉ- prefix ===
+  ["precaution", "précaution"], ["precedent", "précédent"],
+  ["precision", "précision"], ["preference", "préférence"],
+  ["preferer", "préférer"], ["preliminaire", "préliminaire"],
+  ["premiere", "première"], ["preparation", "préparation"],
+  ["presence", "présence"], ["presentation", "présentation"],
+  ["preservation", "préservation"], ["president", "président"],
+  ["prevention", "prévention"], ["prevision", "prévision"], ["prevu", "prévu"],
+  // === CÉ-, GÉ-, HÉ-, LÉ-, MÉ-, PÉ-, SÉ-, TÉ-, VÉ-, BÉ-, FÉ- ===
+  ["celebre", "célèbre"], ["celebrite", "célébrité"],
+  ["cereale", "céréale"], ["ceremonie", "cérémonie"],
+  ["geographie", "géographie"], ["geometrie", "géométrie"],
+  ["genie", "génie"], ["genetique", "génétique"], ["general", "général"],
+  ["generalement", "généralement"], ["generation", "génération"],
+  ["heritage", "héritage"], ["heritier", "héritier"],
+  ["heroique", "héroïque"], ["hesitation", "hésitation"],
+  ["leger", "léger"], ["legerement", "légèrement"],
+  ["legerete", "légèreté"], ["legende", "légende"],
+  ["legislation", "législation"], ["legislatif", "législatif"],
+  ["legitime", "légitime"], ["legitimite", "légitimité"],
+  ["mecanisme", "mécanisme"], ["medecin", "médecin"],
+  ["media", "média"], ["medicament", "médicament"],
+  ["medieval", "médiéval"], ["melancolie", "mélancolie"],
+  ["melange", "mélange"], ["memoire", "mémoire"],
+  ["menage", "ménage"], ["merite", "mérite"],
+  ["metal", "métal"], ["meteorologie", "météorologie"],
+  ["methode", "méthode"], ["metier", "métier"],
+  ["metre", "mètre"], ["metro", "métro"], ["metropole", "métropole"],
+  ["pedagogie", "pédagogie"], ["penalite", "pénalité"],
+  ["penible", "pénible"], ["penurie", "pénurie"],
+  ["perimetre", "périmètre"], ["peripherie", "périphérie"], ["petrole", "pétrole"],
+  ["secheresse", "sécheresse"], ["securite", "sécurité"],
+  ["seduction", "séduction"], ["sejour", "séjour"],
+  ["selection", "sélection"], ["semantique", "sémantique"],
+  ["separation", "séparation"], ["sequence", "séquence"],
+  ["serenite", "sérénité"], ["serieux", "sérieux"], ["severite", "sévérité"],
+  ["telephone", "téléphone"], ["television", "télévision"],
+  ["temoignage", "témoignage"],
+  ["vehicule", "véhicule"], ["verification", "vérification"],
+  ["veritable", "véritable"], ["verite", "vérité"],
+  ["benevole", "bénévole"], ["beton", "béton"],
+  ["benefice", "bénéfice"], ["beneficier", "bénéficier"],
+  ["beneficiaire", "bénéficiaire"],
+  ["federation", "fédération"], ["feminin", "féminin"],
+  // === Other é/è in middle ===
+  ["accelerer", "accélérer"], ["acces", "accès"],
+  ["activite", "activité"], ["amelioration", "amélioration"],
+  ["amenagement", "aménagement"], ["bibliotheque", "bibliothèque"],
+  ["capacite", "capacité"], ["categorie", "catégorie"],
+  ["communaute", "communauté"], ["completement", "complètement"],
+  ["complexite", "complexité"], ["congres", "congrès"],
+  ["consequence", "conséquence"], ["creation", "création"],
+  ["critere", "critère"], ["caractere", "caractère"], ["carriere", "carrière"],
+  ["derniere", "dernière"], ["different", "différent"],
+  ["disponibilite", "disponibilité"], ["durabilite", "durabilité"],
+  ["efficacite", "efficacité"], ["exces", "excès"],
+  ["experience", "expérience"], ["exterieur", "extérieur"],
+  ["fiabilite", "fiabilité"], ["fidelite", "fidélité"],
+  ["frequence", "fréquence"], ["frequemment", "fréquemment"],
+  ["immediat", "immédiat"], ["independant", "indépendant"],
+  ["inferieur", "inférieur"], ["integrer", "intégrer"],
+  ["integration", "intégration"], ["interessant", "intéressant"],
+  ["interet", "intérêt"], ["interieur", "intérieur"],
+  ["interpreter", "interpréter"], ["irregulier", "irrégulier"],
+  ["maniere", "manière"], ["materiel", "matériel"], ["matiere", "matière"],
+  ["modele", "modèle"], ["necessaire", "nécessaire"],
+  ["negociation", "négociation"], ["operation", "opération"],
+  ["periode", "période"], ["phenomene", "phénomène"],
+  ["possibilite", "possibilité"], ["priorite", "priorité"],
+  ["probleme", "problème"], ["procedure", "procédure"],
+  ["proces", "procès"], ["progres", "progrès"],
+  ["propriete", "propriété"], ["qualite", "qualité"],
+  ["rentabilite", "rentabilité"], ["responsabilite", "responsabilité"],
+  ["societe", "société"], ["special", "spécial"],
+  ["specificite", "spécificité"], ["specifique", "spécifique"],
+  ["strategie", "stratégie"], ["succes", "succès"],
+  ["superieur", "supérieur"], ["systeme", "système"],
+  ["temperature", "température"],
+  // === -té words ===
+  ["sante", "santé"], ["beaute", "beauté"], ["liberte", "liberté"],
+  ["volonte", "volonté"], ["difficulte", "difficulté"],
+  ["faculte", "faculté"], ["fierte", "fierté"], ["surete", "sûreté"],
+  // === Missing common words ===
+  ["numero", "numéro"], ["comite", "comité"],
+  ["employe", "employé"], ["verifier", "vérifier"], ["proteger", "protéger"],
+  ["delegue", "délégué"], ["delegation", "délégation"],
+  ["fidele", "fidèle"], ["parallele", "parallèle"], ["clientele", "clientèle"],
+  ["regle", "règle"],
+  // === Short common words ===
+  ["tres", "très"], ["meme", "même"], ["etes", "êtes"],
+  ["apres", "après"], ["aupres", "auprès"], ["deja", "déjà"],
+  ["voila", "voilà"], ["plutot", "plutôt"],
+  ["aussitot", "aussitôt"], ["bientot", "bientôt"],
+  ["pere", "père"], ["mere", "mère"], ["pres", "près"],
+  ["decembre", "décembre"], ["fevrier", "février"],
+  ["idee", "idée"], ["cle", "clé"],
+  // === Ç words ===
+  ["francais", "français"], ["francaise", "française"],
+  ["facade", "façade"], ["lecon", "leçon"], ["facon", "façon"],
+  ["recu", "reçu"], ["apercu", "aperçu"], ["decu", "déçu"],
+  ["garcon", "garçon"], ["concu", "conçu"], ["concue", "conçue"],
+  ["soupcon", "soupçon"], ["commercant", "commerçant"],
+  ["percant", "perçant"], ["fiancailles", "fiançailles"],
+  // === Ô words ===
+  ["role", "rôle"], ["controle", "contrôle"],
+  ["hopital", "hôpital"], ["hotel", "hôtel"], ["depot", "dépôt"],
+  // === Â words ===
+  ["batiment", "bâtiment"], ["chateau", "château"], ["grace", "grâce"],
+  // === Ê words ===
+  ["etre", "être"], ["fenetre", "fenêtre"], ["fete", "fête"],
+  ["foret", "forêt"], ["enquete", "enquête"], ["tempete", "tempête"],
+  ["arret", "arrêt"], ["pret", "prêt"],
+  // === Î words ===
+  ["ile", "île"],
+];
+
+// Mots entiers au sens Unicode (\p{L}) : « Fenêtres » est un seul mot, pas « fen » + « tres ».
+const accentCheckWords = new Set(
+  (plainText.toLowerCase().match(/\p{L}+/gu) || [])
+    .filter(w => /^[a-z]+$/.test(w) && w.length >= 3)
+);
+
+const foundAccentErrors = [];
+const accentFlagged = new Set();
+
+for (const [wrong, correct] of accentPairs) {
+  // Limites Unicode : \b ne voit pas les lettres accentuées (\btres\b trouvait « tres » dans « Fenêtres »).
+  const regex = wordRegex(`${wrong}(?:s|es)?`, 'i');
+  if (regex.test(plainText)) {
+    foundAccentErrors.push(`"${wrong}" → "${correct}"`);
+    accentFlagged.add(wrong);
+  }
+}
+
+const accentPrefixes = [
+  { prefix: 'ec', minLen: 4, excl: new Set(['ecchymose']) },
+  { prefix: 'ed', minLen: 5, excl: new Set([]) },
+  { prefix: 'eg', minLen: 4, excl: new Set([]) },
+  { prefix: 'ep', minLen: 4, excl: new Set([]) },
+  { prefix: 'eq', minLen: 4, excl: new Set([]) },
+  { prefix: 'et', minLen: 5, excl: new Set([]) },
+  { prefix: 'ev', minLen: 4, excl: new Set([]) },
+];
+
+for (const word of accentCheckWords) {
+  if (accentFlagged.has(word)) continue;
+  for (const { prefix, minLen, excl } of accentPrefixes) {
+    if (word.length >= minLen && word.startsWith(prefix) && !excl.has(word)) {
+      foundAccentErrors.push(`"${word}" → "é${word.slice(1)}"`);
+      accentFlagged.add(word);
+      break;
+    }
+  }
+}
+
+const iteExclusions = new Set([
+  'conduite', 'poursuite', 'interdite', 'inscrite', 'prescrite',
+  'produite', 'traduite', 'introduite', 'construite', 'reconduite',
+  'reproduite', 'detruite', 'seduite', 'reduite', 'induite',
+  'defaite', 'parfaite', 'satisfaite', 'insatisfaite',
+  'extraite', 'distraite', 'abstraite', 'soustraite', 'retraite',
+  'maudite', 'gratuite', 'fortuite', 'insolite', 'faillite', 'marmite',
+  'arthrite', 'bronchite', 'cellulite', 'dermatite', 'gastrite',
+  'hepatite', 'laryngite', 'meningite', 'sinusite', 'tendinite',
+  'appendicite', 'conjonctivite', 'cystite', 'gingivite', 'otite',
+  'pharyngite', 'rhinite',
+  'composite', 'satellite', 'parasite', 'meteorite', 'favorite',
+  'dynamite', 'graphite', 'anthracite', 'dolomite', 'lignite',
+  'pyrite', 'magnetite', 'stalactite', 'stalagmite', 'malachite',
+  'sulfite', 'bauxite',
+  'explicite', 'implicite', 'illicite', 'hypocrite', 'termite', 'ermite',
+]);
+
+const iteExclusionsPlural = new Set([...iteExclusions].map(w => w + 's'));
+
+const accentSuffixes = [
+  { suffix: 'ite', correct: 'ité', minLen: 7, excl: iteExclusions },
+  { suffix: 'ites', correct: 'ités', minLen: 8, excl: iteExclusionsPlural },
+  { suffix: 'ere', correct: 'ère', minLen: 5, excl: new Set([]) },
+  { suffix: 'eres', correct: 'ères', minLen: 6, excl: new Set([]) },
+  { suffix: 'eme', correct: 'ème', minLen: 5, excl: new Set([]) },
+  { suffix: 'emes', correct: 'èmes', minLen: 6, excl: new Set([]) },
+  { suffix: 'ee', correct: 'ée', minLen: 5, excl: new Set([]) },
+  { suffix: 'ees', correct: 'ées', minLen: 6, excl: new Set([]) },
+  { suffix: 'ete', correct: 'été/ête', minLen: 6, excl: new Set([]) },
+  { suffix: 'etes', correct: 'étés/êtes', minLen: 7, excl: new Set([]) },
+];
+
+for (const word of accentCheckWords) {
+  if (accentFlagged.has(word)) continue;
+  for (const { suffix, correct, minLen, excl } of accentSuffixes) {
+    if (word.length >= minLen && word.endsWith(suffix) && !excl.has(word)) {
+      foundAccentErrors.push(`"${word}" → "...${correct}"`);
+      accentFlagged.add(word);
+      break;
+    }
+  }
+}
+
+addCheck('accent_verification', foundAccentErrors.length === 0,
+  foundAccentErrors.length === 0
+    ? 'Accents corrects (dictionnaire ~300 mots + patterns prefixes/suffixes)'
+    : `${foundAccentErrors.length} mot(s) sans accent: ${foundAccentErrors.slice(0, 5).join(', ')}${foundAccentErrors.length > 5 ? ` (+${foundAccentErrors.length - 5} autres)` : ''}`);
+
+// =================================================================
 // BANNED FORMULATIONS
 // =================================================================
 const bannedFormulations = [
-  "dans cet article",
-  "il est important de noter",
-  "n'hesitez pas",
-  "force est de constater",
-  "il convient de souligner",
-  "comme son nom l'indique",
-  "il est a noter",
-  "vous l'aurez compris",
-  "sans plus attendre",
-  "dans le monde d'aujourd'hui",
-  "il va sans dire",
-  "a l'heure actuelle",
-  "d'ores et deja",
-  "il existe de nombreux",
-  "il existe de nombreuses",
-  "il existe plusieurs",
-  "que vous soyez",
-  "il est essentiel de",
-  "il est crucial de",
-  "il est primordial de",
-  "comme nous l'avons vu",
-  "en ce qui concerne",
-  "en d'autres termes",
-  "au fil des ans",
-  "de nos jours",
-  "pour conclure",
+  "dans cet article", "il est important de noter", "n'hesitez pas",
+  "force est de constater", "il convient de souligner", "comme son nom l'indique",
+  "il est a noter", "vous l'aurez compris", "sans plus attendre",
+  "dans le monde d'aujourd'hui", "il va sans dire", "a l'heure actuelle",
+  "d'ores et deja", "il existe de nombreux", "il existe de nombreuses",
+  "il existe plusieurs", "que vous soyez", "il est essentiel de",
+  "il est crucial de", "il est primordial de", "comme nous l'avons vu",
+  "en ce qui concerne", "en d'autres termes", "au fil des ans",
+  "de nos jours", "pour conclure",
 ];
 
 const textNorm = normalize(plainText);
@@ -285,7 +527,7 @@ addCheck('banned_formulations', foundBanned.length === 0,
     : `${foundBanned.length} formulation(s) bannie(s): "${foundBanned.join('", "')}"`);
 
 // =================================================================
-// FRENCH LANGUAGE ERRORS (deterministic subset)
+// FRENCH LANGUAGE ERRORS
 // =================================================================
 const languageErrors = [
   { pattern: "malgre que", fix: "bien que + subjonctif" },
@@ -296,7 +538,19 @@ const languageErrors = [
   { pattern: "pallier a l'", fix: "pallier l' (transitif direct)" },
   { pattern: "pallier au ", fix: "pallier le (transitif direct)" },
   { pattern: "pallier aux", fix: "pallier les (transitif direct)" },
-  { pattern: "voire meme", fix: "voire seul ou meme seul" },
+  { pattern: "voire meme", fix: "voire seul ou même seul" },
+  { pattern: "s'averer faux", fix: "se révéler faux (s'avérer = se révéler vrai)" },
+  { pattern: "s'avere faux", fix: "se révèle faux" },
+  { pattern: "s'averer fausse", fix: "se révéler fausse" },
+  { pattern: "s'avere fausse", fix: "se révèle fausse" },
+  { pattern: "au jour d'aujourd'hui", fix: "aujourd'hui (triple pléonasme)" },
+  { pattern: "autant pour moi", fix: "au temps pour moi" },
+  { pattern: "comme meme", fix: "quand même" },
+  { pattern: "adresser un probleme", fix: "traiter/résoudre un problème (calque anglais)" },
+  { pattern: "adresser le probleme", fix: "traiter/résoudre le problème (calque anglais)" },
+  { pattern: "adresser ce probleme", fix: "traiter/résoudre ce problème (calque anglais)" },
+  { pattern: "adresser une question", fix: "aborder/traiter une question (calque anglais)" },
+  { pattern: "adresser la question", fix: "aborder/traiter la question (calque anglais)" },
 ];
 
 const foundLangErrors = [];
@@ -310,6 +564,68 @@ addCheck('language_errors', foundLangErrors.length === 0,
   foundLangErrors.length === 0
     ? 'Aucune erreur de langue IA typique detectee'
     : `${foundLangErrors.length} erreur(s): ${foundLangErrors.join('; ')}`);
+
+// =================================================================
+// READABILITY SCORE (Flesch-Kincaid adapted for French)
+// =================================================================
+if (sentences.length >= 5 && wordCount >= 100) {
+  function countSyllables(word) {
+    const w = word.toLowerCase().replace(/[^a-zà-öø-ÿœæ]/g, '');
+    if (w.length <= 2) return 1;
+    const vowelGroups = w.match(/[aeiouyàâéèêëîïôùûüÿœæ]+/gi) || [];
+    let count = vowelGroups.length;
+    if (w.endsWith('e') && !w.endsWith('ée') && !w.endsWith('ie') && !w.endsWith('ue') && count > 1) count--;
+    if (w.endsWith('es') && count > 1) count--;
+    if (w.endsWith('ent') && count > 1 && w.length > 4) count--;
+    return Math.max(1, count);
+  }
+
+  const totalSyllables = words.reduce((sum, w) => sum + countSyllables(w), 0);
+  const avgWordsPerSentence = wordCount / sentences.length;
+  const avgSyllablesPerWord = totalSyllables / wordCount;
+
+  // Formule Flesch adaptée au français (Kandel & Moles)
+  const fleschScore = 207 - (1.015 * avgWordsPerSentence) - (73.6 * avgSyllablesPerWord);
+  const fleschRounded = Math.round(fleschScore);
+
+  let readabilityLevel;
+  if (fleschRounded >= 80) readabilityLevel = 'tres facile';
+  else if (fleschRounded >= 60) readabilityLevel = 'facile';
+  else if (fleschRounded >= 40) readabilityLevel = 'standard';
+  else if (fleschRounded >= 20) readabilityLevel = 'difficile';
+  else readabilityLevel = 'tres difficile';
+
+  addCheck('readability_score', fleschRounded >= 30,
+    `Score Flesch-Kincaid FR: ${fleschRounded}/100 (${readabilityLevel}) — moy. ${avgWordsPerSentence.toFixed(1)} mots/phrase, ${avgSyllablesPerWord.toFixed(1)} syllabes/mot`);
+
+  // Voix passive (heuristique)
+  const passivePatterns = /(?<![\p{L}\p{N}_])(est|sont|a ete|ont ete|sera|seront|etait|etaient|fut|furent)\s+[\p{L}\p{N}_]+(e|es|i|is|it|ite|ites|u|us|ue|ues)(?![\p{L}\p{N}_])/giu;
+  const passiveMatches = textNorm.match(passivePatterns) || [];
+  const passiveRatio = sentences.length > 0 ? (passiveMatches.length / sentences.length) * 100 : 0;
+
+  addCheck('passive_voice', passiveRatio <= 15,
+    `Voix passive estimee: ${passiveRatio.toFixed(0)}% des phrases (max recommande: 15%)`);
+}
+
+// =================================================================
+// SEMANTIC ENTITY COVERAGE
+// =================================================================
+if (semanticEntities.length > 0) {
+  const found = [];
+  const missing = [];
+
+  for (const entity of semanticEntities) {
+    if (textIncludesKeyword(plainText, entity)) {
+      found.push(entity);
+    } else {
+      missing.push(entity);
+    }
+  }
+
+  const coverage = (found.length / semanticEntities.length) * 100;
+  addCheck('entity_coverage', coverage >= 80,
+    `Couverture entites semantiques: ${found.length}/${semanticEntities.length} (${coverage.toFixed(0)}%)${missing.length > 0 ? ` — manquantes: ${missing.slice(0, 5).join(', ')}` : ''}`);
+}
 
 // =================================================================
 // NUMBER FORMATTING (French conventions)
@@ -340,8 +656,10 @@ const result = {
   keyword_analyzed: primaryKeyword || '(non defini)',
   paragraphs_count: paragraphs.length,
   sentences_count: sentences.length,
-  checks
+  checks,
+  ...(warnings.length > 0 ? { warnings } : {})
 };
 
 console.log(JSON.stringify(result, null, 2));
-process.exit(hasFail ? 1 : 0);
+// exitCode plutôt que process.exit : une sortie de plus de 64 Ko serait tronquée sur un pipe.
+process.exitCode = hasFail ? 1 : 0;

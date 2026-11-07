@@ -132,9 +132,9 @@ Definis en 1-2 phrases l'angle specifique de cette page :
 Determine les types de schema a inclure dans la page :
 - **Toujours** : Article/BlogPosting (avec author, datePublished, dateModified)
 - **Toujours** : BreadcrumbList
-- **Si comparatif/produit** : Product + Review (inclure `offers` avec `price`, `priceCurrency`, `availability` pour les pages affiliation — obligatoire pour les rich results shopping)
-- **Si FAQ presente** : FAQPage (valeur semantique, rich results limites depuis 2023)
-- **Si tutoriel** : HowTo (valeur semantique, rich results limites)
+- **Si FAQ presente** : FAQPage — quand des H2/H3 sont formules comme des questions. Valeur semantique, rich results limites depuis 2023 mais utile pour le signal structure
+- **Si tutoriel/procedure** : HowTo — quand le contenu decrit des etapes a suivre. Valeur semantique
+- **JAMAIS de schema Product** — ce site ne vend rien. Pas de Product, pas d'Offer, jamais
 
 ---
 

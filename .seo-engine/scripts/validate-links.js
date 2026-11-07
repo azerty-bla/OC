@@ -2,16 +2,17 @@
 
 const fs = require('fs');
 const path = require('path');
+const { parseArgs } = require('./utils');
 
-const filePath = process.argv[2];
+const args = parseArgs();
+const filePath = args.file;
+const projectRoot = args.root;
+const configPath = args.config;
 
 if (!filePath) {
-  console.error(JSON.stringify({ status: 'error', message: 'Usage: node validate-links.js <file> [project-root] [config]' }));
-  process.exit(1);
+  console.error(JSON.stringify({ status: 'error', message: 'Usage: node validate-links.js --file <path> [--root <path>] [--config <path>]' }));
+  process.exit(2);
 }
-
-const projectRoot = process.argv[3] || '.';
-const configPath = process.argv[4] || '.seo-engine/config.json';
 
 let minInternalLinks = 2;
 let contentDir = 'src/content';
@@ -28,7 +29,7 @@ try {
   content = fs.readFileSync(filePath, 'utf-8');
 } catch (e) {
   console.log(JSON.stringify({ validator: 'validate-links', file: filePath, status: 'error', internal_links_count: 0, external_links_count: 0, broken_links: [], checks: [{ name: 'file_readable', status: 'fail', message: `Fichier illisible: ${e.message}` }] }, null, 2));
-  process.exit(1);
+  process.exit(2);
 }
 const ext = path.extname(filePath).toLowerCase();
 const checks = [];
@@ -51,6 +52,23 @@ if (ext === '.mdx' || ext === '.md') {
       externalLinks.push({ anchor, href });
     }
   }
+  // Liens <a> HTML dans le MDX + sources du frontmatter (rendues en liens par le gabarit)
+  const htmlA = /<a\s+[^>]*href=["'](https?:[^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi;
+  let ha;
+  while ((ha = htmlA.exec(content)) !== null) externalLinks.push({ anchor: ha[2].replace(/<[^>]+>/g, '').trim(), href: ha[1], html: true });
+  // Seul le bloc `sources:` du frontmatter compte (pas author.url, image, canonical…) ; son propre domaine est exclu.
+  const fmBlock = content.match(/^---\r?\n([\s\S]*?)\r?\n---/)?.[1] || '';
+  const sourcesBlock = fmBlock.match(/^sources:\s*\r?\n((?:[ \t]+.*\r?\n?|\s*\r?\n)+)/m)?.[1] || '';
+  let ownDomain = '';
+  try { ownDomain = String(JSON.parse(fs.readFileSync(configPath, 'utf-8')).project?.domain || '').replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/.*$/, ''); } catch (e) {}
+  const known = new Set(externalLinks.map((l) => l.href));
+  for (const m of sourcesBlock.matchAll(/(?:^|\s)(?:url:\s*|-\s+)["']?(https?:[^"'\s]+)/g)) {
+    const href = m[1];
+    const host = href.replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/.*$/, '');
+    if (known.has(href) || (ownDomain && host === ownDomain)) continue;
+    known.add(href);
+    externalLinks.push({ anchor: 'source', href, frontmatter: true });
+  }
 } else if (ext === '.html' || ext === '.htm') {
   const linkRegex = /<a\s+[^>]*href=["']([^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi;
   let match;
@@ -72,6 +90,7 @@ addCheck('min_internal_links', internalLinks.length >= minInternalLinks,
   `${internalLinks.length} liens internes (minimum requis: ${minInternalLinks})`);
 
 const brokenLinks = [];
+const warnings = [];
 const validLinks = [];
 const checkedHrefs = new Map();
 
@@ -122,6 +141,18 @@ for (const link of internalLinks) {
     }
   }
 
+  // Pendant la production d'un lot, un lien vers une page PLANIFIÉE du même lot est toléré (warning) si elle figure
+  // dans .seo-engine/state/planned-urls.json ({ "urls": ["/x/"] }, écrit en début de lot, supprimé à la fin).
+  // Filet de sécurité : audit-spam (gate-release) bloque tout lien vers une page planifiée qui n'a pas été produite.
+  if (!found) {
+    try {
+      const planned = JSON.parse(fs.readFileSync(path.join(projectRoot, '.seo-engine/state/planned-urls.json'), 'utf-8'));
+      if (Array.isArray(planned.urls) && planned.urls.includes(cleanHref + '/')) {
+        found = true;
+        warnings.push(`Lien vers page planifiée non encore produite : ${cleanHref}/`);
+      }
+    } catch (e) { /* pas de fichier = contrôle strict */ }
+  }
   checkedHrefs.set(cleanHref, found);
   if (found) {
     validLinks.push(link);
@@ -180,7 +211,9 @@ if (ext === '.mdx' || ext === '.md') {
   while ((hm = htmlHrefScan.exec(content)) !== null) {
     if (hm[1].startsWith('http')) htmlExternalHrefs.add(hm[1]);
   }
-  mdSyntaxExternalCount = externalLinks.filter(l => !htmlExternalHrefs.has(l.href)).length;
+  mdSyntaxExternalCount = externalLinks.filter(l => !l.html && !l.frontmatter && !htmlExternalHrefs.has(l.href)).length;
+  // config.links.markdown_external_handled = true : un plugin (rehype…) ajoute target/rel aux liens Markdown externes
+  if (configPath) { try { if (JSON.parse(fs.readFileSync(configPath, 'utf-8')).links?.markdown_external_handled) mdSyntaxExternalCount = 0; } catch (e) {} }
 }
 
 if (ext === '.html' || ext === '.htm') {
@@ -211,8 +244,10 @@ const result = {
   internal_links_count: internalLinks.length,
   external_links_count: externalLinks.length,
   broken_links: brokenLinks,
+  ...(warnings.length > 0 ? { warnings } : {}),
   checks
 };
 
 console.log(JSON.stringify(result, null, 2));
-process.exit(hasFail ? 1 : 0);
+// exitCode plutôt que process.exit : une sortie de plus de 64 Ko serait tronquée sur un pipe.
+process.exitCode = hasFail ? 1 : 0;

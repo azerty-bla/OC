@@ -21,16 +21,16 @@ Tu recois :
 Execute les validators. Ce sont des scripts qui ne mentent pas.
 
 ```bash
-node .seo-engine/scripts/validate-all.js [chemin-du-fichier] --config .seo-engine/config.json --sidecar .seo-engine/state/pages/[slug].json --root .
+node .seo-engine/scripts/validate-all.js --file [chemin-du-fichier] --config .seo-engine/config.json --sidecar .seo-engine/state/pages/[slug].json --root .
 ```
 
 Le rapport JSON contient les resultats par validator :
 - `validate-meta` : longueurs title/description, champs obligatoires
-- `validate-structure` : hierarchie Hn, comptage mots, H1 unique, densite mot-cle, longueur phrases/sections, H2 dupliques
+- `validate-structure` : hierarchie Hn, comptage mots, H1 unique, densite mot-cle, longueur phrases/sections, H2 dupliques, elements citables AI Overviews par section H2
 - `validate-links` : liens internes → fichiers existants sur disque, attributs de securite liens externes (rel/target)
-- `validate-schema` : JSON-LD, schema types, images alt, Open Graph
+- `validate-schema` : JSON-LD, schema types, images alt, Open Graph, detection opportunites FAQPage/HowTo, interdiction schema Product
 - `validate-duplicates` : doublons title/description/H1 sur le site, blocs de contenu dupliques, contenu boilerplate
-- `validate-writing` : keyword stuffing (densite par section, occurrences par paragraphe, phrases consecutives, ratio paragraphes), formulations bannies, erreurs de langue IA typiques, formatage des nombres au format francais
+- `validate-writing` : keyword stuffing (densite par section, occurrences par paragraphe, phrases consecutives, ratio paragraphes), formulations bannies, erreurs de langue IA typiques, formatage des nombres, score de lisibilite Flesch-Kincaid FR, voix passive, couverture des entites semantiques
 
 Chaque check est `pass` ou `fail` avec un message explicatif.
 
@@ -56,7 +56,7 @@ Les scripts verifient la forme. Toi tu verifies le fond. **Priorise les sections
 | 6 | Conclusion avec synthese + CTA | Lis les 3 dernieres phrases |
 | 7 | Pas de contenu "creux" ou de remplissage | Chaque phrase apporte de l'information |
 | 8 | Ton expert mais accessible | Pas de jargon non explique |
-| 9 | Pas de donnees inventees | Aucun chiffre non sourcable |
+| 9 | Pas de donnees inventees | `validate-facts` PASS : aucun chiffre sans fait verifie par script (voir F1) |
 | 10 | Orthographe et grammaire (voir `references/content-guidelines.md` section "Langue francaise") | Relecture attentive — accords participe passe, conjugaison, accents |
 | 11 | Lisibilite : phrases < 35 mots, mots courts privilegies, < 10% phrases passives | Estimation globale (voir `references/content-guidelines.md` section "Lisibilite") |
 | 12 | Pas plus de 300 mots entre deux sous-titres | Verification visuelle |
@@ -130,17 +130,30 @@ Les scripts verifient la forme. Toi tu verifies le fond. **Priorise les sections
 
 #### F0. Qualite redactionnelle et naturalite (audit detaille — references/content-guidelines.md sections "Naturalite" et "Langue francaise")
 
+**PASSE ACCENTS DEDIEE (CRITIQUE — a executer en premier) :**
+
+Avant tout autre audit linguistique, effectue une passe dediee aux accents. Les accents manquants sont l'erreur LLM la plus frequente et la plus visible. Un seul accent manquant detruit la credibilite E-E-A-T.
+
+Methode :
+1. Le script `validate-writing.js` detecte ~300 mots courants sans accents (plus des patterns prefixes/suffixes). Commence par ses resultats, puis par ceux de `validate-language.js` (LanguageTool : orthographe hors lexique bloquante, alertes de grammaire et de typographie a verifier une par une : environ une sur deux est fausse). Un terme technique ou un nom propre juste mais inconnu va dans `.seo-engine/lexique-projet.txt`, jamais dans le texte.
+2. Pour CHAQUE mot du texte portant normalement un accent en francais, verifie sa presence :
+   - Accents aigus (é) : énergie, différent, nécessaire, développement, qualité, sécurité, spécifique, résultat, expérience, référence, etc.
+   - Accents graves (è/à/ù) : problème, système, critère, modèle, manière, première, dernière + homophones a/à, ou/où, la/là
+   - Cedilles (ç) : français, française, façade, leçon, reçu, aperçu, conçu, garçon
+   - Accents circonflexes (â/ê/ô/û) : rôle, contrôle, bâtiment, château, grâce, dû, sûr, mûr
+3. Chaque accent manquant = erreur CRITIQUE. Corriger immediatement.
+
 | # | Critere | Methode | Severite |
 |---|---------|---------|----------|
-| 1 | Pas de mot invente ou inexistant en francais | Lecture attentive — chaque terme technique ou inhabituel doit etre verifiable | CRITIQUE |
-| 2 | Pas de calque anglais non etabli ("solutionner", "adresser un probleme") ; preferer les alternatives a "impacter" en redaction experte | Verification lexicale | IMPORTANT |
+| 1 | Pas de mot invente ou inexistant en francais | Lecture attentive — chaque terme technique ou inhabituel doit etre verifiable dans un dictionnaire | CRITIQUE |
+| 2 | Pas de calque anglais non etabli ("solutionner", "adresser un probleme", "supporter" au sens de prendre en charge) ; preferer les alternatives a "impacter" en redaction experte | Verification lexicale | IMPORTANT |
 | 3 | Collocations correctes (combinaisons de mots naturelles en francais) | Lecture critique — voir liste dans content-guidelines.md | IMPORTANT |
-| 4 | Orthographe : zero faute, accents corrects (a/à, ou/où, la/là, du/dû, sur/sûr) | Relecture mot a mot | CRITIQUE |
-| 5 | Homophones grammaticaux corrects (a/à, ce/se, ces/ses/c'est/s'est, on/ont, son/sont, et/est) | Verification systematique | CRITIQUE |
-| 6 | Accords du participe passe (avec avoir: COD avant = accord; avec etre: accord sujet) | Verification de chaque participe | IMPORTANT |
-| 7 | Conjugaison correcte (subjonctif apres "il faut que/pour que/bien que", futur irregulier, conditionnel) | Verification des formes verbales | IMPORTANT |
-| 8 | Accords adjectifs et pluriels (genre, nombre) | Verification systematique | IMPORTANT |
-| 9 | Pas d'erreurs IA typiques ("malgre que", "au final", "quelque soit", "pallier a", "s'averer faux", "apres que" + subjonctif, "voire meme", "au niveau de" hors sens spatial) | Recherche textuelle | IMPORTANT |
+| 4 | **Accents** : zero accent manquant sur tout le texte (voir passe dediee ci-dessus) | Relecture mot a mot, validator + verification LLM | CRITIQUE |
+| 5 | Homophones grammaticaux corrects (a/à, ce/se, ces/ses/c'est/s'est, on/ont, son/sont, et/est, censé/sensé, davantage/d'avantage) | Verification systematique de chaque occurrence | CRITIQUE |
+| 6 | **Accords du participe passe** (avec avoir: COD avant = accord ; avec etre: accord sujet ; pronominaux: regle specifique) | Verification de CHAQUE participe dans le texte | CRITIQUE |
+| 7 | Conjugaison correcte (subjonctif apres "il faut que/pour que/bien que", futur irregulier, conditionnel, "apres que" + indicatif) | Verification des formes verbales | IMPORTANT |
+| 8 | **Accords adjectifs et pluriels** (genre, nombre, position) | Verification systematique — un adjectif mal accorde est une faute visible | CRITIQUE |
+| 9 | Pas d'erreurs IA typiques ("malgre que", "au final", "quelque soit", "pallier a", "s'averer faux", "apres que" + subjonctif, "voire meme", "au niveau de" hors sens spatial, "au jour d'aujourd'hui", "autant pour moi", "comme meme") | Recherche textuelle | IMPORTANT |
 | 10 | Typographie francaise (espaces insecables avant ;?!«», guillemets francais, tiret cadratin) | Verification typographique | SUGGESTION |
 | 11 | Structures de paragraphes variees (pas tous le meme patron syntaxique en debut) | Lecture des debuts de paragraphes | IMPORTANT |
 | 12 | Pas de phrases creuses, tautologies, ou evidences inutiles | Chaque phrase apporte-t-elle une info concrete ? | IMPORTANT |
@@ -151,10 +164,27 @@ Les scripts verifient la forme. Toi tu verifies le fond. **Priorise les sections
 | 17 | Nombres au format francais (virgule decimale, espace milliers, symbole € apres montant) | Verification des chiffres | IMPORTANT |
 | 18 | Dates au format francais (pas de majuscule aux mois, JJ/MM/AAAA, "14 h 30") | Verification des dates | IMPORTANT |
 
+**Note sur la severite** : les criteres 4, 5, 6 et 8 (accents et accords) sont remontes en CRITIQUE car ce sont les erreurs les plus frequemment produites par les LLM et les plus dommageables pour la credibilite. Le validator `validate-writing.js` detecte les cas les plus courants par script, mais l'audit LLM DOIT completer avec une relecture exhaustive.
+
 **Correction des erreurs de langue :**
 - Corriger directement dans le fichier. Chaque correction doit etre notee dans `audit.fixes_applied`.
 - En cas de doute sur un terme ou une tournure, choisir la formulation la plus simple et la plus sure.
 - Ne PAS reformuler des phrases correctes sous pretexte d'amelioration — corriger seulement ce qui est fautif ou non naturel.
+- Pour les accents : la correction est TOUJOURS certaine — si un mot necessite un accent, il faut le mettre. Pas d'ambiguite.
+
+#### F1. Coherence avec la recherche (toutes missions)
+
+Controle par script, quelle que soit la mission : `node .seo-engine/scripts/validate-facts.js --file [fichier] --sidecar .seo-engine/state/pages/[slug].json --config .seo-engine/config.json --root .` (a lancer en plus de validate-all). Sans section `research` (missions audit-fix et improve), il n'exige que les chiffres ajoutes ou modifies depuis la version commitee ; ceux deja publies qu'il signale en avertissement relevent du skill verif-faits.
+
+| # | Critere | Methode | Severite |
+|---|---------|---------|----------|
+| 1 | Chaque chiffre, date et reference du texte vient d'un fait verifie par script ou d'un calcul declare et refait | `validate-facts` (`numbers_justified`, `calculations`) — le script fait foi | CRITIQUE |
+| 2 | Chaque chiffre est employe dans le contexte de son extrait : meme public, meme canal (bienvenue, parrainage, lien affilie), meme periode, memes conditions, qualificatifs repris | Compare la phrase de la page a l'extrait de `research.verified_facts` ; `validate-facts` (`qualifiers`) | CRITIQUE |
+| 3 | Aucun marqueur `[A VERIFIER]`, `[DONNEE A VERIFIER]`, `URL A VERIFIER` ni valeur fictive (`X €`), aucune adresse fictive a la place d'un vrai lien (`amzn.to/PLACEHOLDER`, ASIN de remplissage) | `validate-facts` (`no_markers`, `no_fake_links`) | CRITIQUE |
+| 4 | Les liens externes pointent vers des adresses lues par script (`research.verified_external_sources` ou sources des faits) | Compare les URLs | IMPORTANT |
+| 5 | L'information gain identifie dans `research.information_gain_opportunities` est exploite dans le contenu | Lecture critique | SUGGESTION |
+
+**Correction** : un chiffre non prouve se remplace par le chiffre exact d'un fait, avec ses qualificatifs, ou la phrase se reformule sans chiffre. Jamais un autre chiffre de memoire, jamais un marqueur. Une source changee depuis la recherche (fait rejete a la relecture) : relancer la recherche sur ce fait, ou retirer le chiffre.
 
 #### F. Coherence avec la strategie
 
@@ -231,7 +261,7 @@ Si le build echoue, lis l'erreur et corrige le fichier.
 Chaque erreur trouvee est classee :
 
 - **CRITIQUE** : bloque la publication. DOIT etre corrigee.
-  - Tout echec de validator script (validate-meta, validate-structure, validate-links, validate-schema, validate-duplicates, validate-writing)
+  - Tout echec de validator script (validate-meta, validate-structure, validate-links, validate-schema, validate-duplicates, validate-writing, validate-language, validate-facts)
   - H1 manquant, meta title/description absente, lien vers page inexistante, build qui echoue, donnee inventee, draft: true
   - Title, description ou H1 duplique avec une autre page du site
   - Liens externes sans `target="_blank"` et `rel="noopener noreferrer"` (HTML)
@@ -239,6 +269,9 @@ Chaque erreur trouvee est classee :
   - **Mot invente ou inexistant en francais** (terme non verifiable)
   - **Juxtaposition de mots-cles sans liaison grammaticale** (suite de termes SEO sans structure de phrase)
   - **Faute d'orthographe** (accent manquant, homonyme incorrect, mot mal orthographie)
+  - **Accent manquant** (é, è, ê, à, ù, ô, â, û, ç — chaque accent manquant est une faute d'orthographe distincte)
+  - **Accord incorrect** (participe passe, adjectif/nom en genre ou en nombre)
+  - **Donnee factuelle non verifiee** (chiffre, date, prix, reference ou reglementation sans fait verifie par script, ou employe hors du contexte de son extrait) — un marqueur `[A VERIFIER]` ne l'excuse pas : il bloque aussi
 
 - **IMPORTANT** : devrait etre corrigee. L'orchestrateur boucle tant qu'il en reste.
   - Mot-cle primaire absent d'un H2, paragraphe trop long (>5 phrases), ancre de lien non optimisee, densite mot-cle trop haute, phrase > 35 mots, section > 300 mots entre titres
@@ -314,3 +347,21 @@ Ecris les resultats dans le side-car, section `audit` :
 ```
 
 Le gate-publish sera verifie par l'orchestrateur apres ta sortie.
+
+---
+
+## Audit anti-spam (spam policies Google)
+
+Reference : `.seo-engine/references/spam-policies.md`. Le validateur `validate-spam` (lance par `validate-all`) fait foi. En complement, verifie a la lecture :
+
+| # | Critere | Severite |
+|---|---|---|
+| S1 | La page apporte une information absente des autres pages du site (calcul, tableau de conditions, cas chiffre, arbre de decision, fait reglementaire). Sinon : fusion ou suppression | CRITIQUE |
+| S2 | Aucune affirmation d'experience vecue non prouvee (« nous avons teste », « j'ai ouvert un compte ») | CRITIQUE |
+| S3 | Avis/classement : chiffres mesurables, limites de chaque offre (y compris du n°1), alternatives, justification du rang par la methodologie | IMPORTANT |
+| S4 | Liens partenaires : via le composant prevu, `rel="sponsored"`, divulgation visible, pas de CTA avant un argument | IMPORTANT |
+| S5 | FAQ : questions propres a la page, pas reprises telles quelles d'autres pages | IMPORTANT |
+| S6 | Title/H1 : une seule annee, pas de liste de mots-cles, pas de repetition | IMPORTANT |
+| S7 | `updatedDate` modifiee uniquement si le contenu change substantiellement | CRITIQUE |
+| S8 | Aucune donnee structuree trompeuse (note agregee inventee, avis sur soi-meme) | CRITIQUE |
+

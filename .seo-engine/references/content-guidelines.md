@@ -202,7 +202,7 @@ Ces exemples illustrent le principe. Il s'applique a toutes les thematiques, pas
 ## Donnees et chiffres
 
 - **Ne JAMAIS inventer** de statistiques, prix, pourcentages, dates.
-- Donnee necessaire mais non disponible : fourchette qualitative ou `[DONNEE A VERIFIER]`.
+- Donnee necessaire mais non disponible : formulation sans chiffre (« une prime variable selon la campagne »). Jamais `[DONNEE A VERIFIER]` dans une page, jamais un chiffre de memoire : chaque chiffre vient d'un fait verifie par script (`validate-facts.js`), avec ses qualificatifs et dans son contexte.
 - References reglementaires exactes (numeros de decret, fiches CEE, normes NF/EN/ISO).
 - **Citer les sources** quand on avance un fait precis. Format : "(Source : [Nom], [annee])" ou lien vers la source.
 
@@ -210,17 +210,50 @@ Ces exemples illustrent le principe. Il s'applique a toutes les thematiques, pas
 
 Le contenu est en francais. Les erreurs de langue detruisent la credibilite (E-E-A-T). Verifie systematiquement :
 
-**Orthographe et accents :**
-- Accents obligatoires : a/à, ou/où, la/là, du/dû, sur/sûr. Pas d'accent manquant.
-- Mots pieges courants : "différent" (pas "different"), "intéressant", "développement", "nécessaire", "parallèle", "occurrence", "connexion".
-- Pluriels irreguliers : "travaux" (pas "travails"), "vitraux", "détails" (pas "détaills").
+**Orthographe et accents (CRITIQUE — erreur LLM la plus frequente) :**
 
-**Grammaire et accords :**
-- Accord du participe passe avec l'auxiliaire avoir : s'accorde avec le COD s'il est place avant. "Les pages que j'ai **ecrites**" (pas "ecrit").
-- Accord du participe passe avec etre : s'accorde avec le sujet. "Les donnees sont **publiees**".
-- Accord de l'adjectif : "une isolation **thermique**" (pas "thermiques"), "des pompes a chaleur **performantes**".
+Les accents manquants sont la faute la plus courante dans les textes generes par IA. Un SEUL accent manquant est une faute d'orthographe visible qui detruit la credibilite E-E-A-T. Verification SYSTEMATIQUE obligatoire.
+
+*Homophones a accent :*
+- a/à : "il a" (verbe avoir) vs "à" (preposition : à Paris, grâce à, face à)
+- ou/où : "ou" (alternative : rouge ou bleu) vs "où" (lieu/temps : la maison où, le jour où)
+- la/là : "la" (article : la maison) vs "là" (adverbe : ici et là, celle-là)
+- du/dû : "du" (article : du pain) vs "dû" (participe de devoir : l'argent dû — mais "due", "dus", "dues" sans accent)
+- sur/sûr : "sur" (preposition : sur la table) vs "sûr" (adjectif : il est sûr, bien sûr)
+- mur/mûr : "mur" (nom : un mur) vs "mûr" (adjectif : un fruit mûr)
+- cru/crû : "cru" (participe de croire) vs "crû" (participe de croître)
+
+*Mots frequemment ecrits sans accents par les LLM :*
+- É au debut : énergie, écologie, économie, électrique, élément, éligible, émission, énormément, époque, équipement, équipe, équivalent, établissement, étape, état, étude, évaluation, événement, évolution, éviter
+- É/È au milieu : activité, amélioration, bénéfice, capacité, catégorie, conséquence, création, critère, décret, définition, démarche, développement, différent, efficacité, expérience, fiabilité, fréquence, généralement, immédiat, indépendant, intéressant, intérêt, irrégulier, manière, méthode, modèle, nécessaire, opération, période, phénomène, possibilité, préférence, première, préparation, présence, priorité, problème, procédure, propriété, qualité, réalité, référence, réflexion, région, réglementation, rénovation, répartition, réponse, résultat, sécurité, société, spécifique, stratégie, supérieur, système, température, vérité
+- Ç : français, française, façade, leçon, reçu, aperçu, déçu, garçon, conçu, conçue
+- Ô : rôle, contrôle, côté, côte (au sens de littoral ou pente)
+- Â : bâtiment, château, grâce, pâte (vs "patte"), tâche (vs "tache" = salissure)
+
+*Pieges courants :*
+- "différent" (pas "different"), "intéressant" (pas "interessant"), "développement" (pas "developpement"), "nécessaire" (pas "necessaire"), "parallèle" (pas "parallele"), "occurrence" (pas "occurence"), "connexion" (pas "connection")
+- Pluriels irreguliers : "travaux" (pas "travails"), "vitraux", "détails" (pas "détaills")
+- Le script `validate-writing.js` detecte automatiquement ~300 mots courants sans accents (plus des patterns prefixes/suffixes), mais la verification LLM doit couvrir TOUS les mots du texte.
+
+**Grammaire et accords (CRITIQUE — seconde erreur LLM la plus frequente) :**
+
+*Accord du participe passe (regle complete) :*
+- Avec **avoir** : s'accorde avec le COD si place AVANT le verbe. "Les pages que j'ai **écrites**" (pas "écrit"). "J'ai **écrit** les pages" (COD apres → pas d'accord).
+- Avec **être** : s'accorde TOUJOURS avec le sujet. "Les données sont **publiées**". "Elle est **partie**".
+- Verbes **pronominaux** : "Elles se sont **lavées**" (COD = se = elles → accord). "Elles se sont **lavé** les mains" (COD = mains, apres le verbe → pas d'accord). "Elles se sont **parlé**" (se = COI → pas d'accord).
+- **Cas piege** : "La maison que j'ai fait **construire**" → pas d'accord (faire + infinitif est invariable). "Les efforts qu'il a **fallu**" → invariable (verbe impersonnel).
+
+*Accord de l'adjectif :*
+- Genre et nombre : "une isolation **thermique**" (pas "thermiques"), "des pompes à chaleur **performantes**".
+- Adjectifs de couleur composes : invariables → "des murs **bleu clair**" (pas "bleus clairs").
+- Adjectifs places avant le nom : "de **bonnes** performances", "de **grands** travaux".
+- "Demi" : invariable avant le nom ("une **demi**-heure"), accord apres ("une heure et **demie**").
+
+*Autres regles :*
 - "Quoique" (= bien que) vs "quoi que" (= quelle que soit la chose que).
 - "Parce que" vs "par ce que" : toujours "parce que" pour la cause.
+- "Quel que" : s'accorde avec le sujet qui suit → "quelle que soit la raison", "quels que soient les résultats".
+- "Tout" adverbe : invariable devant un adjectif masculin ("tout contents"), mais s'accorde devant un adjectif feminin commencant par une consonne ou un h aspire ("toute contente", "toutes honteuses").
 
 **Conjugaison :**
 - Futur : "vous **beneficierez**" (pas "bénéficirez"), "il **enverra**" (pas "envoira").
@@ -252,6 +285,11 @@ Le contenu est en francais. Les erreurs de langue detruisent la credibilite (E-E
 - "Au niveau de" → ne signifie PAS "en ce qui concerne". "Au niveau de" est spatial ou hierarchique : "au niveau du sol", "au niveau regional"
 - Confusion "davantage" / "d'avantage" : "davantage" = plus, "d'avantage" = de benefice
 - "Amener" / "apporter" / "emmener" / "emporter" : "amener" et "emmener" pour les etres animes, "apporter" et "emporter" pour les objets
+- "Comme même" → erreur pour "quand même" (confusion tres frequente dans les textes IA)
+- "Au jour d'aujourd'hui" → triple pleonasme. "Aujourd'hui" suffit (ou "actuellement", "a ce jour")
+- "Autant pour moi" → l'expression correcte est "au temps pour moi" (origine militaire)
+- "Se rappeler de" → transitif direct : "se rappeler quelque chose" (pas "se rappeler de quelque chose"). "Se souvenir de" est correct.
+- "Adresser un problème" → calque de l'anglais "to address a problem". En francais : "traiter", "résoudre", "aborder" un problème. "Adresser" = envoyer à une adresse ("adresser une lettre", "adresser la parole à").
 
 **Nombres et dates en francais :**
 - Separateur decimal = virgule : "1,5 kW" (pas "1.5 kW")
@@ -299,3 +337,10 @@ Pas de CTA agressif. Le CTA est la suite logique du contenu.
 - `updatedDate` : date de derniere mise a jour significative.
 - Les deux sont visibles sur la page et dans le schema (datePublished, dateModified).
 - Mettre a jour le contenu perime plutot que de le laisser en ligne.
+
+---
+
+## Spam policies (obligatoire)
+
+Toutes les regles de `references/spam-policies.md` s'appliquent a la redaction : pas de page en serie par entite, pas de fausse experience, pas de FAQ recyclee, pas de fausse fraicheur, limites exposees dans chaque avis, affiliation divulguee et qualifiee.
+

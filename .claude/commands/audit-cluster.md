@@ -61,6 +61,10 @@ Identifier les pages de moins de 500 mots :
 - Tous les titles sont dans la plage 50-60 caracteres
 - Toutes les descriptions sont dans la plage 150-160 caracteres
 
+### 6. Spam policies (site entier)
+
+Lance `node .seo-engine/scripts/audit-spam.js --config .seo-engine/config.json --root .` et reporte ses controles (quasi-doublons, plans identiques, FAQ recyclees, fausse fraicheur, auteurs non verifies, pages de confiance, liens vers des drafts, code trompeur, sites lies). Reference : `.seo-engine/references/spam-policies.md`.
+
 ## Sortie
 
 Produis un rapport structure :
@@ -77,6 +81,7 @@ Produis un rapport structure :
 | Maillage | PASS/FAIL | ... |
 | Orphelins | PASS/FAIL | ... |
 | Meta | PASS/FAIL | ... |
+| Spam policies | PASS/FAIL | voir docs/AUDIT-SPAM.md |
 
 ## Actions requises
 - [ ] ...
