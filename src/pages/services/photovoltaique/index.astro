@@ -1,0 +1,240 @@
+---
+import "../../../styles/global.css";
+import Base from "../../../layouts/Base.astro";
+import FaqAccordion from "../../../components/FaqAccordion.astro";
+import { getPageDates, formatDateFr } from "../../../lib/pageDates.mjs";
+
+const siteUrl = "https://oteria-conseil.fr";
+const canonical = "/services/photovoltaique/";
+const title = "Installation photovoltaïque en entreprise : étude, aides";
+const description = "Installation photovoltaïque en entreprise : tarif depuis juin 2026, appel d'offres 100-500 kWc, autoconsommation ou revente, hangar agricole, exemple.";
+const h1 = "Installation photovoltaïque en entreprise : ce qui a changé en 2026";
+const pageDates = getPageDates(canonical);
+
+const faq = [
+  {
+    question: "La prime à l'autoconsommation existe-t-elle encore ?",
+    answer: "Non pour les nouvelles demandes. L'arrêté du 1er juin 2026 a supprimé les primes à l'investissement des installations de 0 à 100 kWc. Il vise celles dont la demande complète de raccordement est déposée à partir du 5 juin 2026.",
+  },
+  {
+    question: "Une installation photovoltaïque peut-elle donner droit à une prime CEE ?",
+    answer: "La production d'électricité solaire n'ouvre pas, à notre connaissance, de prime CEE pour une entreprise : nous n'avons pas trouvé de fiche standardisée en ce sens. Les travaux qui réduisent la consommation du bâtiment peuvent en revanche y donner droit.",
+  },
+  {
+    question: "Faut-il une autorisation d'urbanisme pour poser des panneaux sur un toit ?",
+    answer: "Pour la toiture d'un bâtiment existant, il faut généralement déposer une déclaration préalable de travaux. Pour un bâtiment neuf, la demande est jointe au permis de construire. Une ombrière ou une installation au sol obéit à des règles propres.",
+  },
+  {
+    question: "Peut-on vendre toute la production d'une petite installation ?",
+    answer: "Non pour les très petites puissances : les installations en vente de la totalité d'au plus 9 kWc ne sont pas éligibles au tarif d'achat. Au-delà, le choix entre vente totale et autoconsommation dépend surtout de votre consommation sur site.",
+  },
+  {
+    question: "Que devient l'électricité produite si l'on ne se raccorde pas au réseau ?",
+    answer: "En l'absence de raccordement, le surplus est perdu, sauf si l'exploitant dispose d'une solution de stockage. Le raccordement reste en général conseillé, même avec un tarif de surplus faible.",
+  },
+  {
+    question: "Oteria Conseil installe-t-il les panneaux ?",
+    answer: "Non. Nous étudions votre projet, puis vous mettons en relation avec des installateurs partenaires choisis pour la qualité de leur travail. Notre accompagnement est gratuit pour votre entreprise.",
+  },
+];
+
+const schema = [
+  { "@context": "https://schema.org", "@type": "WebPage", name: title, description, url: `${siteUrl}${canonical}`, ...(pageDates ? { datePublished: pageDates.published, dateModified: pageDates.modified } : {}) },
+  {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: h1,
+    description,
+    author: { "@type": "Organization", name: "Oteria Conseil", url: siteUrl },
+    publisher: { "@type": "Organization", name: "Oteria Conseil", url: siteUrl },
+    mainEntityOfPage: `${siteUrl}${canonical}`,
+    ...(pageDates ? { datePublished: pageDates.published, dateModified: pageDates.modified } : {}),
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Accueil", item: `${siteUrl}/` },
+      { "@type": "ListItem", position: 2, name: "Nos services", item: `${siteUrl}/services/` },
+      { "@type": "ListItem", position: 3, name: "Photovoltaïque", item: `${siteUrl}${canonical}` },
+    ],
+  },
+  { "@context": "https://schema.org", "@type": "ProfessionalService", name: "Oteria Conseil", url: siteUrl, description: "Mandataire CEE : étude des projets, sélection d'installateurs partenaires et sécurisation des dossiers de certificats d'économies d'énergie", areaServed: "FR" },
+  { "@context": "https://schema.org", "@type": "FAQPage", mainEntity: faq.map((f) => ({ "@type": "Question", name: f.question, acceptedAnswer: { "@type": "Answer", text: f.answer } })) },
+];
+---
+
+<Base title={title} description={description} canonicalPath={canonical} modified={pageDates?.modified}>
+  <script type="application/ld+json" set:html={JSON.stringify(schema)} />
+
+  <section style="background-color: #102a43;">
+    <div class="mx-auto max-w-7xl px-6 py-14 md:py-20">
+      <nav aria-label="Fil d'Ariane" class="mb-8">
+        <ol class="flex flex-wrap items-center gap-2 text-sm" style="color: #9fb3c8;">
+          <li><a href="/" class="no-underline transition-colors" style="color: #9fb3c8;">Accueil</a></li>
+          <li aria-hidden="true" style="color: #627d98;">/</li>
+          <li><a href="/services/" class="no-underline transition-colors" style="color: #9fb3c8;">Nos services</a></li>
+          <li aria-hidden="true" style="color: #627d98;">/</li>
+          <li style="color: #f5c04a;" class="font-medium">Photovoltaïque</li>
+        </ol>
+      </nav>
+      <h1 class="text-3xl md:text-4xl lg:text-5xl font-bold leading-tight max-w-4xl" style="color: #ffffff;">{h1}</h1>
+      {pageDates && (
+        <p class="text-sm mt-4" style="color: #9fb3c8;">Mis à jour le <time datetime={pageDates.modified}>{formatDateFr(pageDates.modified)}</time> · Oteria Conseil</p>
+      )}
+      <p class="mt-6 text-lg leading-relaxed max-w-3xl" style="color: #d9e2ec;">Une <strong>installation photovoltaïque en entreprise</strong> ne se calcule plus comme il y a deux ans. Le tarif de rachat du surplus est devenu symbolique, la prime à l'investissement a disparu et les projets de taille moyenne passent par appel d'offres. Nous présentons ici les nouvelles règles, la méthode de dimensionnement et un exemple chiffré.</p>
+      <div class="mt-8">
+        <a href="/diagnostic-gratuit/" class="inline-flex items-center rounded-md px-6 py-3 text-sm font-semibold no-underline transition-colors" style="background-color: #d4a024; color: #102a43;">Faire étudier mon projet</a>
+      </div>
+    </div>
+  </section>
+
+  <article class="expertise-content">
+    <div class="mx-auto max-w-3xl px-6 py-14 md:py-20">
+
+      <div class="expertise-highlight">
+        <p><strong>En bref :</strong> jusqu'à 100 kWc, le surplus injecté est racheté 1,1 c€/kWh pour les demandes de raccordement déposées à partir du 5 juin 2026, sans prime à l'investissement. Entre 100 et 500 kWc, les projets passent par un appel d'offres simplifié. La rentabilité repose donc sur l'électricité que vous consommez vous-même.</p>
+      </div>
+
+      <h2>Tarif d'achat et aides : les nouvelles règles depuis juin 2026</h2>
+
+      <p>L'arrêté du 1er juin 2026 a modifié l'arrêté tarifaire du 6 octobre 2021, dit « S21 ». Selon le centre de ressources photovoltaique.info, ses dispositions s'appliquent aux installations dont la demande complète de raccordement est déposée à partir du 5 juin 2026. Trois changements concernent directement les entreprises :</p>
+
+      <ul>
+        <li>un <strong>tarif d'achat unique</strong> de 1,1 c€/kWh pour les installations de 0 à 100 kWc ;</li>
+        <li>la <strong>suppression des primes à l'investissement</strong>, y compris pour l'autoconsommation ;</li>
+        <li>une indexation de ce tarif de 2 % par an pendant toute la vie du contrat, sans dégressivité trimestrielle.</li>
+      </ul>
+
+      <p>Au-delà de 1 600 kWh/kWc.an, l'électricité injectée n'est plus rémunérée. Par ailleurs, les installations en vente de la totalité d'au plus 9 kWc ne sont pas éligibles au tarif d'achat.</p>
+
+      <p>Au-dessus de 100 kWc, le guichet ouvert a cédé la place à la mise en concurrence. L'appel d'offres « Petit PV », dit simplifié, s'applique depuis le 22 septembre 2025 aux installations sur bâtiment, ombrière ou au sol de plus de 100 kWc et d'au plus 500 kWc. Les projets les plus compétitifs sur le prix obtiennent un contrat de complément de rémunération sur 20 ans. La 2e période s'est tenue du 20 juillet 2026 au 31 juillet 2026 ; le calendrier des périodes suivantes n'est pas connu.</p>
+
+      <p>De nombreuses pages commerciales affichent encore des primes ou un ancien barème : vérifiez la date des informations avant d'établir un plan d'affaires.</p>
+
+      <h2>Autoconsommation ou revente du surplus : choisir selon la puissance</h2>
+
+      <p>L'autoconsommation consiste à consommer sur place l'électricité produite par ses panneaux, le surplus étant injecté sur le réseau. Avec un rachat à 1,1 c€/kWh, chaque kWh autoconsommé vaut bien davantage qu'un kWh revendu : il évite un achat au prix de votre contrat de fourniture. Le dimensionnement doit donc suivre votre courbe de consommation, et non la surface de toiture disponible.</p>
+
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr><th>Puissance</th><th>Régime applicable</th><th>Logique conseillée</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Jusqu'à 9 kWc</td><td>Tarif d'achat du surplus uniquement (pas de vente totale)</td><td>Autoconsommation, petits sites</td></tr>
+            <tr><td>De 9 à 100 kWc</td><td>Tarif unique de 1,1 c€/kWh sur le surplus, sans prime</td><td>Caler la puissance sur la consommation de jour</td></tr>
+            <tr><td>De 100 à 500 kWc</td><td>Appel d'offres simplifié, complément de rémunération sur 20 ans</td><td>Autoconsommation forte ou dossier d'appel d'offres compétitif</td></tr>
+            <tr><td>Au-delà de 500 kWc</td><td>Appels d'offres de la Commission de régulation de l'énergie</td><td>Projet industriel, étude de raccordement dédiée</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>Un bâtiment industriel ou logistique qui fonctionne en journée, avec des groupes froids, de l'air comprimé ou de la ventilation, se prête bien à l'autoconsommation. Des bureaux fermés le week-end en consomment moins : la puissance installée doit alors rester modeste.</p>
+
+      <h2>Toiture, ombrière, hangar agricole ou sol : où installer les panneaux</h2>
+
+      <p>Le support détermine le coût, les démarches et parfois l'obligation. Voici les quatre cas les plus fréquents :</p>
+
+      <ul>
+        <li><strong>Toiture existante :</strong> c'est la solution la plus courante pour le photovoltaïque sur bâtiment industriel ou tertiaire. Selon Entreprendre Service Public, il faut généralement déposer une déclaration préalable de travaux. Faites vérifier la charpente et l'étanchéité avant tout engagement.</li>
+        <li><strong>Ombrière de parking :</strong> elle répond souvent à une obligation réglementaire, que nous détaillons sur notre page consacrée à la loi APER.</li>
+        <li><strong>Hangar ou bâtiment agricole :</strong> le photovoltaïque agricole couvre un hangar neuf ou une toiture d'élevage, de stockage ou de serre. Les tarifs et l'appel d'offres s'appliquent selon la même grille de puissance qu'ailleurs. Les offres de hangar « gratuit » reposent sur un tiers qui finance la centrale et en assure la gestion : examinez la durée d'occupation et le sort du bâtiment en fin de contrat.</li>
+        <li><strong>Au sol :</strong> une solution réservée aux grands terrains, avec des autorisations d'urbanisme plus lourdes et souvent un appel d'offres.</li>
+      </ul>
+
+      <h3>Les démarches administratives d'un projet photovoltaïque</h3>
+
+      <p>Quel que soit le support, un projet suit les mêmes étapes administratives. La fiche d'Entreprendre Service Public recommande de consulter la mairie dès le choix du lieu d'implantation, pour connaître les contraintes du plan local d'urbanisme. Il faut alors prévoir :</p>
+
+      <ul>
+        <li>l'autorisation d'urbanisme adaptée au support : déclaration préalable, permis de construire ou absence de formalité ;</li>
+        <li>la demande de raccordement au réseau public, avec notamment le plan cadastral, le plan de masse, l'autorisation d'urbanisme et le bilan de puissance ;</li>
+        <li>le choix de vendre ou non le surplus, indiqué au moment de cette demande ;</li>
+        <li>l'assurance de l'installation et son entretien régulier, car chaque composant a sa propre durée de vie.</li>
+      </ul>
+
+      <p>La date de la demande complète de raccordement est déterminante, car elle fixe le régime tarifaire applicable. Un dossier incomplet déposé trop tôt ne garantit aucun régime. Intégrez aussi le délai d'instruction de la mairie à votre calendrier de commande, et ne signez pas de bon de commande ferme avant d'avoir obtenu l'autorisation d'urbanisme.</p>
+
+      <p>Pour l'exploitation, demandez à l'installateur le plan de maintenance, la garantie des onduleurs et le mode de suivi de la production à distance : ces éléments préservent le rendement dans la durée.</p>
+
+      <p>Pour une exploitation agricole, l'étude doit aussi examiner les autres leviers d'économies d'énergie du site, que nous présentons sur notre page dédiée au <a href="/secteurs/agriculture/">secteur agricole</a>.</p>
+
+      <h2>Exemple chiffré : la rentabilité d'une centrale de 100 kWc en toiture</h2>
+
+      <p>Exemple : une PME installe 100 kWc en toiture. Nous retenons, par exemple, une production de 1 100 kWh par kWc et par an, dont 75 % autoconsommés et 25 % injectés.</p>
+
+      <ul>
+        <li>Production annuelle : 100 × 1 100 = <strong>110 000 kWh</strong>.</li>
+        <li>Électricité injectée : 110 000 × 25 % = 27 500 kWh.</li>
+        <li>Revenu du surplus au tarif de 1,1 c€/kWh : 27 500 × 1,1 / 100 = <strong>302,50 € par an</strong>.</li>
+        <li>Électricité autoconsommée : 110 000 − 27 500 = <strong>82 500 kWh</strong> que l'entreprise n'achète plus à son fournisseur.</li>
+      </ul>
+
+      <p>Le constat est clair : le surplus rapporte peu, et presque toute la valeur vient des 82 500 kWh non achetés. Leur valeur dépend du prix de votre contrat de fourniture, hors acheminement et taxes non évités. Une étude sérieuse part de vos courbes de consommation horaires, et non d'un rendement promis. Nous ne garantissons aucun temps de retour avant de disposer de ces données.</p>
+
+      <p>Trois erreurs reviennent souvent dans les offres qui nous sont soumises :</p>
+
+      <ul>
+        <li><strong>Un dimensionnement calé sur la toiture :</strong> une centrale trop grande injecte beaucoup, au tarif de 1,1 c€/kWh, et allonge le temps de retour.</li>
+        <li><strong>Un plan d'affaires fondé sur une prime disparue :</strong> vérifiez la date de dépôt prévue de la demande de raccordement et le régime qui s'y attache.</li>
+        <li><strong>Un rendement annoncé sans relevé :</strong> la production dépend de l'orientation, de l'inclinaison et des ombres portées. Exigez une simulation sur votre site.</li>
+      </ul>
+
+      <p>Le plan de financement de l'investissement se construit comme pour tout projet d'efficacité énergétique : notre page sur le <a href="/services/financement-operations/">financement CEE</a> traite du reste à charge.</p>
+
+      <h2>Les panneaux photovoltaïques ouvrent-ils droit à une prime CEE ?</h2>
+
+      <p>La réponse est non : le dispositif des certificats d'économies d'énergie récompense une baisse de consommation, non une production. Nous n'avons trouvé aucune fiche d'opération standardisée qui finance des panneaux photovoltaïques installés par une entreprise.</p>
+
+      <p>Mieux vaut donc réduire d'abord la consommation, avec des travaux éligibles aux CEE : isolation, pompe à chaleur, gestion technique du bâtiment, récupération de chaleur. Les panneaux se dimensionnent après, sur la consommation résiduelle. Inverser l'ordre conduit souvent à surdimensionner la centrale, puis à revendre un surplus presque sans valeur.</p>
+
+      <h2>Loi APER et décret tertiaire : les obligations qui touchent au solaire</h2>
+
+      <p>Deux textes incitent les entreprises à recourir au solaire, sans toujours l'imposer.</p>
+
+      <ul>
+        <li><strong>Loi APER :</strong> elle impose la solarisation des parcs de stationnement extérieurs de plus de 1 500 m², sur au moins 50 % de leur superficie. Pour les toitures de bâtiments neufs ou lourdement rénovés, la proportion à couvrir passe à 40 % à compter du 1er juillet 2026, puis à 50 % à compter du 1er juillet 2027. Les extensions et rénovations visées ont une emprise au sol de plus de 500 m². Le détail figure sur notre page <a href="/services/loi-aper/">loi APER</a>.</li>
+        <li><strong>Décret tertiaire :</strong> il concerne les bâtiments tertiaires d'au moins 1 000 m² de surface de plancher et fixe une baisse de consommation d'énergie finale de 40 % d'ici 2030. L'électricité autoconsommée réduit l'achat au réseau ; son traitement exact dans OPERAT se vérifie au cas par cas. Voir notre page consacrée au <a href="/services/decret-tertiaire/">décret tertiaire</a>.</li>
+      </ul>
+
+      <p>Un même site peut donc relever des deux textes, en plus des obligations relatives aux bornes de recharge. Une étude unique évite de multiplier les interlocuteurs et les devis.</p>
+
+      <h2>Comment Oteria Conseil accompagne votre projet solaire</h2>
+
+      <p>Oteria Conseil est mandataire CEE et n'installe pas de panneaux. Nous intervenons gratuitement pour votre entreprise, en quatre temps :</p>
+
+      <ol>
+        <li>analyse de vos consommations et de vos obligations (APER, décret tertiaire) ;</li>
+        <li>repérage des travaux d'économies d'énergie à mener d'abord, avec leur prime CEE ;</li>
+        <li>mise en relation avec des installateurs partenaires, choisis pour la qualité de leur travail ;</li>
+        <li>vérification des devis au regard des règles applicables à votre puissance, et montage des dossiers CEE dans les règles de l'art.</li>
+      </ol>
+
+          <p>Nous sélectionnons nos installateurs partenaires avec exigence : qualité d'exécution, garantie décennale et conformité aux normes en vigueur.</p>
+
+      <p>Retrouvez l'ensemble de <a href="/services/">nos services</a> pour les autres volets de votre projet énergétique.</p>
+
+      <h2>Questions fréquentes sur le photovoltaïque en entreprise</h2>
+
+      <FaqAccordion items={faq} />
+
+      <h2>Photovoltaïque en entreprise : l'autoconsommation avant tout</h2>
+
+      <p>Depuis juin 2026, une <strong>installation photovoltaïque en entreprise</strong> se justifie par l'autoconsommation, et non plus par la revente ou par une prime. Un projet bien conçu commence par réduire la consommation, se dimensionne sur vos besoins réels et tient compte de vos obligations réglementaires. Envoyez-nous vos consommations : nous étudions gratuitement la puissance adaptée et les travaux à financer en priorité.</p>
+
+      <div class="rounded-lg p-8 mt-10 text-center" style="background-color: #f0f4f8;">
+        <p class="text-xl font-bold text-navy-900 mb-3">Un projet solaire sur votre site ?</p>
+        <p class="text-navy-600 mb-6">Puissance adaptée à vos consommations, obligations et installateurs partenaires.</p>
+        <a href="/diagnostic-gratuit/" class="inline-flex items-center justify-center rounded-md px-8 py-4 text-base font-semibold no-underline transition-colors" style="background-color: #d4a024; color: #102a43;">Faire étudier mon projet</a>
+      </div>
+
+      <p class="text-sm mt-10">Sources :</p>
+      <ul class="text-sm">
+        <li><a href="https://www.photovoltaique.info/fr/actualites/detail/arrete-s21-detail-des-modifications-et-nouveau-tarif-unique/" target="_blank" rel="noopener noreferrer">photovoltaique.info, arrêté S21 : détail des modifications et nouveau tarif unique</a></li>
+        <li><a href="https://www.photovoltaique.info/fr/tarifs-dachat-et-autoconsommation/appels-doffres/appel-doffres-simplifie-100-500-kwc/" target="_blank" rel="noopener noreferrer">photovoltaique.info, appel d'offres simplifié 100-500 kWc</a></li>
+        <li><a href="https://entreprendre.service-public.gouv.fr/vosdroits/F38925" target="_blank" rel="noopener noreferrer">Entreprendre Service Public, installation de panneaux photovoltaïques par une entreprise</a></li>
+      </ul>
+    </div>
+  </article>
+</Base>

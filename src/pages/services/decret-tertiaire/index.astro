@@ -1,0 +1,254 @@
+---
+import "../../../styles/global.css";
+import Base from "../../../layouts/Base.astro";
+import { getPageDates, formatDateFr } from "../../../lib/pageDates.mjs";
+import FaqAccordion from "../../../components/FaqAccordion.astro";
+
+const siteUrl = "https://oteria-conseil.fr";
+const canonical = "/services/decret-tertiaire/";
+const title = "Accompagnement décret tertiaire : obligations, OPERAT, CEE";
+const description = "Accompagnement décret tertiaire gratuit : bâtiments d'au moins 1 000 m², objectif −40 % en 2030, OPERAT, sanctions et travaux financés par les CEE.";
+const h1 = "Accompagnement décret tertiaire : de la déclaration OPERAT aux travaux financés";
+const pageDates = getPageDates(canonical);
+
+const faq = [
+  {
+    question: "Le seuil d'au moins 1 000 m² s'apprécie-t-il par bâtiment ou par site ?",
+    answer: "Les deux cas existent. Le décret vise un bâtiment, une partie de bâtiment à usage mixte ou un ensemble de bâtiments sur une même unité foncière. Le décret s'applique dès que les surfaces tertiaires cumulées atteignent au moins 1 000 m².",
+  },
+  {
+    question: "Qui déclare sur OPERAT : le propriétaire ou le locataire ?",
+    answer: "Chacun pour ce qui le concerne. Les propriétaires et, s'il y en a, les preneurs transmettent les consommations des entités qui les concernent ; le preneur peut déléguer cette transmission au propriétaire ou à un prestataire.",
+  },
+  {
+    question: "Peut-on encore choisir une année de référence ?",
+    answer: "Oui, entre 2010 et 2019. Sans choix avant le 30 septembre 2027, la référence devient la première année pleine d'exploitation déclarée sur OPERAT, souvent moins favorable pour un bâtiment déjà rénové.",
+  },
+  {
+    question: "Le décret tertiaire impose-t-il un audit énergétique ?",
+    answer: "Non, pas en tant que tel. Une étude énergétique devient nécessaire si vous demandez une modulation de vos objectifs, car elle fait partie du dossier technique. Pour bâtir un plan d'actions, un diagnostic reste toutefois la meilleure base.",
+  },
+  {
+    question: "Que faut-il transmettre en cas de vente ou de location ?",
+    answer: "L'évaluation du respect de l'obligation, issue de la dernière attestation numérique annuelle générée par OPERAT, s'annexe à la promesse ou au compromis de vente, ou au contrat de bail en cas de location.",
+  },
+  {
+    question: "Les CEE peuvent-ils financer des travaux réalisés pour le décret tertiaire ?",
+    answer: "Oui, si l'opération correspond à une fiche d'opération standardisée en vigueur et que le cadre CEE est posé avant l'acceptation du devis. Le décret tertiaire n'exclut pas la prime : il est simplement l'occasion d'engager les travaux.",
+  },
+];
+
+const schema = [
+  { "@context": "https://schema.org", "@type": "WebPage", name: title, description, url: `${siteUrl}${canonical}`, ...(pageDates ? { datePublished: pageDates.published, dateModified: pageDates.modified } : {}) },
+  {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: h1,
+    description,
+    author: { "@type": "Organization", name: "Oteria Conseil", url: siteUrl },
+    publisher: { "@type": "Organization", name: "Oteria Conseil", url: siteUrl },
+    mainEntityOfPage: `${siteUrl}${canonical}`,
+    ...(pageDates ? { datePublished: pageDates.published, dateModified: pageDates.modified } : {}),
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Accueil", item: `${siteUrl}/` },
+      { "@type": "ListItem", position: 2, name: "Nos services", item: `${siteUrl}/services/` },
+      { "@type": "ListItem", position: 3, name: "Décret tertiaire", item: `${siteUrl}${canonical}` },
+    ],
+  },
+  { "@context": "https://schema.org", "@type": "ProfessionalService", name: "Oteria Conseil", url: siteUrl, description: "Mandataire CEE : étude des projets, sélection d'installateurs partenaires et sécurisation des dossiers de certificats d'économies d'énergie", areaServed: "FR" },
+  { "@context": "https://schema.org", "@type": "FAQPage", mainEntity: faq.map((f) => ({ "@type": "Question", name: f.question, acceptedAnswer: { "@type": "Answer", text: f.answer } })) },
+];
+---
+
+<Base title={title} description={description} canonicalPath={canonical} modified={pageDates?.modified}>
+  <script type="application/ld+json" set:html={JSON.stringify(schema)} />
+
+  <section style="background-color: #102a43;">
+    <div class="mx-auto max-w-7xl px-6 py-14 md:py-20">
+      <nav aria-label="Fil d'Ariane" class="mb-8">
+        <ol class="flex flex-wrap items-center gap-2 text-sm" style="color: #9fb3c8;">
+          <li><a href="/" class="no-underline" style="color: #9fb3c8;">Accueil</a></li>
+          <li aria-hidden="true">/</li>
+          <li><a href="/services/" class="no-underline" style="color: #9fb3c8;">Nos services</a></li>
+          <li aria-hidden="true">/</li>
+          <li style="color: #f5c04a;" class="font-medium">Décret tertiaire</li>
+        </ol>
+      </nav>
+      <h1 class="text-3xl md:text-4xl lg:text-5xl font-bold leading-tight max-w-4xl" style="color: #ffffff;">{h1}</h1>
+      {pageDates && (
+        <p class="text-sm mt-4" style="color: #9fb3c8;">Mis à jour le <time datetime={pageDates.modified}>{formatDateFr(pageDates.modified)}</time> · Oteria Conseil, mandataire CEE</p>
+      )}
+      <p class="mt-6 text-lg leading-relaxed max-w-3xl" style="color: #d9e2ec;">Un <strong>accompagnement décret tertiaire</strong> ne se limite pas à la déclaration annuelle : l'objectif est de réduire la consommation, ce qui suppose des travaux. Voici les règles en vigueur et la façon dont les certificats d'économies d'énergie (CEE) financent une partie de la trajectoire.</p>
+      <div class="mt-8">
+        <a href="/diagnostic-gratuit/" class="inline-flex items-center rounded-md px-6 py-3 text-sm font-semibold no-underline" style="background-color: #d4a024; color: #102a43;">Faire étudier mon projet</a>
+      </div>
+    </div>
+  </section>
+
+  <article class="expertise-content">
+    <div class="mx-auto max-w-3xl px-6 py-14 md:py-20">
+
+      <div class="expertise-highlight">
+        <p><strong>L'essentiel :</strong> le décret tertiaire concerne les surfaces d'activité tertiaire d'au moins 1 000 m². Leurs occupants doivent réduire leur consommation d'énergie finale de 40 % d'ici 2030 par rapport à une année de référence, ou atteindre une valeur absolue fixée pour leur activité. Les consommations se déclarent chaque année sur OPERAT, au plus tard le 30 septembre.</p>
+      </div>
+
+      <h2>Qui est concerné par le décret tertiaire ?</h2>
+
+      <p>Le décret tertiaire, aussi appelé dispositif Éco Énergie Tertiaire, vise les bâtiments existants qui hébergent des activités tertiaires sur une surface de plancher supérieure ou égale à 1 000 m². Il couvre trois configurations :</p>
+
+      <ul>
+        <li>un bâtiment entièrement tertiaire d'au moins 1 000 m² ;</li>
+        <li>les parties d'un bâtiment à usage mixte dont les surfaces tertiaires cumulées atteignent ce seuil ;</li>
+        <li>un ensemble de bâtiments sur une même unité foncière ou un même site, avec le même cumul.</li>
+      </ul>
+
+      <p>Sur un site industriel ou agricole, les surfaces non tertiaires liées à l'activité tertiaire sont prises en compte pour apprécier le dépassement du seuil. Chaque périmètre soumis à l'obligation s'appelle une entité fonctionnelle assujettie (EFA). Le texte exempte certains bâtiments, comme ceux destinés au culte ou les constructions provisoires.</p>
+
+      <h3>Le cas des sites industriels, logistiques et agricoles</h3>
+
+      <p>Un site de production peut relever du décret dès lors qu'il abrite des bureaux, un laboratoire ou un showroom : tout dépend du cumul des surfaces tertiaires sur le site. Pour les travaux, le ministère apporte une précision : pour des bureaux implantés sur un site industriel, ce sont les fiches CEE du secteur tertiaire qui s'appliquent, et non les fiches industrielles. Un même chantier peut donc mobiliser des fiches tertiaires pour les bureaux et des fiches industrielles pour les ateliers.</p>
+
+      <p>Propriétaires et locataires portent tous deux l'obligation. Ils définissent ensemble les actions, puis chacun met en œuvre les moyens qui relèvent de sa responsabilité, souvent précisés dans le bail.</p>
+
+      <h3>Propriétaire et locataire : qui finance quoi ?</h3>
+
+      <p>Le partage suit les responsabilités. Le locataire agit en général sur l'exploitation, les réglages et le comportement des occupants ; le propriétaire sur l'enveloppe et les gros équipements. Le bail peut prévoir une autre répartition. Pour les CEE, la prime revient au bénéficiaire de l'opération, celui qui fait réaliser les travaux. Il est donc préférable de décider, avant les devis, qui porte chaque action, pour que la prime revienne à celui qui paie.</p>
+
+      <h2>Les objectifs du décret tertiaire : −40 % en 2030, en valeur relative ou absolue</h2>
+
+      <p>Chaque EFA doit atteindre l'un des deux objectifs suivants ; un seul suffit pour être en conformité.</p>
+
+      <ul>
+        <li><strong>Valeur relative :</strong> une consommation d'énergie finale réduite de 40 % d'ici 2030, de 50 % d'ici 2040 et de 60 % d'ici 2050 par rapport à l'année de référence.</li>
+        <li><strong>Valeur absolue :</strong> un niveau de consommation fixé selon la consommation des bâtiments neufs de la même catégorie d'activité, exprimé en kWh par m² et par an.</li>
+      </ul>
+
+      <p>OPERAT calcule automatiquement les deux objectifs. La valeur absolue avantage les bâtiments déjà performants ; la valeur relative convient mieux à un bâtiment qui partait de loin. L'administration contrôlera l'atteinte des objectifs au plus tard les 31 décembre 2031, 2041 et 2051, sur la base de la dernière attestation numérique annuelle.</p>
+
+      <h2>Bien choisir l'année de référence</h2>
+
+      <p>L'année de référence se situe entre 2010 et 2019, ou correspond à la première année pleine d'exploitation déclarée sur OPERAT. Elle couvre 12 mois consécutifs et doit être justifiée par des factures ou un moyen équivalent.</p>
+
+      <p>Ce choix a des conséquences importantes : plus l'année retenue consommait, plus l'effort de 40 % porte sur une base élevée. En l'absence de choix avant le 30 septembre 2027, la référence devient la première année pleine d'exploitation remontée sur OPERAT. Pour un bâtiment déjà rénové, cette référence par défaut peut se révéler pénalisante.</p>
+
+      <p>Autre point de vigilance : en cas de nouveau bail ou d'acquisition, le nouvel occupant ne conserve la référence de son prédécesseur que s'il déclare les identifiants OPERAT des entités auxquelles il succède. À défaut, l'année de référence ne peut pas être antérieure à son arrivée.</p>
+
+      <h2>Déclarer les consommations sur OPERAT</h2>
+
+      <p>OPERAT, la plateforme de l'Agence de la transition écologique, recueille les déclarations. Les données de l'année précédente doivent être transmises chaque année au plus tard le 30 septembre. Chaque déclaration comprend les activités exercées, la surface, les consommations par type d'énergie et, le cas échéant, l'année de référence et les indicateurs d'intensité d'usage.</p>
+
+      <p>La plateforme génère une attestation numérique annuelle et une notation Éco Énergie Tertiaire. Sa publication, par affichage ou par un autre moyen, restait facultative jusqu'au 1er juillet 2026. L'évaluation issue de la dernière attestation s'annexe aussi aux compromis de vente et aux baux.</p>
+
+      <p>Deux leviers sont souvent méconnus. Les propriétaires peuvent mutualiser leurs résultats sur tout ou partie de leur patrimoine en formant un « groupe de structures » dans OPERAT. La consommation liée à la recharge des véhicules électriques et hybrides rechargeables peut en outre être déduite.</p>
+
+      <h3>Les erreurs de déclaration à éviter</h3>
+
+      <ul>
+        <li>laisser passer le 30 septembre 2027 sans choisir d'année de référence ;</li>
+        <li>découper le site en entités qui ne correspondent ni aux baux ni aux compteurs ;</li>
+        <li>déclarer une consommation globale sans la répartir, par exemple au prorata de la surface tertiaire ;</li>
+        <li>oublier les indicateurs d'intensité d'usage, qui servent à moduler l'objectif selon le volume d'activité ;</li>
+        <li>reprendre un bail sans récupérer les identifiants OPERAT du prédécesseur.</li>
+      </ul>
+
+      <h2>Plan d'actions : quels travaux engager, avec quelles fiches CEE</h2>
+
+      <p>Un plan d'actions est la liste chiffrée des travaux et des réglages prévus, avec leur échéance et leur responsable. Le décret liste les leviers attendus : performance énergétique du bâtiment, équipements performants avec dispositifs de contrôle et de gestion active, exploitation des équipements, adaptation des locaux et comportement des occupants. La plupart des travaux correspondants ont une fiche CEE du secteur tertiaire :</p>
+
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr><th>Levier</th><th>Exemple de travaux</th><th>Fiche CEE</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Pilotage</td><td>GTB de classe A ou B</td><td>BAT-TH-116</td></tr>
+            <tr><td>Enveloppe</td><td>Isolation de combles ou de toitures</td><td>BAT-EN-101</td></tr>
+            <tr><td>Production de chaleur</td><td>Pompe à chaleur air/eau</td><td>BAT-TH-163</td></tr>
+            <tr><td>Ventilation</td><td>Ventilation double flux</td><td>BAT-TH-126</td></tr>
+            <tr><td>Grands volumes</td><td>Déstratification d'air</td><td>BAT-TH-142</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>Les codes ci-dessus figurent au catalogue des fiches publié par le ministère. Notre page <a href="/dispositifs/fiches-cee/tertiaire/">fiches CEE du secteur tertiaire</a> regroupe leurs conditions et les autres fiches. Une prime ne s'obtient que si le cadre CEE précède l'acceptation du devis.</p>
+
+      <h3>Dans quel ordre engager les travaux ?</h3>
+
+      <p>Le pilotage vient souvent en premier. Une GTB coûte moins cher qu'une rénovation d'enveloppe, et elle fournit les données qui permettent de cibler la suite. Viennent après lui les équipements, comme le remplacement d'une chaudière par une pompe à chaleur, puis l'enveloppe. Cet ordre n'a rien d'obligatoire : un toit à refaire ou une chaudière en fin de vie peut l'inverser. Dans tous les cas, chaque action doit être chiffrée, en kWh économisés pour la trajectoire et en kWh  cumac pour la prime.</p>
+
+      <h3>Exemple chiffré : une trajectoire −40 % sur 2 500 m² de bureaux</h3>
+
+      <p>Exemple : des bureaux de 2 500 m² en zone climatique H1, dont la consommation de l'année de référence 2015 s'élevait à 600 000 kWh, soit 240 kWh/m² par an.</p>
+
+      <ul>
+        <li>Objectif 2030 : 360 000 kWh par an, soit 144 kWh/m² ;</li>
+        <li>économie à trouver : 240 000 kWh par an ;</li>
+        <li>premier levier étudié : une GTB de classe B pilotant chauffage, climatisation, éclairage et auxiliaires.</li>
+      </ul>
+
+      <p>La fiche BAT-TH-116 attribue aux bureaux, en classe B, 435 kWh  cumac/m² pour ces quatre usages. Ce projet génère donc (240 + 97 + 90 + 8) × 1,1 × 2 500 = <strong>1 196 250 kWh  cumac</strong>. Un kWh  cumac cumule et actualise les économies sur la durée de vie de l'équipement : il ne se compare donc pas aux kWh annuels de la trajectoire. Notre page <a href="/dispositifs/kwh-cumac/">kWh  cumac</a> explique la conversion.</p>
+
+      <h2>Modulation des objectifs : l'effet des CEE sur le calcul</h2>
+
+      <p>Les objectifs peuvent être modulés pour contraintes techniques, architecturales ou patrimoniales, pour un changement d'activité ou de volume d'activité, ou pour un coût manifestement disproportionné. OPERAT applique automatiquement la modulation liée au seul volume d'activité ; les autres exigent un dossier technique.</p>
+
+      <p>La disproportion se prouve par un calcul : le temps de retour brut d'un levier, déduction faite des aides financières perceptibles, doit être supérieur à :</p>
+
+      <ul>
+        <li>30 ans pour les travaux sur l'enveloppe ;</li>
+        <li>15 ans pour le renouvellement des équipements énergétiques ;</li>
+        <li>10 ans pour les systèmes d'optimisation et d'exploitation, comme une GTB.</li>
+      </ul>
+
+      <p>La prime CEE compte comme une aide perceptible : elle raccourcit le temps de retour et peut donc rendre une modulation impossible à justifier. Il faut en tenir compte avant de monter le dossier technique. Les modulations de la décennie 2020 se déclarent au plus tard le 30 septembre 2027.</p>
+
+      <p>Le dossier technique réunit deux études énergétiques, l'une sur le bâtiment, l'autre sur les usages spécifiques, ainsi qu'une identification des actions sur les locaux et les comportements. Il se termine par un programme d'actions qui mobilise tous les leviers. Comme il doit pouvoir être fourni rapidement à la demande de la préfecture, il est préférable de le préparer en même temps que le plan de travaux.</p>
+
+      <h2>Les sanctions prévues par le décret tertiaire</h2>
+
+      <p>Une mise en demeure est l'injonction écrite du préfet de se conformer à l'obligation dans un délai fixé. La procédure se déroule par étapes. En cas d'objectif non atteint sans justification, le préfet peut mettre en demeure d'établir un programme d'actions. Sans programme dans un délai de 6 mois, il peut adresser une mise en demeure individuelle au propriétaire et au preneur, avec un délai de 3 mois.</p>
+
+      <p>Si ces mises en demeure restent sans effet, l'État les publie sur un site internet de ses services. Le préfet peut enfin prononcer une amende administrative au plus égale à 1 500 € pour une personne physique et 7 500 € pour une personne morale. Son montant dépend de la gravité des manquements.</p>
+
+      <h2>Comment Oteria Conseil vous aide à tenir la trajectoire du décret tertiaire</h2>
+
+      <p>Oteria Conseil est mandataire CEE. Notre rôle consiste à relier votre obligation à des travaux finançables, puis à les faire réaliser par des installateurs partenaires choisis pour la qualité de leur travail. Nous n'installons rien nous-mêmes, et cet accompagnement est gratuit pour vous.</p>
+
+      <ol>
+        <li><strong>Périmètre et référence :</strong> identification des EFA, cumul des surfaces, choix argumenté de l'année de référence.</li>
+        <li><strong>Plan d'actions chiffré :</strong> économie à trouver, travaux candidats, fiche CEE correspondante et volume de kWh  cumac de chaque action.</li>
+        <li><strong>Mise en relation :</strong> installateurs partenaires sélectionnés, devis comparables, cadre CEE signé avant toute acceptation de devis.</li>
+        <li><strong>Dossier sécurisé :</strong> vérification des pièces, conformité aux fiches, suivi jusqu'à la délivrance des certificats.</li>
+      </ol>
+
+          <p>Les consommations déclarées sur OPERAT engagent votre entreprise : nous les contrôlons avec la même exigence que nos dossiers CEE.</p>
+
+      <p>Si votre site dispose aussi de systèmes de chauffage ou de climatisation puissants, l'obligation de GTB s'ajoute : voir notre page <a href="/services/decret-bacs/">décret BACS</a>. Pour une approche par activité, consultez notre page <a href="/secteurs/tertiaire/">secteur tertiaire</a>, ou revenez à <a href="/services/">tous nos services</a>. Si vous envisagez de produire une partie de votre électricité, lisez notre page sur le <a href="/services/photovoltaique/">photovoltaïque en entreprise</a>.</p>
+
+      <h2>Questions fréquentes sur le décret tertiaire</h2>
+
+      <FaqAccordion items={faq} />
+
+      <h2>Décret tertiaire : les points à retenir</h2>
+
+      <p>Le décret tertiaire fixe un cap de −40 % en 2030, mais c'est le choix de l'année de référence, la qualité des déclarations OPERAT et l'ordre des travaux qui font la différence. Dans le cadre de notre <strong>accompagnement décret tertiaire</strong>, nous chiffrons chaque action en kWh économisés et en kWh  cumac, pour que les CEE financent une partie de la trajectoire. Envoyez-nous vos surfaces et vos consommations : nous vous dirons où vous en êtes et par quels travaux commencer.</p>
+
+      <div class="rounded-lg p-8 mt-10 text-center" style="background-color: #f0f4f8;">
+        <p class="text-xl font-bold text-navy-900 mb-3">Où en est votre trajectoire −40 % ?</p>
+        <p class="text-navy-600 mb-6">Étude gratuite : périmètre, année de référence, plan d'actions et CEE mobilisables.</p>
+        <a href="/diagnostic-gratuit/" class="inline-flex items-center justify-center rounded-md px-8 py-4 text-base font-semibold no-underline" style="background-color: #d4a024; color: #102a43;">Faire étudier mon projet</a>
+      </div>
+
+      <p class="text-sm mt-10">Sources :</p>
+      <ul class="text-sm">
+        <li><a href="https://entreprendre.service-public.gouv.fr/vosdroits/F38065" target="_blank" rel="noopener noreferrer">Service Public Entreprendre, réduction de la consommation d'énergie dans les bâtiments à usage tertiaire</a></li>
+        <li><a href="https://www.ecologie.gouv.fr/sites/default/files/documents/Catalogue%20fiches%20version%20actualis%C3%A9e%2084%C3%A8me%20arr%C3%AAt%C3%A9.pdf" target="_blank" rel="noopener noreferrer">catalogue des fiches d'opérations standardisées, ministère de la Transition écologique</a></li>
+        <li><a href="https://www.ecologie.gouv.fr/sites/default/files/documents/BAT-TH-116%20vA62-6%20%C3%A0%20compter%20du%2001-01-2025_1.pdf" target="_blank" rel="noopener noreferrer">fiche CEE BAT-TH-116</a></li>
+      </ul>
+    </div>
+  </article>
+</Base>

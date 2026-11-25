@@ -1,0 +1,164 @@
+---
+/**
+ * Encart « jusqu'à 100 % de financement possible pour cette opération ».
+ * Conditions commerciales constatées par Oteria Conseil (pas des règles de fiche CEE) :
+ * - isolation : tertiaire, résidentiel collectif, résidentiel individuel ;
+ * - déstratificateur : bâtiments industriels uniquement (hors entrepôts logistiques),
+ *   chauffage convectif ET puissance de chauffage d'au moins 500 kW.
+ * Formulation : « jusqu'à 100 % », jamais « gratuit » ni « 0 € ».
+ *
+ * Visible (fond marine, étiquette dorée en flèche) mais nuancé : un seul aplat doré (le chiffre),
+ * l'appel à l'action est un lien texte, les réserves sont lisibles.
+ */
+interface Props {
+  variant: "isolation" | "destratificateur";
+  /** Version resserrée (titre h3), pour une section qui a déjà son h2. */
+  compact?: boolean;
+}
+const { variant, compact = false } = Astro.props;
+const Heading = compact ? "h3" : "h2";
+const content = {
+  isolation: {
+    ref: "Fiches BAT-EN et BAR-EN",
+    title: "Isolation : un financement intégral possible dans trois cas",
+    items: [
+      { name: "Tertiaire", detail: "bureaux, commerces, enseignement, santé" },
+      { name: "Résidentiel collectif", detail: "copropriétés, immeubles de logements" },
+      { name: "Résidentiel individuel", detail: "maisons individuelles" },
+    ],
+    note: "Hors isolation des murs par l'extérieur.",
+    conditions: "Le montant dépend du chantier (surface isolée, zone climatique, cours des CEE) ; Oteria Conseil le vérifie gratuitement avant la signature du devis.",
+  },
+  destratificateur: {
+    ref: "Fiche IND-BA-110, bâtiments industriels",
+    title: "Déstratificateur industriel : un financement intégral possible à deux conditions",
+    items: [
+      { name: "Un chauffage convectif", detail: "aérothermes, générateurs d'air chaud" },
+      { name: "Une puissance de chauffage d'au moins 500 kW", detail: "" },
+    ],
+    note: "Hors entrepôts logistiques, locaux de stockage et bâtiments tertiaires.",
+    conditions: "Le montant dépend du chantier (puissance de chauffage, zone climatique, cours des CEE) ; Oteria Conseil le vérifie gratuitement avant la signature du devis.",
+  },
+}[variant];
+---
+<aside class:list={["f100", { "f100--compact": compact }]} aria-labelledby={`f100-${variant}`}>
+  <p class="f100-figure">
+    <span class="f100-figure__pre">Jusqu'à</span>
+    <span class="f100-figure__num">100&nbsp;%</span>
+    <span class="f100-figure__post">de financement possible pour cette opération</span>
+  </p>
+
+  <div class="f100-main">
+    <p class="f100-ref">{content.ref}</p>
+    <Heading class="f100-title" id={`f100-${variant}`}>{content.title}</Heading>
+    <ol class="f100-list">
+      {content.items.map((item, i) => (
+        <li>
+          <span class="f100-list__num" aria-hidden="true">{String(i + 1).padStart(2, "0")}</span>
+          <span><strong>{item.name}</strong>{item.detail && <span class="f100-list__detail"> · {item.detail}</span>}</span>
+        </li>
+      ))}
+    </ol>
+    {content.note && <p class="f100-note">{content.note}</p>}
+    <p class="f100-conditions">{content.conditions}</p>
+    <a class="f100-link" href="/diagnostic-gratuit/">Faire étudier mon projet<span aria-hidden="true"> →</span></a>
+  </div>
+</aside>
+
+<style>
+  .f100 {
+    display: grid;
+    grid-template-columns: 1fr;
+    background-color: #102a43;
+    border: 1px solid #243b53;
+    color: #d9e2ec;
+    margin: 0 0 2.5rem;
+  }
+  .f100--compact { margin: 1.5rem 0; }
+
+  /* Le chiffre : étiquette dorée en flèche (classe d'étiquette énergie), seul aplat de couleur */
+  .f100 .f100-figure {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    column-gap: 0.4rem;
+    width: fit-content;
+    max-width: calc(100% - 1rem);
+    margin: 1rem 0 0;
+    padding: 0.6rem 2.25rem 0.6rem 1.25rem;
+    background-color: #d4a024;
+    color: #0a1929;
+    clip-path: polygon(0 0, calc(100% - 1.1rem) 0, 100% 50%, calc(100% - 1.1rem) 100%, 0 100%);
+    font-family: var(--font-heading, inherit);
+    font-variant-numeric: tabular-nums;
+    line-height: 1.15;
+  }
+  .f100-figure__pre { font-size: 0.875rem; font-weight: 500; }
+  .f100-figure__num { font-size: 1.625rem; font-weight: 700; letter-spacing: -0.01em; }
+  .f100-figure__post { font-size: 0.8125rem; font-weight: 500; flex-basis: 100%; }
+
+  .f100-main { padding: 1rem 1.25rem 1.5rem; min-width: 0; }
+  .f100 .f100-ref { font-size: 0.8125rem; color: #9fb3c8; margin: 0 0 0.3rem; }
+  .f100 .f100-title {
+    color: #ffffff;
+    font-family: var(--font-heading, inherit);
+    font-size: 1.125rem;
+    font-weight: 700;
+    line-height: 1.3;
+    text-wrap: balance;
+    margin: 0 0 0.75rem;
+    padding: 0;
+    border: 0;
+  }
+  .f100 .f100-title::after { display: none; }
+
+  .f100 .f100-list { list-style: none; margin: 0 0 0.9rem; padding: 0; border-top: 1px solid #334e68; }
+  .f100 .f100-list li {
+    display: grid;
+    grid-template-columns: 2rem 1fr;
+    gap: 0.5rem;
+    align-items: baseline;
+    padding: 0.55rem 0;
+    margin: 0;
+    border-bottom: 1px solid #334e68;
+    font-size: 0.9375rem;
+    line-height: 1.45;
+  }
+  .f100 .f100-list li::before { content: none; }
+  .f100-list__num { font-family: var(--font-heading, inherit); font-weight: 700; color: #f5c04a; font-variant-numeric: tabular-nums; }
+  .f100 .f100-list strong { color: #ffffff; font-weight: 600; }
+  .f100-list__detail { color: #bcccdc; }
+
+  .f100 .f100-note { color: #ffffff; font-size: 0.875rem; font-weight: 500; margin: 0 0 0.35rem; }
+  .f100 .f100-conditions { color: #9fb3c8; font-size: 0.8125rem; line-height: 1.55; margin: 0 0 0.9rem; }
+  .f100 .f100-link {
+    color: #ffffff;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    text-decoration: underline;
+    text-decoration-color: #d4a024;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 5px;
+  }
+  .f100 .f100-link:hover,
+  .f100 .f100-link:focus-visible { color: #f5c04a; }
+  .f100 .f100-link:focus-visible { outline: 2px solid #f5c04a; outline-offset: 3px; }
+
+  @media (min-width: 768px) {
+    .f100 { grid-template-columns: 12.5rem 1fr; }
+    .f100 .f100-figure {
+      display: block;
+      width: auto;
+      max-width: none;
+      margin: 1.5rem 0 auto;
+      padding: 1.1rem 2.25rem 1.1rem 1.25rem;
+    }
+    .f100 .f100-figure > span { display: block; }
+    .f100-figure__num { font-size: 2.5rem; margin: 0.15rem 0 0.25rem; }
+    .f100-main { padding: 1.5rem 1.75rem 1.75rem 1.5rem; }
+    .f100 .f100-title { font-size: 1.375rem; }
+    .f100--compact { grid-template-columns: 10.5rem 1fr; }
+    .f100--compact .f100-figure__num { font-size: 2rem; }
+    .f100--compact .f100-title { font-size: 1.125rem; }
+  }
+</style>

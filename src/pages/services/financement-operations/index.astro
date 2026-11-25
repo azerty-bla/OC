@@ -1,0 +1,255 @@
+---
+import "../../../styles/global.css";
+import Base from "../../../layouts/Base.astro";
+import FaqAccordion from "../../../components/FaqAccordion.astro";
+import Financement100 from "../../../components/Financement100.astro";
+import { getPageDates, formatDateFr } from "../../../lib/pageDates.mjs";
+
+const siteUrl = "https://oteria-conseil.fr";
+const canonical = "/services/financement-operations/";
+const title = "Financement CEE des travaux d'efficacité énergétique";
+const description = "Financement CEE d'un projet d'entreprise : calcul de la prime, moment du versement, TVA, cumul avec un prêt et plan de financement chiffré sur un exemple.";
+const h1 = "Financement CEE : Oteria Conseil construit le montage financier de vos travaux";
+const pageDates = getPageDates(canonical);
+
+const faq = [
+  {
+    question: "La prime CEE est-elle versée avant les travaux ?",
+    answer: "En règle générale, non. Le dossier se prépare avant la signature du devis, mais la prime est versée une fois les travaux réalisés et les pièces réunies. Elle peut aussi venir en déduction de la facture, selon l'offre signée avec l'obligé ou le délégataire.",
+  },
+  {
+    question: "Existe-t-il un préfinancement de la prime CEE ?",
+    answer: "Oui, mais du côté de l'installateur : certaines offres avancent la prime à l'installateur, qui peut alors la déduire directement de votre facture. Votre entreprise ne décaisse plus que le reste à charge. Sans cette déduction, prévoyez de financer le coût total des travaux, puis de percevoir la prime après le dépôt du dossier.",
+  },
+  {
+    question: "La prime CEE est-elle soumise à la TVA ?",
+    answer: "Selon le ministère, les sommes versées au bénéficiaire par un obligé sont des participations d'équipement ou des aides à l'achat non soumises à la TVA. Elles ne réduisent pas la base taxable des travaux, seulement le montant TTC à payer.",
+  },
+  {
+    question: "Peut-on cumuler la prime CEE avec un prêt ?",
+    answer: "Oui, un prêt bancaire ou un prêt public finance le reste à charge sans remettre en cause la prime. Pour les subventions publiques, vérifiez les règles de cumul de chaque aide avant de signer, et inscrivez-les dans le plan de financement.",
+  },
+  {
+    question: "Que vaut une prime CEE aujourd'hui ?",
+    answer: "La prime se calcule en multipliant le volume de MWh cumac de l'opération par le prix du MWh cumac. Ce prix évolue : notre baromètre suit les cours publiés. Le volume, lui, se calcule dès l'étude, à partir de la fiche applicable.",
+  },
+];
+
+const schema = [
+  { "@context": "https://schema.org", "@type": "WebPage", name: title, description, url: `${siteUrl}${canonical}`, ...(pageDates ? { datePublished: pageDates.published, dateModified: pageDates.modified } : {}) },
+  {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: h1,
+    description,
+    author: { "@type": "Organization", name: "Oteria Conseil", url: siteUrl },
+    publisher: { "@type": "Organization", name: "Oteria Conseil", url: siteUrl },
+    mainEntityOfPage: `${siteUrl}${canonical}`,
+    ...(pageDates ? { datePublished: pageDates.published, dateModified: pageDates.modified } : {}),
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Accueil", item: `${siteUrl}/` },
+      { "@type": "ListItem", position: 2, name: "Nos services", item: `${siteUrl}/services/` },
+      { "@type": "ListItem", position: 3, name: "Financement des opérations", item: `${siteUrl}${canonical}` },
+    ],
+  },
+  { "@context": "https://schema.org", "@type": "ProfessionalService", name: "Oteria Conseil", url: siteUrl, description: "Mandataire CEE : étude des projets, sélection d'installateurs partenaires et sécurisation des dossiers de certificats d'économies d'énergie", areaServed: "FR" },
+  { "@context": "https://schema.org", "@type": "FAQPage", mainEntity: faq.map((f) => ({ "@type": "Question", name: f.question, acceptedAnswer: { "@type": "Answer", text: f.answer } })) },
+];
+---
+
+<Base title={title} description={description} canonicalPath={canonical} modified={pageDates?.modified}>
+  <script type="application/ld+json" set:html={JSON.stringify(schema)} />
+
+  <section style="background-color: #102a43;">
+    <div class="mx-auto max-w-7xl px-6 py-14 md:py-20">
+      <nav aria-label="Fil d'Ariane" class="mb-8">
+        <ol class="flex flex-wrap items-center gap-2 text-sm" style="color: #9fb3c8;">
+          <li><a href="/" class="no-underline transition-colors" style="color: #9fb3c8;">Accueil</a></li>
+          <li aria-hidden="true" style="color: #627d98;">/</li>
+          <li><a href="/services/" class="no-underline transition-colors" style="color: #9fb3c8;">Nos services</a></li>
+          <li aria-hidden="true" style="color: #627d98;">/</li>
+          <li style="color: #f5c04a;" class="font-medium">Financement des opérations</li>
+        </ol>
+      </nav>
+      <h1 class="text-3xl md:text-4xl lg:text-5xl font-bold leading-tight max-w-4xl" style="color: #ffffff;">{h1}</h1>
+      {pageDates && (
+        <p class="text-sm mt-4" style="color: #9fb3c8;">Mis à jour le <time datetime={pageDates.modified}>{formatDateFr(pageDates.modified)}</time> · Oteria Conseil</p>
+      )}
+      <p class="mt-6 text-lg leading-relaxed max-w-3xl" style="color: #d9e2ec;">Oteria Conseil construit le montage financier de vos travaux d'économies d'énergie, avec le <strong>financement CEE</strong> comme premier levier d'aide. Nous calculons ce que rapporte la prime, le moment où elle est versée et ce qu'il reste à financer, puis nous complétons le plan avec votre trésorerie, un prêt ou une autre aide. Exemple chiffré à l'appui.</p>
+      <div class="mt-8">
+        <a href="/diagnostic-gratuit/" class="inline-flex items-center rounded-md px-6 py-3 text-sm font-semibold no-underline transition-colors" style="background-color: #d4a024; color: #102a43;">Faire étudier mon projet</a>
+      </div>
+    </div>
+  </section>
+
+  <article class="expertise-content">
+    <div class="mx-auto max-w-3xl px-6 py-14 md:py-20">
+
+      <h2>Un mandataire CEE au service de toute l'opération</h2>
+
+      <p>Oteria Conseil intervient comme <a href="/services/mandataire-cee/">mandataire CEE</a>, gratuitement pour votre entreprise. Une opération financée par les CEE réunit deux parties : le bénéficiaire et l'installateur qui réalise les travaux. Notre travail sécurise la prime pour l'une comme pour l'autre. Nous n'installons rien nous-mêmes.</p>
+
+      <h3>Pour vous, bénéficiaire des travaux</h3>
+      <ul>
+        <li>Nous étudions le projet, identifions la fiche applicable et calculons le volume de certificats.</li>
+        <li>Nous pouvons vous mettre en relation avec nos installateurs partenaires, choisis pour la qualité de leur travail.</li>
+        <li>Avant la signature du devis, nous vérifions que l'offre de prime est écrite. Nous pouvons aussi vous accompagner pour le financement du reste à charge.</li>
+      </ul>
+
+      <h3>Pour vous, installateur partenaire</h3>
+      <ul>
+        <li>Nous sécurisons le montage administratif complet du dossier.</li>
+        <li>Le dossier est sécurisé sur le terrain, avec un contrôle à distance sur 100 % des opérations.</li>
+        <li>Nous pouvons proposer des tarifs préférentiels chez des distributeurs partenaires, avec un paiement des CEE anticipé pour alléger votre trésorerie.</li>
+      </ul>
+
+      <p>Nous appliquons la même méthode aux obligations réglementaires, comme le <a href="/services/decret-bacs/">décret BACS</a> pour la GTB. Chaque montant que nous annonçons repose sur la fiche en vigueur et sur un calcul que nous vous montrons : c'est notre façon de travailler avec rigueur. Retrouvez l'ensemble de <a href="/services/">nos services</a>.</p>
+
+      <div class="expertise-highlight">
+        <p><strong>En bref :</strong> la prime CEE correspond à un volume d'économies d'énergie, exprimé en MWh cumac, multiplié par un prix. Elle se prépare avant la signature du devis et se perçoit après les travaux. Le reste à charge se finance par la trésorerie, un prêt ou une autre aide, selon les règles de cumul.</p>
+      </div>
+
+      <h2>Deux exemples de travaux que la prime CEE peut financer en totalité</h2>
+
+      <p>Sur les dossiers qu'Oteria Conseil monte, la prime CEE finance en général une partie de l'investissement. Dans certains cas, nous constatons qu'elle peut aller jusqu'à 100 % du coût des travaux. En voici deux exemples : l'<a href="/expertises/isolation-thermique/">isolation thermique</a> et le <a href="/expertises/destratificateur/industrie/">déstratificateur en bâtiment industriel</a>.</p>
+
+      <Financement100 variant="isolation" compact />
+      <Financement100 variant="destratificateur" compact />
+
+      <h2>Les trois sources de financement d'une opération d'économies d'énergie</h2>
+
+      <p>Une opération d'économies d'énergie désigne des travaux ou un équipement qui réduisent la consommation d'un bâtiment ou d'un procédé : isolation, pompe à chaleur, gestion technique, récupération de chaleur. Son plan de financement combine en général trois sources.</p>
+
+      <ul>
+        <li><strong>La prime CEE :</strong> versée par un fournisseur d'énergie soumis à une obligation d'économies (l'obligé) ou par un délégataire, en échange des certificats générés par vos travaux.</li>
+        <li><strong>Les fonds propres ou un prêt :</strong> ils couvrent le reste à charge et l'avance de trésorerie tant que la prime n'est pas versée.</li>
+        <li><strong>Les autres aides :</strong> subventions publiques ou régionales, lorsque le projet y est éligible et que leurs règles de cumul le permettent.</li>
+      </ul>
+
+      <p>Le dispositif des CEE est entré dans sa 6e période le 1er janvier 2026. Pour l'entreprise, le principe ne change pas : les économies d'énergie générées par les travaux ont une valeur, et cette valeur finance une partie de l'investissement. Avant toute signature, il faut donc vérifier qu'une fiche d'opération standardisée correspond au projet.</p>
+
+      <h2>Comment se calcule la prime CEE : volume et prix du MWh cumac</h2>
+
+      <p>La valorisation des CEE repose sur une formule simple : <strong>prime = volume en MWh cumac × prix du MWh cumac</strong>. Le volume vient de la fiche d'opération standardisée : un forfait par mètre carré, par équipement ou par puissance, corrigé par des coefficients (zone climatique, secteur d'activité). Le kWh cumac correspond à des kWh d'énergie finale économisés, cumulés sur la durée de vie de l'équipement et actualisés. Notre page sur le <a href="/dispositifs/kwh-cumac/">kWh cumac</a> détaille cette unité.</p>
+
+      <p>Le prix, lui, se négocie au moment de contractualiser avec l'obligé ou le délégataire. Il suit le marché des certificats et varie dans le temps. Nous ne publions donc pas de montant au cours du jour sur cette page : consultez notre <a href="/dispositifs/barometre-prix-cee/">baromètre du prix des CEE</a> pour les tendances récentes.</p>
+
+      <p>Il en découle deux conséquences pratiques :</p>
+
+      <ul>
+        <li>Le volume se calcule de façon certaine dès l'étude, à partir des caractéristiques réelles du projet.</li>
+        <li>Le montant en euros n'est connu qu'une fois le prix fixé par écrit, avant l'engagement des travaux.</li>
+      </ul>
+
+      <p>Pour un premier ordre de grandeur, notre outil de <a href="/dispositifs/calcul-prime/">calcul de la prime CEE</a> applique les forfaits des fiches les plus courantes.</p>
+
+      <h2>Quand la prime CEE est-elle versée ? Les étapes et leur effet sur la trésorerie</h2>
+
+      <p>La trésorerie est l'aspect du projet que les entreprises sous-estiment le plus : la prime arrive après les travaux, alors que les acomptes de l'installateur sont dus avant. Voici la chronologie type d'un dossier :</p>
+
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr><th>Étape</th><th>Ce qui se passe</th><th>Effet sur la trésorerie</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>1. Étude</td><td>Choix de la fiche, calcul du volume, offre de prime écrite</td><td>Aucun décaissement</td></tr>
+            <tr><td>2. Engagement</td><td>Acceptation du devis ou du bon de commande</td><td>Acompte éventuel à l'installateur</td></tr>
+            <tr><td>3. Travaux</td><td>Réalisation, puis facture avec les mentions exigées</td><td>Paiement du solde des travaux</td></tr>
+            <tr><td>4. Dossier</td><td>Réunion des pièces, contrôle de conformité, dépôt</td><td>Aucun mouvement</td></tr>
+            <tr><td>5. Versement</td><td>Paiement de la prime ou déduction déjà opérée sur facture</td><td>Encaissement de la prime</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>La date d'engagement correspond à la date d'acceptation du devis ou du bon de commande par le bénéficiaire. La preuve du rôle actif et incitatif de l'obligé doit être antérieure ou égale à cette date. Autrement dit, l'offre de prime doit exister avant votre signature. Depuis le 1er janvier 2018, le demandeur justifie cette date en archivant le contrat accepté par le bénéficiaire.</p>
+
+      <p>Deux leviers permettent de limiter l'avance : une prime déduite directement de la facture, si l'offre le prévoit, et un échéancier d'acomptes négocié avec l'installateur. Oteria Conseil n'avance pas la prime ; nous vous aidons en revanche à organiser ce calendrier.</p>
+
+      <h2>Prime CEE et TVA : comment la faire apparaître sur la facture</h2>
+
+      <p>Le traitement fiscal de la prime soulève de nombreuses questions. La foire aux questions du ministère de la Transition écologique énonce deux règles utiles :</p>
+
+      <ul>
+        <li>Les sommes versées au bénéficiaire par un obligé s'analysent comme des participations d'équipement ou des aides à l'achat, non soumises à la TVA.</li>
+        <li>Une prime imputée sur la facture ne réduit pas la base taxable à la TVA des travaux. Elle diminue seulement le montant TTC que vous auriez dû payer.</li>
+      </ul>
+
+      <p>En pratique, la facture de l'installateur doit faire apparaître le montant total des travaux soumis à la TVA, puis la prime en déduction du TTC. Une facture qui retire la prime avant de calculer la TVA doit être corrigée. Pour l'enregistrement comptable de la prime, faites valider le traitement par votre expert-comptable.</p>
+
+      <h2>Cumuler la prime CEE avec un prêt ou une subvention</h2>
+
+      <p>Le cumul d'aides consiste à combiner, sur un même projet, la prime CEE avec un prêt ou une subvention, dans la limite des règles propres à chaque aide. La prime couvre rarement tout le projet : le reste à charge se finance par d'autres moyens.</p>
+
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr><th>Source</th><th>Rôle dans le plan</th><th>Point de vigilance</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Prime CEE</td><td>Réduit le coût net des travaux</td><td>Offre signée avant le devis</td></tr>
+            <tr><td>Prêt bancaire ou public</td><td>Finance le reste à charge et l'avance</td><td>Conditions propres à chaque prêteur</td></tr>
+            <tr><td>Subvention publique (agence nationale, région)</td><td>Réduit encore le reste à charge</td><td>Règles de cumul, ouverture du guichet, dépôt avant engagement</td></tr>
+            <tr><td>Contrat de performance énergétique</td><td>Engagement de résultat d'un prestataire</td><td>Montage contractuel lourd, à réserver aux gros projets</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>Le Fonds Chaleur soutient la chaleur renouvelable et la récupération de chaleur. Avant de l'inscrire dans votre plan, vérifiez sur le portail de l'agence de la transition écologique que le dépôt de nouvelles demandes est ouvert. Comme pour les CEE, une aide à l'investissement se demande en principe avant de signer le devis.</p>
+
+      <p>Le tiers-financement et le contrat de performance énergétique se rencontrent surtout dans le secteur public. Pour une entreprise privée, un prêt classique ou un crédit-bail sur l'équipement reste le montage le plus courant.</p>
+
+      <h2>Cinq erreurs de montage qui privent l'entreprise de sa prime</h2>
+
+      <ol>
+        <li><strong>Devis signé trop tôt :</strong> sans offre de prime antérieure à l'acceptation du devis, le dossier n'est pas recevable.</li>
+        <li><strong>Fiche arrivée à échéance :</strong> chaque fiche vaut pour une période d'engagement. La fiche GTB BAT-TH-116 s'applique aux opérations engagées avant le 1er janvier 2030.</li>
+        <li><strong>Facture incomplète :</strong> elle doit reprendre les mentions techniques exigées par la fiche (performances, marque, référence).</li>
+        <li><strong>Mauvais demandeur :</strong> le premier détenteur des CEE, donc le demandeur, répond des manquements au cadre réglementaire.</li>
+        <li><strong>Frais mal identifiés :</strong> un service payé en déduction de la prime doit être clairement séparé du montant de l'aide sur les documents.</li>
+      </ol>
+
+      <p>Toutes ces erreurs surviennent avant ou pendant les travaux. Une fois le devis signé ou la facture émise, il est souvent trop tard pour les corriger.</p>
+
+      <h2>Exemple chiffré : le plan de financement d'une GTB dans des bureaux</h2>
+
+      <p>Exemple : une entreprise installe une gestion technique du bâtiment (GTB) de classe B. Elle équipe, par exemple, 2 500 m² de bureaux situés en zone climatique H2. Le système pilote le chauffage et le refroidissement. L'opération relève de la fiche BAT-TH-116, applicable aux bâtiments tertiaires existants.</p>
+
+      <ul>
+        <li>Forfaits de la fiche pour des bureaux en classe B : 240 kWh cumac/m² pour le chauffage et 97 kWh cumac/m² pour le refroidissement, soit 337 kWh cumac/m².</li>
+        <li>Coefficient de la zone H2 : 0,9.</li>
+        <li>Volume : 337 × 0,9 × 2 500 = <strong>758 250 kWh cumac</strong>, soit 758,25 MWh cumac.</li>
+        <li>Prime : 758,25 MWh cumac × prix du MWh cumac fixé dans l'offre, avant la signature du devis.</li>
+        <li>Reste à charge : montant TTC du devis − prime, financé par la trésorerie ou un prêt.</li>
+      </ul>
+
+      <p>Ce calcul sert aussi de repère pour le contrôle : la foire aux questions du ministère prévoit une dérogation au contrôle sur site pour certains petits dossiers en patrimoine propre. Elle exige notamment que bénéficiaire et demandeur soient une seule et même personne, avec au plus 20 opérations et 5 GWh cumac par dossier. Avec 758 250 kWh cumac, l'opération de l'exemple reste sous ce seuil de volume ; les autres conditions de la dérogation sont à vérifier au cas par cas.</p>
+
+      <p>Chiffrer le volume avant tout montant en euros évite les mauvaises surprises : vous connaissez exactement la base sur laquelle se négocie la prime.</p>
+
+      <h2>Vos questions sur la prime CEE et la trésorerie</h2>
+
+      <FaqAccordion items={faq} />
+
+      <h2>Financement CEE : trois principes pour sécuriser la prime</h2>
+
+      <p>Un <strong>financement CEE</strong> bien monté repose sur trois principes : calculer le volume dès l'étude, signer l'offre de prime avant le devis, et prévoir la trésorerie jusqu'au versement. Le reste à charge se complète avec un prêt ou une aide dont le cumul a été vérifié. Envoyez-nous votre projet : nous chiffrons le volume de certificats et le plan de financement avant que vous ne signiez.</p>
+
+      <div class="rounded-lg p-8 mt-10 text-center" style="background-color: #f0f4f8;">
+        <p class="text-xl font-bold text-navy-900 mb-3">Un projet de travaux à financer ?</p>
+        <p class="text-navy-600 mb-6">Volume de MWh cumac, fiche applicable et calendrier de trésorerie, avant signature.</p>
+        <a href="/diagnostic-gratuit/" class="inline-flex items-center justify-center rounded-md px-8 py-4 text-base font-semibold no-underline transition-colors" style="background-color: #d4a024; color: #102a43;">Faire étudier mon projet</a>
+      </div>
+
+      <p class="text-sm mt-10">Sources :</p>
+      <ul class="text-sm">
+        <li><a href="https://www.ecologie.gouv.fr/politiques-publiques/questions-reponses-dispositif-cee" target="_blank" rel="noopener noreferrer">ministère de la Transition écologique, questions-réponses sur le dispositif des CEE</a></li>
+        <li><a href="https://www.ecologie.gouv.fr/sites/default/files/documents/BAT-TH-116%20vA62-6%20%C3%A0%20compter%20du%2001-01-2025_1.pdf" target="_blank" rel="noopener noreferrer">fiche d'opération standardisée BAT-TH-116</a></li>
+      </ul>
+    </div>
+  </article>
+</Base>

@@ -3,9 +3,11 @@ interface Props {
   title: string;
   description?: string;
   canonicalPath?: string;
+  modified?: string;
 }
 
-const { title, description, canonicalPath } = Astro.props;
+const { title, description, canonicalPath, modified } = Astro.props;
+const modifiedTime = modified ? String(modified).slice(0, 10) : undefined;
 const siteUrl = "https://oteria-conseil.fr";
 // Le title est écrit tel quel dans chaque page (pas de suffixe de marque auto : titres < 60 car.)
 const fullTitle = title;
@@ -30,6 +32,8 @@ const base = import.meta.env.BASE_URL; // "/OC/" en prod GitHub Pages, "/" en de
     <meta property="og:title" content={fullTitle} />
     {description && <meta property="og:description" content={description} />}
     <meta property="og:type" content="website" />
+    {modifiedTime && <meta property="article:modified_time" content={modifiedTime} />}
+    {modifiedTime && <meta property="og:updated_time" content={modifiedTime} />}
     <meta property="og:url" content={canonical} />
     <meta property="og:site_name" content="Oteria Conseil" />
     <meta property="og:image" content={`${siteUrl}/og-image.png`} />
@@ -53,11 +57,33 @@ const base = import.meta.env.BASE_URL; // "/OC/" en prod GitHub Pages, "/" en de
         </a>
 
         <!-- Desktop nav -->
-        <div class="hidden md:flex items-center gap-8 text-sm font-medium text-navy-700">
+        <div class="hidden lg:flex items-center gap-5 xl:gap-8 text-sm font-medium text-navy-700 whitespace-nowrap">
+          <!-- Services dropdown -->
+          <div class="relative" data-dropdown="services">
+            <button type="button" class="flex items-center gap-1 hover:text-gold-700 no-underline bg-transparent border-none cursor-pointer text-sm font-medium text-navy-700" aria-expanded="false" aria-haspopup="true">
+              Nos services
+              <svg class="w-4 h-4 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+            </button>
+            <div class="absolute top-full left-0 mt-2 w-72 rounded-lg shadow-xl border border-navy-100 bg-white opacity-0 invisible translate-y-2 transition-all duration-200 pointer-events-none z-50" data-dropdown-panel>
+              <div class="py-2">
+                <a href={`${base}services/mandataire-cee/`} class="block px-4 py-2.5 text-sm no-underline hover:bg-navy-50" style="color: #486581;">Mandataire CEE</a>
+                <a href={`${base}services/financement-operations/`} class="block px-4 py-2.5 text-sm no-underline hover:bg-navy-50" style="color: #486581;">Financement des opérations</a>
+                <a href={`${base}services/decret-tertiaire/`} class="block px-4 py-2.5 text-sm no-underline hover:bg-navy-50" style="color: #486581;">Accompagnement décret tertiaire</a>
+                <a href={`${base}services/decret-bacs/`} class="block px-4 py-2.5 text-sm no-underline hover:bg-navy-50" style="color: #486581;">Décret BACS</a>
+                <a href={`${base}services/loi-aper/`} class="block px-4 py-2.5 text-sm no-underline hover:bg-navy-50" style="color: #486581;">Loi APER</a>
+                <a href={`${base}services/loi-lom/`} class="block px-4 py-2.5 text-sm no-underline hover:bg-navy-50" style="color: #486581;">Loi LOM</a>
+                <a href={`${base}services/photovoltaique/`} class="block px-4 py-2.5 text-sm no-underline hover:bg-navy-50" style="color: #486581;">Photovoltaïque</a>
+                <a href={`${base}services/achat-energie-optimisation-factures/`} class="block px-4 py-2.5 text-sm no-underline hover:bg-navy-50" style="color: #486581;">Achat d'énergies et optimisation des factures</a>
+                <div class="border-t border-navy-100 my-1"></div>
+                <a href={`${base}services/`} class="block px-4 py-2.5 text-sm no-underline hover:bg-navy-50 font-semibold" style="color: #243b53;">Tous nos services</a>
+              </div>
+            </div>
+          </div>
+
           <!-- Expertises mega-menu -->
           <div class="relative" data-dropdown="expertises">
             <button type="button" class="flex items-center gap-1 hover:text-gold-700 no-underline bg-transparent border-none cursor-pointer text-sm font-medium text-navy-700" aria-expanded="false" aria-haspopup="true">
-              Expertises
+              Opérations CEE
               <svg class="w-4 h-4 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
             </button>
             <div class="absolute top-full left-0 mt-2 w-64 rounded-lg shadow-xl border border-navy-100 bg-white opacity-0 invisible translate-y-2 transition-all duration-200 pointer-events-none z-50" data-dropdown-panel>
@@ -71,7 +97,7 @@ const base = import.meta.env.BASE_URL; // "/OC/" en prod GitHub Pages, "/" en de
                 <a href={`${base}expertises/variateur-de-vitesse/`} class="block px-4 py-2.5 text-sm no-underline hover:bg-navy-50" style="color: #486581;">Variateur de vitesse</a>
                 <a href={`${base}expertises/vmc-double-flux/`} class="block px-4 py-2.5 text-sm no-underline hover:bg-navy-50" style="color: #486581;">VMC double flux</a>
                 <div class="border-t border-navy-100 my-1"></div>
-                <a href={`${base}expertises/`} class="block px-4 py-2.5 text-sm no-underline hover:bg-navy-50 font-semibold" style="color: #243b53;">Toutes nos expertises</a>
+                <a href={`${base}expertises/`} class="block px-4 py-2.5 text-sm no-underline hover:bg-navy-50 font-semibold" style="color: #243b53;">Toutes nos opérations CEE</a>
               </div>
             </div>
           </div>
@@ -79,7 +105,7 @@ const base = import.meta.env.BASE_URL; // "/OC/" en prod GitHub Pages, "/" en de
           <!-- Dispositifs CEE dropdown -->
           <div class="relative" data-dropdown="dispositifs">
             <button type="button" class="flex items-center gap-1 hover:text-gold-700 no-underline bg-transparent border-none cursor-pointer text-sm font-medium text-navy-700" aria-expanded="false" aria-haspopup="true">
-              Dispositifs CEE
+              Le dispositif CEE
               <svg class="w-4 h-4 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
             </button>
             <div class="absolute top-full left-0 mt-2 w-64 rounded-lg shadow-xl border border-navy-100 bg-white opacity-0 invisible translate-y-2 transition-all duration-200 pointer-events-none z-50" data-dropdown-panel>
@@ -123,7 +149,7 @@ const base = import.meta.env.BASE_URL; // "/OC/" en prod GitHub Pages, "/" en de
         <!-- Mobile burger button -->
         <button
           type="button"
-          class="md:hidden self-center relative w-10 h-10 flex items-center justify-center rounded-md border-none bg-transparent cursor-pointer z-[60]"
+          class="lg:hidden self-center relative w-10 h-10 flex items-center justify-center rounded-md border-none bg-transparent cursor-pointer z-[60]"
           id="burger-btn"
           aria-label="Ouvrir le menu"
           aria-expanded="false"
@@ -169,6 +195,33 @@ const base = import.meta.env.BASE_URL; // "/OC/" en prod GitHub Pages, "/" en de
 
       <!-- Mobile nav links -->
       <div class="flex flex-col px-6 gap-1 flex-1">
+        <!-- Services accordion -->
+        <div class="border-b" style="border-color: #334e68;">
+          <button
+            type="button"
+            class="w-full flex items-center justify-between py-4 border-none bg-transparent cursor-pointer text-left text-base font-medium"
+            style="color: #ffffff;"
+            data-accordion="services-mobile"
+            aria-expanded="false"
+          >
+            Nos services
+            <svg class="w-5 h-5 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+          </button>
+          <div class="overflow-hidden max-h-0 transition-[max-height] duration-300 ease-in-out" data-accordion-panel="services-mobile">
+            <div class="pb-4 pl-4 flex flex-col gap-3">
+              <a href={`${base}services/mandataire-cee/`} class="text-sm no-underline" style="color: #bcccdc;">Mandataire CEE</a>
+              <a href={`${base}services/financement-operations/`} class="text-sm no-underline" style="color: #bcccdc;">Financement des opérations</a>
+              <a href={`${base}services/decret-tertiaire/`} class="text-sm no-underline" style="color: #bcccdc;">Accompagnement décret tertiaire</a>
+              <a href={`${base}services/decret-bacs/`} class="text-sm no-underline" style="color: #bcccdc;">Décret BACS</a>
+              <a href={`${base}services/loi-aper/`} class="text-sm no-underline" style="color: #bcccdc;">Loi APER</a>
+              <a href={`${base}services/loi-lom/`} class="text-sm no-underline" style="color: #bcccdc;">Loi LOM</a>
+              <a href={`${base}services/photovoltaique/`} class="text-sm no-underline" style="color: #bcccdc;">Photovoltaïque</a>
+              <a href={`${base}services/achat-energie-optimisation-factures/`} class="text-sm no-underline" style="color: #bcccdc;">Achat d'énergies et optimisation des factures</a>
+              <a href={`${base}services/`} class="text-sm no-underline font-semibold" style="color: #f5c04a;">Tous nos services</a>
+            </div>
+          </div>
+        </div>
+
         <!-- Expertises accordion -->
         <div class="border-b" style="border-color: #334e68;">
           <button
@@ -178,7 +231,7 @@ const base = import.meta.env.BASE_URL; // "/OC/" en prod GitHub Pages, "/" en de
             data-accordion="expertises-mobile"
             aria-expanded="false"
           >
-            Expertises
+            Opérations CEE
             <svg class="w-5 h-5 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
           </button>
           <div class="overflow-hidden max-h-0 transition-[max-height] duration-300 ease-in-out" data-accordion-panel="expertises-mobile">
@@ -191,7 +244,7 @@ const base = import.meta.env.BASE_URL; // "/OC/" en prod GitHub Pages, "/" en de
               <a href={`${base}expertises/pompe-a-chaleur/`} class="text-sm no-underline" style="color: #bcccdc;">Pompe à chaleur</a>
               <a href={`${base}expertises/variateur-de-vitesse/`} class="text-sm no-underline" style="color: #bcccdc;">Variateur de vitesse</a>
               <a href={`${base}expertises/vmc-double-flux/`} class="text-sm no-underline" style="color: #bcccdc;">VMC double flux</a>
-              <a href={`${base}expertises/`} class="text-sm no-underline font-semibold" style="color: #f5c04a;">Toutes nos expertises</a>
+              <a href={`${base}expertises/`} class="text-sm no-underline font-semibold" style="color: #f5c04a;">Toutes nos opérations CEE</a>
             </div>
           </div>
         </div>
@@ -205,7 +258,7 @@ const base = import.meta.env.BASE_URL; // "/OC/" en prod GitHub Pages, "/" en de
             data-accordion="dispositifs-mobile"
             aria-expanded="false"
           >
-            Dispositifs CEE
+            Le dispositif CEE
             <svg class="w-5 h-5 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
           </button>
           <div class="overflow-hidden max-h-0 transition-[max-height] duration-300 ease-in-out" data-accordion-panel="dispositifs-mobile">
@@ -277,7 +330,7 @@ const base = import.meta.env.BASE_URL; // "/OC/" en prod GitHub Pages, "/" en de
             </p>
           </div>
           <div>
-            <p class="text-sm font-semibold uppercase tracking-wider mb-4" style="color: #ffffff;">Expertises</p>
+            <p class="text-sm font-semibold uppercase tracking-wider mb-4" style="color: #ffffff;">Opérations CEE</p>
             <ul class="space-y-2 text-sm">
               <li><a href={`${base}expertises/air-comprime/`} class="no-underline" style="color: #bcccdc;">Air comprimé</a></li>
               <li><a href={`${base}expertises/destratificateur/`} class="no-underline" style="color: #bcccdc;">Destratificateur</a></li>

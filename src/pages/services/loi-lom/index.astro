@@ -1,0 +1,221 @@
+---
+import "../../../styles/global.css";
+import Base from "../../../layouts/Base.astro";
+import FaqAccordion from "../../../components/FaqAccordion.astro";
+import { getPageDates, formatDateFr } from "../../../lib/pageDates.mjs";
+
+const siteUrl = "https://oteria-conseil.fr";
+const canonical = "/services/loi-lom/";
+const title = "Loi LOM et bornes de recharge : obligations des entreprises";
+const description = "Loi LOM et borne de recharge : parkings concernés, nombre de points, pré-équipement, puissance, fin du quota de flotte remplacé par une taxe, aides.";
+const h1 = "Loi LOM : ce que votre entreprise doit prévoir pour ses bornes de recharge et sa flotte";
+const pageDates = getPageDates(canonical);
+
+const faq = [
+  {
+    question: "Une PME doit-elle installer des bornes sur son parking existant ?",
+    answer: "Pour un bâtiment existant, l'obligation vise les parkings de plus de 20 emplacements. Le bâtiment doit en outre être possédé et occupé par une entreprise de plus de 250 salariés, dont le bilan ou le chiffre d'affaires dépasse les seuils fixés. En dessous, l'obligation d'équipement de l'existant ne s'applique pas ; les règles du neuf et des rénovations importantes restent à examiner.",
+  },
+  {
+    question: "Qu'est-ce que le pré-équipement d'une place de stationnement ?",
+    answer: "Une place pré-équipée reçoit les conduits destinés au passage des câbles et les dispositifs de sécurité nécessaires, afin qu'une borne puisse y être installée plus tard sans gros travaux. Le pré-équipement ne comprend pas la borne elle-même.",
+  },
+  {
+    question: "Le quota de véhicules propres existe-t-il encore pour les entreprises ?",
+    answer: "Non pour les voitures et utilitaires légers : le quota de l'article L. 224-10 du code de l'environnement a été supprimé par la loi de finances pour 2025. Il est remplacé par une taxe annuelle incitative, due par les entreprises dont la flotte atteint au moins 100 véhicules.",
+  },
+  {
+    question: "Existe-t-il une prime CEE pour une borne de recharge d'entreprise ?",
+    answer: "Nous n'avons pas trouvé de fiche d'opération standardisée pour une borne installée sur le parking privé d'une entreprise. La fiche TRA-EQ-114 finance l'achat ou la location de véhicules légers électriques neufs par une personne morale, pas la borne.",
+  },
+  {
+    question: "Qui peut installer une borne de recharge en entreprise ?",
+    answer: "Confiez l'installation à un installateur qualifié pour les infrastructures de recharge (IRVE). Après avoir étudié votre parking et votre installation électrique, nous vous mettons en relation avec des installateurs partenaires choisis pour la qualité de leur travail.",
+  },
+  {
+    question: "Que se passe-t-il si le réseau électrique ne suffit pas ?",
+    answer: "La fiche officielle prévoit que l'obligation peut être adaptée si des travaux importants d'adaptation du réseau électrique sont nécessaires. Ce cas doit être démontré par des devis ; il ne se présume pas.",
+  },
+];
+
+const schema = [
+  { "@context": "https://schema.org", "@type": "WebPage", name: title, description, url: `${siteUrl}${canonical}`, ...(pageDates ? { datePublished: pageDates.published, dateModified: pageDates.modified } : {}) },
+  {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: h1,
+    description,
+    author: { "@type": "Organization", name: "Oteria Conseil", url: siteUrl },
+    publisher: { "@type": "Organization", name: "Oteria Conseil", url: siteUrl },
+    mainEntityOfPage: `${siteUrl}${canonical}`,
+    ...(pageDates ? { datePublished: pageDates.published, dateModified: pageDates.modified } : {}),
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Accueil", item: `${siteUrl}/` },
+      { "@type": "ListItem", position: 2, name: "Nos services", item: `${siteUrl}/services/` },
+      { "@type": "ListItem", position: 3, name: "Loi LOM", item: `${siteUrl}${canonical}` },
+    ],
+  },
+  { "@context": "https://schema.org", "@type": "ProfessionalService", name: "Oteria Conseil", url: siteUrl, description: "Mandataire CEE : étude des projets, sélection d'installateurs partenaires et sécurisation des dossiers de certificats d'économies d'énergie", areaServed: "FR" },
+  { "@context": "https://schema.org", "@type": "FAQPage", mainEntity: faq.map((f) => ({ "@type": "Question", name: f.question, acceptedAnswer: { "@type": "Answer", text: f.answer } })) },
+];
+---
+
+<Base title={title} description={description} canonicalPath={canonical} modified={pageDates?.modified}>
+  <script type="application/ld+json" set:html={JSON.stringify(schema)} />
+
+  <section style="background-color: #102a43;">
+    <div class="mx-auto max-w-7xl px-6 py-14 md:py-20">
+      <nav aria-label="Fil d'Ariane" class="mb-8">
+        <ol class="flex flex-wrap items-center gap-2 text-sm" style="color: #9fb3c8;">
+          <li><a href="/" class="no-underline transition-colors" style="color: #9fb3c8;">Accueil</a></li>
+          <li aria-hidden="true" style="color: #627d98;">/</li>
+          <li><a href="/services/" class="no-underline transition-colors" style="color: #9fb3c8;">Nos services</a></li>
+          <li aria-hidden="true" style="color: #627d98;">/</li>
+          <li style="color: #f5c04a;" class="font-medium">Loi LOM</li>
+        </ol>
+      </nav>
+      <h1 class="text-3xl md:text-4xl lg:text-5xl font-bold leading-tight max-w-4xl" style="color: #ffffff;">{h1}</h1>
+      {pageDates && (
+        <p class="text-sm mt-4" style="color: #9fb3c8;">Mis à jour le <time datetime={pageDates.modified}>{formatDateFr(pageDates.modified)}</time> · Oteria Conseil</p>
+      )}
+      <p class="mt-6 text-lg leading-relaxed max-w-3xl" style="color: #d9e2ec;">Sur la <strong>loi LOM</strong> et les <strong>bornes de recharge</strong>, beaucoup de règles périmées circulent encore. Nous présentons ici ce qui s'applique réellement à votre entreprise pour ses parkings existants, ses constructions neuves et sa flotte. Nous détaillons aussi le calcul du nombre de points et de la puissance, puis ce qui peut être financé.</p>
+      <div class="mt-8">
+        <a href="/diagnostic-gratuit/" class="inline-flex items-center rounded-md px-6 py-3 text-sm font-semibold no-underline transition-colors" style="background-color: #d4a024; color: #102a43;">Faire étudier mon projet</a>
+      </div>
+    </div>
+  </section>
+
+  <article class="expertise-content">
+    <div class="mx-auto max-w-3xl px-6 py-14 md:py-20">
+
+      <div class="expertise-highlight">
+        <p><strong>En bref :</strong> depuis le 1er janvier 2025, les parkings de plus de 20 places des bâtiments non résidentiels existants doivent offrir des points de recharge, mais seulement pour les grandes entreprises. Le neuf et les rénovations importantes imposent un pré-équipement. Pour les flottes, le quota a été remplacé par une taxe annuelle.</p>
+      </div>
+
+      <h2>Ce que la loi LOM impose aux entreprises</h2>
+
+      <p>La loi d'orientation des mobilités, dite loi LOM, organise le déploiement de la recharge des véhicules électriques dans les bâtiments et le verdissement des flottes. Ses obligations relatives aux parkings figurent aujourd'hui dans le code de la construction et de l'habitation, aux articles L. 113-11 à L. 113-17. Celles qui portent sur les flottes ont depuis été profondément revues.</p>
+
+      <p>Le tableau ci-dessous permet de situer votre entreprise :</p>
+
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr><th>Votre situation</th><th>Obligation</th><th>Section</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Bâtiment non résidentiel existant, parking de plus de 20 places, grande entreprise propriétaire et occupante</td><td>Points de recharge installés</td><td>Parkings existants</td></tr>
+            <tr><td>Bâtiment neuf ou rénovation importante, parking d'au moins 10 places</td><td>Pré-équipement d'une partie des places et au moins une place équipée</td><td>Neuf et rénovations</td></tr>
+            <tr><td>Flotte d'au moins 100 véhicules légers</td><td>Taxe annuelle incitative si l'objectif de véhicules à faibles émissions n'est pas atteint</td><td>Flottes</td></tr>
+            <tr><td>Parking extérieur de plus de 1 500 m²</td><td>Ombrières photovoltaïques (loi APER, texte distinct)</td><td>Voir notre page dédiée</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>La dernière ligne relève d'un autre texte : la <a href="/services/loi-aper/">loi APER</a> impose la solarisation des parcs de stationnement extérieurs de plus de 1 500 m². Un même parking peut donc être soumis aux deux obligations, bornes et ombrières, et gagne à faire l'objet d'une seule étude.</p>
+
+      <h2>Parkings existants : quelles entreprises doivent installer des bornes depuis 2025</h2>
+
+      <p>Selon la fiche officielle d'Entreprendre Service Public, l'obligation d'installer des bornes concerne depuis le 1er janvier 2025 les bâtiments existants non résidentiels qui comportent plus de 20 emplacements de stationnement. Les bâtiments mixtes sont visés dès que plus de 20 places servent à un usage non résidentiel.</p>
+
+      <p>Le champ d'application est pourtant plus étroit qu'on ne le lit souvent. L'obligation s'applique uniquement aux parkings dépendant de bâtiments possédés et occupés par des entreprises :</p>
+
+      <ul>
+        <li>de plus de 250 salariés ;</li>
+        <li>et au bilan supérieur à 43 000 000 € et/ou au chiffre d'affaires supérieur à 50 000 000 €.</li>
+      </ul>
+
+      <p>Le parking doit alors disposer d'au moins un point de recharge, placé sur un emplacement accessible aux personnes à mobilité réduite (PMR), puis d'un point de recharge par tranche de 20 emplacements supplémentaires. La fiche donne un exemple : un bâtiment non résidentiel de 95 emplacements doit comporter au moins 4 points de recharge, dont 1 accessible PMR.</p>
+
+      <p>La réglementation prévoit une souplesse : l'obligation peut être adaptée si des travaux importants d'adaptation du réseau électrique sont nécessaires. Ce cas doit être justifié par des chiffrages précis, non par une simple estimation.</p>
+
+      <h2>Bâtiments neufs et rénovations importantes : l'obligation de pré-équipement</h2>
+
+      <p>Le pré-équipement désigne l'installation, dès la construction, des conduits et dispositifs qui permettront de poser une borne plus tard sans gros travaux. Pour les bâtiments non résidentiels neufs, ou lors d'une rénovation importante, les parkings d'au moins 10 emplacements doivent comporter :</p>
+
+      <ul>
+        <li>au moins 20 % d'emplacements pré-équipés ;</li>
+        <li>parmi eux, 2 % dimensionnés pour être accessibles aux PMR, avec au minimum un emplacement ;</li>
+        <li>au moins un emplacement accessible aux PMR et équipé pour la recharge.</li>
+      </ul>
+
+      <p>Une rénovation est qualifiée d'importante lorsque son montant représente au moins 25 % de la valeur du bâtiment, hors coût du terrain. L'obligation ne s'applique pas aux parkings des bâtiments possédés et occupés par des entreprises sous les seuils de taille indiqués plus haut. En rénovation importante, elle est également écartée lorsque le coût des installations de recharge et de raccordement représente plus de 7 % du coût total des travaux.</p>
+
+      <p>Le parking concerné peut être intérieur ou extérieur, dès lors qu'il se trouve sur la même unité foncière que le bâtiment et qu'il sert à ses usagers.</p>
+
+      <h2>Comment calculer le nombre de points de recharge et la puissance</h2>
+
+      <p>Le nombre de points de recharge et la puissance électrique qui leur est dédiée, notée PIRVE et exprimée en kVA, déterminent le budget. La PIRVE dépend du nombre de places, réparti en tranches : 10 à 20, 21 à 40, 41 à 100, 101 à 200, et 201 emplacements et plus. Elle dépend aussi du type d'usagers.</p>
+
+      <p><strong>Exemple illustratif n° 1 : parking existant.</strong> Soit une entreprise au-dessus des seuils de taille, dont le parking compte par exemple 160 places. Elle doit installer un premier point accessible PMR, puis un point par tranche de 20 places au-delà des 20 premières : 1 + (160 − 20) / 20 = <strong>8 points de recharge</strong> au minimum.</p>
+
+      <p><strong>Exemple illustratif n° 2 : bâtiment neuf.</strong> Soit un parking neuf destiné aux salariés, de 90 places par exemple :</p>
+
+      <ul>
+        <li>places pré-équipées : 90 × 20 % = <strong>18 places</strong> au minimum ;</li>
+        <li>places PMR parmi elles : 2 % de 18 donnent moins d'une place, le minimum d'un emplacement s'applique donc ;</li>
+        <li>PIRVE pour les salariés : au moins 30 kVA + 6 kVA par tranche de 10 emplacements au-delà de 50, soit 30 + 6 × (90 − 50) / 10 = <strong>54 kVA</strong>.</li>
+      </ul>
+
+      <p>Ces minimums réglementaires ne reflètent pas vos besoins réels. Pour dimensionner l'installation sans surcoût, le nombre de véhicules électriques attendus, les horaires de recharge et le pilotage des points comptent davantage.</p>
+
+      <h2>Flottes de véhicules : la taxe annuelle incitative remplace le quota</h2>
+
+      <p>Ce changement reste mal relayé. Selon le ministère de la Transition écologique, l'obligation d'intégrer une part minimale de véhicules à faibles émissions dans les flottes de plus de 100 voitures particulières et utilitaires légers a été supprimée. Cette disposition de l'article L. 224-10 du code de l'environnement a disparu avec l'article 28 de la loi de finances pour 2025.</p>
+
+      <p>Elle est remplacée par une taxe annuelle incitative (TAI), en vigueur depuis le 1er mars 2025. D'après le Bulletin officiel des finances publiques, elle s'applique uniquement aux entreprises dont la flotte compte au moins 100 véhicules. Son montant est le produit de trois termes :</p>
+
+      <ul>
+        <li>un tarif unitaire : 2 000 € en 2025, 4 000 € en 2026, 5 000 € en 2027 ;</li>
+        <li>le nombre de véhicules manquants pour atteindre l'objectif cible, de 15 % en 2025 jusqu'à 48 % en 2030 ;</li>
+        <li>le taux annuel de renouvellement des véhicules légers très émetteurs propre à l'entreprise.</li>
+      </ul>
+
+      <p><strong>Exemple illustratif n° 3.</strong> Supposons, par exemple, qu'il manque 3 véhicules à une entreprise pour atteindre l'objectif de 2026, avec un taux de renouvellement de 20 %. La taxe s'élève alors à 4 000 × 3 × 20 % = <strong>2 400 €</strong>. Par ailleurs, les entreprises restent tenues de déclarer leurs acquisitions de véhicules à faibles émissions pour l'année 2024.</p>
+
+      <h2>Quelles aides pour financer les bornes et les véhicules électriques ?</h2>
+
+      <p>Les aides à la recharge ont beaucoup évolué, et de nombreux sites affichent encore d'anciens barèmes. Voici ce que nous avons pu vérifier :</p>
+
+      <ul>
+        <li><strong>Advenir :</strong> ce programme de financement des bornes s'inscrit dans le cadre des CEE. Doté d'un budget de 520 millions d'euros, il vise 250 000 points de recharge d'ici 2027. Sa page d'accueil met en avant les volets immeuble collectif, poids lourds et autocars, voirie publique, Corse et Outre-mer : vérifiez l'éligibilité d'un parking d'entreprise avant de compter sur la prime.</li>
+        <li><strong>CEE sur les véhicules :</strong> la fiche TRA-EQ-114 vise l'achat ou la location d'un véhicule léger électrique neuf, ou le rétrofit électrique, par une collectivité ou une autre personne morale. Elle couvre les véhicules d'un poids total autorisé en charge inférieur ou égal à 3,5 tonnes.</li>
+        <li><strong>CEE sur la borne :</strong> nous n'avons trouvé aucune fiche d'opération standardisée pour une borne installée sur le parking privé d'une entreprise.</li>
+      </ul>
+
+      <p>Les conditions de la fiche TRA-EQ-114 et des autres fiches du secteur sont détaillées sur notre page des <a href="/dispositifs/fiches-cee/transport/">fiches CEE du transport</a>. Pour articuler prime, prêt et trésorerie, consultez notre page sur le <a href="/services/financement-operations/">financement CEE</a>.</p>
+
+      <h2>Comment Oteria Conseil accompagne votre projet de bornes et de flotte</h2>
+
+      <p>Oteria Conseil est mandataire CEE et accompagne votre entreprise gratuitement. Nous vérifions d'abord si vos parkings et votre flotte entrent dans le champ des obligations, avec les seuils exacts de la fiche officielle. Nous calculons le nombre de points et la PIRVE minimale, puis les comparons à vos besoins réels.</p>
+
+      <p>Nous vous mettons alors en relation avec des installateurs IRVE partenaires, choisis pour la qualité de leur travail ; Oteria Conseil n'installe aucun équipement. Quand des véhicules électriques entrent dans le projet, nous montons le dossier CEE dans les règles de l'art, avant toute commande. Les bornes peuvent aussi être alimentées par une installation solaire, présentée sur notre page consacrée au <a href="/services/photovoltaique/">photovoltaïque en entreprise</a>. Pour les autres volets de votre projet, consultez l'ensemble de <a href="/services/">nos services</a>.</p>
+
+      <h2>Questions fréquentes sur la loi LOM et les bornes de recharge</h2>
+
+      <FaqAccordion items={faq} />
+
+      <h2>Loi LOM : l'essentiel pour votre entreprise</h2>
+
+      <p>Pour les <strong>bornes de recharge</strong>, la loi LOM vise surtout les grandes entreprises propriétaires et occupantes de parkings existants, ainsi que tous les projets neufs ou de rénovation importante. Le quota de flotte a laissé place à une taxe calculée chaque année. Avant d'acheter des bornes ou des véhicules, faites vérifier vos obligations et vos financements : nous le faisons gratuitement.</p>
+
+      <div class="rounded-lg p-8 mt-10 text-center" style="background-color: #f0f4f8;">
+        <p class="text-xl font-bold text-navy-900 mb-3">Un parking ou une flotte à mettre en conformité ?</p>
+        <p class="text-navy-600 mb-6">Obligations réelles, nombre de points, puissance et financements possibles.</p>
+        <a href="/diagnostic-gratuit/" class="inline-flex items-center justify-center rounded-md px-8 py-4 text-base font-semibold no-underline transition-colors" style="background-color: #d4a024; color: #102a43;">Faire étudier mon projet</a>
+      </div>
+
+      <p class="text-sm mt-10">Sources :</p>
+      <ul class="text-sm">
+        <li><a href="https://www.justice.fr/fiche/infrastructures-obligatoires-recharge-vehicules-electriques" target="_blank" rel="noopener noreferrer">Entreprendre Service Public (DILA), infrastructures obligatoires de recharge des véhicules électriques</a></li>
+        <li><a href="https://www.ecologie.gouv.fr/politiques-publiques/verdissement-du-parc-automobile" target="_blank" rel="noopener noreferrer">ministère de la Transition écologique, verdissement du parc automobile</a></li>
+        <li><a href="https://bofip.impots.gouv.fr/bofip/14720-PGP.html/identifiant=BOI-AIS-MOB-10-30-40-20260225" target="_blank" rel="noopener noreferrer">BOFiP, taxe annuelle incitative sur les flottes</a></li>
+        <li><a href="https://www.ecologie.gouv.fr/sites/default/files/documents/TRA-EQ-114%20vA83-5%20%C3%A0%20compter%20du%2001-06-2026.pdf" target="_blank" rel="noopener noreferrer">fiche d'opération standardisée TRA-EQ-114</a></li>
+      </ul>
+    </div>
+  </article>
+</Base>

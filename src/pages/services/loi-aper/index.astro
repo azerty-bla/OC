@@ -1,0 +1,246 @@
+---
+import "../../../styles/global.css";
+import Base from "../../../layouts/Base.astro";
+import { getPageDates, formatDateFr } from "../../../lib/pageDates.mjs";
+import FaqAccordion from "../../../components/FaqAccordion.astro";
+
+const siteUrl = "https://oteria-conseil.fr";
+const canonical = "/services/loi-aper/";
+const title = "Loi APER : ombrières de parking et solaire en entreprise";
+const description = "Loi APER : parkings de plus de 1 500 m² à équiper d'ombrières, échéances 2026 et 2028, report jusqu'en 2030, toitures, sanctions et calcul de surface.";
+const h1 = "Loi APER : ce que doivent faire les entreprises pour leurs parkings et toitures";
+const pageDates = getPageDates(canonical);
+
+const faq = [
+  {
+    question: "Un parking d'exactement 1 500 m² est-il concerné ?",
+    answer: "Non : l'obligation vise les parcs de stationnement extérieurs d'une superficie supérieure à 1 500 m². Attention toutefois au mode de calcul : la superficie intègre les places et les voies de circulation entre les entrées et les sorties du parc.",
+  },
+  {
+    question: "Les parkings couverts ou souterrains sont-ils visés ?",
+    answer: "Non. L'obligation d'ombrières ne s'applique pas aux parcs intégrés à un bâtiment, qu'ils soient intérieurs ou souterrains. Une autre obligation peut en revanche viser la toiture du bâtiment lors de travaux.",
+  },
+  {
+    question: "Des arbres peuvent-ils remplacer les ombrières ?",
+    answer: "Ils peuvent exonérer le parc déjà ombragé par des arbres sur au moins la moitié de sa superficie. Il faut des arbres à canopée large, répartis à raison d'un arbre pour trois emplacements.",
+  },
+  {
+    question: "Existe-t-il une prime CEE pour une ombrière photovoltaïque ?",
+    answer: "Non. Aucune fiche d'opération standardisée CEE ne porte sur les ombrières photovoltaïques. Les CEE peuvent en revanche financer les travaux d'efficacité énergétique réalisés sur les bâtiments du même site.",
+  },
+  {
+    question: "Faut-il solariser la toiture d'un bâtiment existant en l'absence de travaux ?",
+    answer: "Pour la toiture, l'obligation naît lors d'une construction, d'une extension ou d'une rénovation lourde de plus de 500 m² d'emprise au sol. Pour les parkings extérieurs existants, l'obligation d'ombrières s'applique en revanche sans travaux, selon le calendrier.",
+  },
+  {
+    question: "Un tiers-investisseur peut-il financer les ombrières ?",
+    answer: "Oui. Dans ce cas, pour apprécier une éventuelle exonération pour coût excessif, le coût retenu est le reste à charge éventuellement demandé par le tiers-investisseur au propriétaire.",
+  },
+];
+
+const schema = [
+  { "@context": "https://schema.org", "@type": "WebPage", name: title, description, url: `${siteUrl}${canonical}`, ...(pageDates ? { datePublished: pageDates.published, dateModified: pageDates.modified } : {}) },
+  {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: h1,
+    description,
+    author: { "@type": "Organization", name: "Oteria Conseil", url: siteUrl },
+    publisher: { "@type": "Organization", name: "Oteria Conseil", url: siteUrl },
+    mainEntityOfPage: `${siteUrl}${canonical}`,
+    ...(pageDates ? { datePublished: pageDates.published, dateModified: pageDates.modified } : {}),
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Accueil", item: `${siteUrl}/` },
+      { "@type": "ListItem", position: 2, name: "Nos services", item: `${siteUrl}/services/` },
+      { "@type": "ListItem", position: 3, name: "Loi APER", item: `${siteUrl}${canonical}` },
+    ],
+  },
+  { "@context": "https://schema.org", "@type": "ProfessionalService", name: "Oteria Conseil", url: siteUrl, description: "Mandataire CEE : étude des projets, sélection d'installateurs partenaires et sécurisation des dossiers de certificats d'économies d'énergie", areaServed: "FR" },
+  { "@context": "https://schema.org", "@type": "FAQPage", mainEntity: faq.map((f) => ({ "@type": "Question", name: f.question, acceptedAnswer: { "@type": "Answer", text: f.answer } })) },
+];
+---
+
+<Base title={title} description={description} canonicalPath={canonical} modified={pageDates?.modified}>
+  <script type="application/ld+json" set:html={JSON.stringify(schema)} />
+
+  <section style="background-color: #102a43;">
+    <div class="mx-auto max-w-7xl px-6 py-14 md:py-20">
+      <nav aria-label="Fil d'Ariane" class="mb-8">
+        <ol class="flex flex-wrap items-center gap-2 text-sm" style="color: #9fb3c8;">
+          <li><a href="/" class="no-underline" style="color: #9fb3c8;">Accueil</a></li>
+          <li aria-hidden="true">/</li>
+          <li><a href="/services/" class="no-underline" style="color: #9fb3c8;">Nos services</a></li>
+          <li aria-hidden="true">/</li>
+          <li style="color: #f5c04a;" class="font-medium">Loi APER</li>
+        </ol>
+      </nav>
+      <h1 class="text-3xl md:text-4xl lg:text-5xl font-bold leading-tight max-w-4xl" style="color: #ffffff;">{h1}</h1>
+      {pageDates && (
+        <p class="text-sm mt-4" style="color: #9fb3c8;">Mis à jour le <time datetime={pageDates.modified}>{formatDateFr(pageDates.modified)}</time> · Oteria Conseil, mandataire CEE</p>
+      )}
+      <p class="mt-6 text-lg leading-relaxed max-w-3xl" style="color: #d9e2ec;">La <strong>loi APER</strong> oblige les propriétaires de grands parkings extérieurs à les couvrir d'ombrières photovoltaïques, et impose de solariser ou de végétaliser la toiture des bâtiments non résidentiels neufs ou lourdement rénovés. Voici les seuils, les dates, le calcul de surface et ce qui a changé en 2025 et 2026.</p>
+      <div class="mt-8">
+        <a href="/diagnostic-gratuit/" class="inline-flex items-center rounded-md px-6 py-3 text-sm font-semibold no-underline" style="background-color: #d4a024; color: #102a43;">Faire étudier mon projet</a>
+      </div>
+    </div>
+  </section>
+
+  <article class="expertise-content">
+    <div class="mx-auto max-w-3xl px-6 py-14 md:py-20">
+
+      <div class="expertise-highlight">
+        <p><strong>L'essentiel :</strong> les parcs de stationnement extérieurs de plus de 1 500 m² doivent être équipés, sur au moins 50 % de leur superficie, d'ombrières produisant de l'énergie renouvelable. Échéance : le 1er juillet 2026 pour les parcs de plus de 10 000 m², le 1er juillet 2028 pour ceux compris entre 1 500 et 10 000 m². Un report reste possible sous conditions.</p>
+      </div>
+
+      <h2>Ce que prévoit la loi APER pour les entreprises</h2>
+
+      <p>La loi APER est la loi n° 2023-175 du 10 mars 2023 relative à l'accélération de la production d'énergies renouvelables. Pour les entreprises, deux volets comptent :</p>
+
+      <ul>
+        <li><strong>les parkings extérieurs existants</strong>, visés par l'article 40 et précisés par le décret n° 2024-1023 du 13 novembre 2024 ;</li>
+        <li><strong>les toitures</strong> des bâtiments non résidentiels construits, étendus ou lourdement rénovés, qui doivent intégrer un procédé de production d'énergies renouvelables ou une végétalisation.</li>
+      </ul>
+
+      <p>Le texte a évolué depuis sa publication. La loi du 26 novembre 2025 relative à la simplification du droit de l'urbanisme et du logement a ouvert un report aux parcs intermédiaires. Un décret du 7 septembre 2026 en a fixé les conditions. De nombreuses pages en ligne n'en tiennent pas encore compte.</p>
+
+      <p>Ne confondez pas la loi APER avec l'obligation issue de la loi Climat et résilience. Celle-ci vise les parcs neufs, lourdement rénovés ou dont le contrat de gestion est renouvelé, de plus de 500 m² et associés à certains bâtiments. Elle impose sur la moitié de leur superficie un ombrage, par arbres ou par ombrières, et une gestion des eaux pluviales. Un même parking peut relever successivement des deux textes.</p>
+
+      <h2>Parkings de plus de 1 500 m² : l'obligation d'ombrières</h2>
+
+      <p>L'obligation porte sur les parcs de stationnement extérieurs d'une superficie supérieure à 1 500 m² en France métropolitaine, en Guadeloupe et en Martinique. Ils doivent être équipés, sur au moins 50 % de leur superficie, d'ombrières dont toute la partie supérieure intègre un procédé de production d'énergies renouvelables, en pratique des panneaux photovoltaïques.</p>
+
+      <p>Le propriétaire du parc porte l'obligation. Lorsqu'un tiers gère le parc en concession, en délégation de service public ou sous autorisation d'occupation du domaine public, elle revient au concessionnaire, au délégataire ou au titulaire de l'autorisation.</p>
+
+      <h3>Calculer la superficie à prendre en compte</h3>
+
+      <p>La superficie retenue comprend les emplacements de stationnement et les voies de circulation, entre les entrées et les sorties du parc. Le calcul en retire plusieurs surfaces :</p>
+
+      <ul>
+        <li>espaces verts, espaces de repos, zones de stockage, espaces logistiques, de manutention, de chargement et de déchargement ;</li>
+        <li>parties où stationnent des véhicules transportant des marchandises dangereuses ;</li>
+        <li>parties situées à moins de 10 mètres d'une installation classée pour la protection de l'environnement (ICPE) ;</li>
+        <li>voies empruntées spécifiquement par des poids lourds de marchandises dont le PTAC est supérieur à 7,5 tonnes.</li>
+      </ul>
+
+      <h3>Exemple chiffré : un parking logistique de 6 400 m²</h3>
+
+      <p>Exemple : une entreprise possède un parking extérieur de 6 400 m², dont 900 m² d'aires de chargement et de voies réservées aux poids lourds de plus de 7,5 tonnes. La superficie retenue est alors de 5 500 m².</p>
+
+      <ul>
+        <li>Le parc dépasse 1 500 m² sans atteindre 10 000 m² : échéance au 1er juillet 2028.</li>
+        <li>Surface minimale à couvrir d'ombrières photovoltaïques : 2 750 m², soit 50 % de 5 500 m².</li>
+        <li>À défaut d'équipement à l'échéance, la sanction peut aller jusqu'à 20 000 € et être prononcée chaque année.</li>
+      </ul>
+
+      <p>Réalisé avant la consultation des installateurs, ce calcul de surface évite de surdimensionner l'installation ou, à l'inverse, de laisser une partie du parc hors obligation.</p>
+
+      <h3>Parcs adjacents et parcs en concession</h3>
+
+      <p>Deux propriétaires de parcs adjacents, situés sur la même unité foncière, peuvent mutualiser leur obligation d'un commun accord, dont ils doivent attester. La surface d'ombrières réalisée doit alors égaler la somme des surfaces dues par chaque parc. Cette souplesse permet de concentrer les ombrières là où la structure et le raccordement coûtent le moins.</p>
+
+      <p>Pour un parc géré en concession ou en délégation de service public, l'échéance dépend de la date de conclusion ou de renouvellement du contrat. La préfecture du département peut aussi accorder, exceptionnellement et sous conditions, un délai supplémentaire.</p>
+
+      <h2>Calendrier de la loi APER, report et exemptions</h2>
+
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr><th>Parc extérieur (hors concession)</th><th>Échéance de principe</th><th>Report possible</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Supérieur ou égal à 10 000 m²</td><td>1er juillet 2026</td><td>Oui, sous conditions (loi « industrie verte » de 2023)</td></tr>
+            <tr><td>De 1 500 à 10 000 m²</td><td>1er juillet 2028</td><td>Jusqu'en 2030, sous conditions (décret du 7 septembre 2026)</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>Le report n'est pas automatique. Selon le ministère de l'Économie, les panneaux doivent respecter des exigences de rendement, de durabilité, d'empreinte carbone et de garantie. Pour les parcs de 1 500 à 10 000 m², les modules doivent en plus être assemblés dans l'Espace économique européen et répondre à des critères de résilience de l'approvisionnement. Un organisme accrédité doit certifier le respect de ces critères.</p>
+
+      <h3>Préparer une demande de report</h3>
+
+      <p>Si vous visez le report, le cahier des charges remis aux installateurs doit reprendre ces exigences dès la consultation. Demandez par écrit :</p>
+
+      <ul>
+        <li>les caractéristiques de rendement, de durabilité, d'empreinte carbone et de garantie des modules proposés ;</li>
+        <li>le lieu d'assemblage des modules, pour un parc de 1 500 à 10 000 m² ;</li>
+        <li>le nom de l'organisme accrédité qui certifiera le respect des critères ;</li>
+        <li>un calendrier compatible avec la nouvelle échéance.</li>
+      </ul>
+
+      <p>Indépendamment du report, le parc peut être exempté s'il est :</p>
+
+      <ul>
+        <li>intégré à un bâtiment (parc intérieur ou souterrain) ;</li>
+        <li>déjà ombragé par des arbres sur au moins la moitié de sa superficie, à raison d'un arbre pour trois emplacements ;</li>
+        <li>soumis à des contraintes techniques, de sécurité, patrimoniales ou environnementales démontrées ;</li>
+        <li>trop coûteux à équiper : le coût hors taxes des travaux, revenus de la vente d'électricité sur 20 ans déduits, doit dépasser 10 % de la valeur du parc ou de son coût de création.</li>
+      </ul>
+
+      <p>Chaque exemption suppose une attestation et, pour les ombrières, une étude technico-économique réalisée par une entreprise qualifiée.</p>
+
+      <h2>Toitures : une couverture d'au moins 30 %, puis 40 %, puis 50 %</h2>
+
+      <p>Le second volet de la loi APER vise les toitures. Il concerne les constructions de bâtiments à usage commercial, industriel, artisanal, administratif, de bureaux ou d'entrepôt. Il s'étend à leurs extensions et rénovations lourdes de plus de 500 m² d'emprise au sol. Ces bâtiments doivent intégrer en toiture un procédé de production d'énergies renouvelables ou un système de végétalisation.</p>
+
+      <p>La surface couverte doit être au moins égale à 30 % de la toiture construite ou rénovée. Ce taux passe à 40 % à compter du 1er juillet 2026, puis à 50 % à compter du 1er juillet 2027. Pour une toiture neuve de 8 000 m², par exemple, la surface à équiper passe ainsi de 2 400 m² à 3 200 m², puis à 4 000 m².</p>
+
+      <p>Une exception s'applique lorsque le coût hors taxes de l'installation dépasse 15 % du coût total hors taxes des travaux. La végétalisation peut aussi être écartée pour une toiture dont la pente va au-delà de 20 %.</p>
+
+      <h2>Sanctions prévues par la loi APER</h2>
+
+      <p>Pour les parkings, le propriétaire en défaut risque une sanction pouvant aller jusqu'à 20 000 € pour un parc de 1 500 à 10 000 m². Elle peut atteindre 40 000 € pour un parc supérieur ou égal à 10 000 m². L'administration peut la prononcer chaque année jusqu'à la mise en conformité, après une procédure contradictoire.</p>
+
+      <p>Pour les toitures, l'autorité administrative compétente peut prononcer, après mise en demeure restée sans effet, une amende administrative au plus égale à 20 000 € pour une personne physique. Le plafond monte à 100 000 € pour une personne morale.</p>
+
+      <h2>Ombrières et CEE : ce qui est finançable</h2>
+
+      <p>Aucune fiche d'opération standardisée CEE ne porte sur les ombrières photovoltaïques ni sur la production d'électricité solaire d'une entreprise. Une ombrière n'ouvre donc droit à aucune prime CEE, contrairement à ce qu'affirment certaines offres.</p>
+
+      <p>Le chantier des ombrières est en revanche l'occasion de traiter les bâtiments du même site : GTB, isolation, pompe à chaleur ou déstratification dans un entrepôt chauffé. Ces travaux, eux, relèvent de fiches CEE, comme BAT-TH-142 pour la déstratification d'air. Sur un site tertiaire de plus de 1 000 m², ils servent aussi la trajectoire du <a href="/services/decret-tertiaire/">décret tertiaire</a>, et la GTB peut répondre au <a href="/services/decret-bacs/">décret BACS</a>.</p>
+
+      <h3>Exemple : un entrepôt chauffé et son parking</h3>
+
+      <p>Exemple : sur un site logistique doté d'un parking extérieur de 5 500 m² et d'un entrepôt chauffé, le projet comporte deux volets. Le premier relève de la loi APER : 2 750 m² d'ombrières à poser, sans prime CEE. Le second relève des CEE : déstratification de l'air sous la toiture de l'entrepôt, GTB sur les bureaux, et éventuellement pompe à chaleur. Mener les deux en parallèle permet de mutualiser les études et la préparation du chantier, et de ne pas laisser passer le moment où les CEE doivent être cadrés, c'est-à-dire avant la signature des devis.</p>
+
+      <p>Pour financer les ombrières elles-mêmes, plusieurs schémas existent : achat direct, location ou tiers-investissement. Dans ce dernier cas, le coût retenu pour juger d'un éventuel coût excessif est le reste à charge demandé au propriétaire.</p>
+
+      <h2>Comment Oteria Conseil vous accompagne face à la loi APER</h2>
+
+      <p>Oteria Conseil est mandataire CEE. Nous n'installons pas d'ombrières : nous étudions votre site et vous mettons en relation avec des installateurs partenaires choisis pour la qualité de leur travail. Vous ne payez rien pour cet accompagnement.</p>
+
+      <ol>
+        <li><strong>Diagnostic de l'obligation :</strong> superficie retenue, surfaces exclues, échéance, éligibilité au report ou à une exemption.</li>
+        <li><strong>Cahier des charges :</strong> exigences à imposer aux panneaux si vous visez le report, puis consultation d'installateurs partenaires.</li>
+        <li><strong>Volet CEE du site :</strong> repérage des travaux d'efficacité énergétique finançables sur les bâtiments, dossier sécurisé et cadre posé avant la signature des devis.</li>
+      </ol>
+
+      <p>Nous veillons à ce que les travaux soient faits dans les règles de l'art. Un parking soumis à la loi APER relève souvent aussi de la <a href="/services/loi-lom/">loi LOM sur les bornes de recharge</a>. Pour une centrale en toiture, voir notre page <a href="/services/photovoltaique/">photovoltaïque en entreprise</a>, et pour le plan de financement des travaux, notre page <a href="/services/financement-operations/">financement CEE</a>. Retrouvez <a href="/services/">l'ensemble de nos services</a>.</p>
+
+      <h2>Questions fréquentes sur la loi APER</h2>
+
+      <FaqAccordion items={faq} />
+
+      <h2>Loi APER : les points à retenir</h2>
+
+      <p>Le texte impose des ombrières sur au moins la moitié des parkings extérieurs de plus de 1 500 m², avec des échéances en 2026 et 2028. Les parcs intermédiaires peuvent bénéficier d'un report jusqu'en 2030, sous conditions strictes sur les panneaux. La loi relève aussi le taux de solarisation des toitures. Les CEE ne financent pas l'ombrière, mais ils financent les travaux d'efficacité réalisés en même temps. Envoyez-nous le plan de votre parking : nous calculerons la surface concernée.</p>
+
+      <div class="rounded-lg p-8 mt-10 text-center" style="background-color: #f0f4f8;">
+        <p class="text-xl font-bold text-navy-900 mb-3">Quelle surface d'ombrières pour votre parking ?</p>
+        <p class="text-navy-600 mb-6">Étude gratuite : superficie retenue, échéance, report ou exemption, et travaux CEE du site.</p>
+        <a href="/diagnostic-gratuit/" class="inline-flex items-center justify-center rounded-md px-8 py-4 text-base font-semibold no-underline" style="background-color: #d4a024; color: #102a43;">Faire étudier mon projet</a>
+      </div>
+
+      <p class="text-sm mt-10">Sources :</p>
+      <ul class="text-sm">
+        <li><a href="https://entreprendre.service-public.gouv.fr/vosdroits/F38187" target="_blank" rel="noopener noreferrer">Service Public Entreprendre, ombrage des parcs de stationnement existants</a></li>
+        <li><a href="https://entreprendre.service-public.gouv.fr/vosdroits/F38107" target="_blank" rel="noopener noreferrer">Service Public Entreprendre, énergies renouvelables ou végétalisation des toitures</a></li>
+        <li><a href="https://www.entreprises.gouv.fr/espace-presse/solarisation-des-parcs-de-stationnement-le-gouvernement-encourage-les-panneaux" target="_blank" rel="noopener noreferrer">ministère de l'Économie, communiqué sur le report des échéances</a></li>
+        <li><a href="https://www.ecologie.gouv.fr/politiques-publiques/parcs-stationnement" target="_blank" rel="noopener noreferrer">ministère de la Transition écologique, parcs de stationnement</a></li>
+      </ul>
+    </div>
+  </article>
+</Base>

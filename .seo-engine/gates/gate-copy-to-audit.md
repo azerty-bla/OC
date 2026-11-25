@@ -38,6 +38,8 @@ Lance : `node .seo-engine/scripts/validate-facts.js --file [fichier] --sidecar .
 - [ ] Attribution auteur presente (frontmatter `author` ou byline)
 - [ ] Pas de keyword stuffing evident : max 1 occurrence du mot-cle par paragraphe (sauf intro), pas de juxtaposition de mots-cles sans liaison grammaticale
 - [ ] Auto-relecture qualite effectuee : pas de mot invente, pas de faute d'orthographe grossiere, phrases naturelles
+- [ ] `validate-writing` : `brand_truncated` et `brand_as_adjective` PASS (nom de l'entreprise complet, jamais en adjectif) ; `banned_formulations` PASS (tics oraux et dramatises compris)
+- [ ] Relecture humaine du sommaire (H1/H2/H3 lus seuls) : titres rediges en francais, propres a la page, sans empilement de noms ; sujets des verbes logiques (l'entreprise agit, pas « les services ») — passe 4 bis de `pole-copy.md`
 
 ## En cas d'echec
 

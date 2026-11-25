@@ -1,0 +1,233 @@
+---
+import "../../../styles/global.css";
+import Base from "../../../layouts/Base.astro";
+import FaqAccordion from "../../../components/FaqAccordion.astro";
+import { getPageDates, formatDateFr } from "../../../lib/pageDates.mjs";
+
+const siteUrl = "https://oteria-conseil.fr";
+const canonical = "/services/achat-energie-optimisation-factures/";
+const title = "Courtier en énergie : achat et optimisation des factures";
+const description = "Courtier en énergie pour professionnels : stratégie d'achat, lecture de facture, TURPE, accise et taux réduits, appel d'offres, exemple chiffré.";
+const h1 = "Courtier en énergie : acheter votre électricité et votre gaz au juste prix";
+const pageDates = getPageDates(canonical);
+
+const faq = [
+  {
+    question: "Quelle part de la facture d'électricité peut-on négocier ?",
+    answer: "Seule la fourniture, c'est-à-dire le prix de l'énergie elle-même, se négocie avec le fournisseur. L'acheminement (TURPE) est fixé par la Commission de régulation de l'énergie et les taxes par la loi. Sur ces deux postes, l'entreprise agit au moyen de la puissance contractuelle, de la bonne option tarifaire et des taux réduits auxquels elle a droit.",
+  },
+  {
+    question: "Comment savoir si mon entreprise a droit à un taux réduit d'accise ?",
+    answer: "Les tarifs réduits, exonérations et exemptions sont listés aux articles L. 312-42 et suivants du code des impositions sur les biens et services. Pour en bénéficier, l'entreprise remet à son fournisseur une attestation qui précise les usages concernés et les quantités affectées.",
+  },
+  {
+    question: "Faut-il choisir un prix fixe ou un prix indexé ?",
+    answer: "Le prix fixe donne de la visibilité sur le budget pendant toute la durée du contrat. Le prix indexé suit le marché, à la hausse comme à la baisse. Le choix dépend de la part de l'énergie dans vos coûts et de votre capacité à suivre les marchés.",
+  },
+  {
+    question: "Un fournisseur peut-il facturer une mauvaise option d'acheminement ?",
+    answer: "L'option tarifaire et la puissance contractuelle figurent sur la facture et dans le contrat d'acheminement. Une puissance trop haute coûte chaque mois ; une puissance trop basse entraîne des dépassements. Ces paramètres se vérifient à partir des courbes de charge.",
+  },
+  {
+    question: "L'intervention d'Oteria Conseil sur l'achat d'énergie est-elle payante ?",
+    answer: "Non, notre accompagnement est gratuit pour votre entreprise. Nous ne vendons pas d'énergie et n'installons aucun équipement.",
+  },
+  {
+    question: "Pourquoi relier l'achat d'énergie aux CEE ?",
+    answer: "Parce que le kWh le moins cher reste celui que l'on ne consomme pas. Une baisse de consommation financée en partie par une prime CEE réduit la facture sur toutes ses composantes proportionnelles, quel que soit le contrat signé.",
+  },
+];
+
+const schema = [
+  { "@context": "https://schema.org", "@type": "WebPage", name: title, description, url: `${siteUrl}${canonical}`, ...(pageDates ? { datePublished: pageDates.published, dateModified: pageDates.modified } : {}) },
+  {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: h1,
+    description,
+    author: { "@type": "Organization", name: "Oteria Conseil", url: siteUrl },
+    publisher: { "@type": "Organization", name: "Oteria Conseil", url: siteUrl },
+    mainEntityOfPage: `${siteUrl}${canonical}`,
+    ...(pageDates ? { datePublished: pageDates.published, dateModified: pageDates.modified } : {}),
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Accueil", item: `${siteUrl}/` },
+      { "@type": "ListItem", position: 2, name: "Nos services", item: `${siteUrl}/services/` },
+      { "@type": "ListItem", position: 3, name: "Achat d'énergie et factures", item: `${siteUrl}${canonical}` },
+    ],
+  },
+  { "@context": "https://schema.org", "@type": "ProfessionalService", name: "Oteria Conseil", url: siteUrl, description: "Mandataire CEE : étude des projets, sélection d'installateurs partenaires et sécurisation des dossiers de certificats d'économies d'énergie", areaServed: "FR" },
+  { "@context": "https://schema.org", "@type": "FAQPage", mainEntity: faq.map((f) => ({ "@type": "Question", name: f.question, acceptedAnswer: { "@type": "Answer", text: f.answer } })) },
+];
+---
+
+<Base title={title} description={description} canonicalPath={canonical} modified={pageDates?.modified}>
+  <script type="application/ld+json" set:html={JSON.stringify(schema)} />
+
+  <section style="background-color: #102a43;">
+    <div class="mx-auto max-w-7xl px-6 py-14 md:py-20">
+      <nav aria-label="Fil d'Ariane" class="mb-8">
+        <ol class="flex flex-wrap items-center gap-2 text-sm" style="color: #9fb3c8;">
+          <li><a href="/" class="no-underline transition-colors" style="color: #9fb3c8;">Accueil</a></li>
+          <li aria-hidden="true" style="color: #627d98;">/</li>
+          <li><a href="/services/" class="no-underline transition-colors" style="color: #9fb3c8;">Nos services</a></li>
+          <li aria-hidden="true" style="color: #627d98;">/</li>
+          <li style="color: #f5c04a;" class="font-medium">Achat d'énergie et factures</li>
+        </ol>
+      </nav>
+      <h1 class="text-3xl md:text-4xl lg:text-5xl font-bold leading-tight max-w-4xl" style="color: #ffffff;">{h1}</h1>
+      {pageDates && (
+        <p class="text-sm mt-4" style="color: #9fb3c8;">Mis à jour le <time datetime={pageDates.modified}>{formatDateFr(pageDates.modified)}</time> · Oteria Conseil</p>
+      )}
+      <p class="mt-6 text-lg leading-relaxed max-w-3xl" style="color: #d9e2ec;">Faire appel à un <strong>courtier en énergie</strong> n'a d'intérêt que si l'on sait ce qui, dans une facture professionnelle, se négocie vraiment. Nous décomposons ici la facture d'électricité, présentons les stratégies d'achat et les taxes récupérables, puis mesurons sur un exemple le poids de l'acheminement.</p>
+      <div class="mt-8">
+        <a href="/diagnostic-gratuit/" class="inline-flex items-center rounded-md px-6 py-3 text-sm font-semibold no-underline transition-colors" style="background-color: #d4a024; color: #102a43;">Faire étudier mon projet</a>
+      </div>
+    </div>
+  </section>
+
+  <article class="expertise-content">
+    <div class="mx-auto max-w-3xl px-6 py-14 md:py-20">
+
+      <div class="expertise-highlight">
+        <p><strong>En bref :</strong> une facture d'électricité professionnelle se compose de la fourniture, seule partie négociable, de l'acheminement fixé par la Commission de régulation de l'énergie et des taxes. Un bon achat combine trois actions : choisir la stratégie de prix, corriger la facture (puissance, option, taux réduits) et réduire la consommation.</p>
+      </div>
+
+      <h2>Le rôle d'un courtier en énergie, et l'approche d'Oteria Conseil</h2>
+
+      <p>Un courtier en énergie est un intermédiaire qui compare les offres des fournisseurs d'électricité et de gaz pour le compte d'une entreprise, puis l'aide à négocier et à suivre son contrat. Il ne vend pas d'énergie lui-même. Il intervient pour des professionnels, sur un ou plusieurs sites, en électricité comme en gaz.</p>
+
+      <p>Oteria Conseil aborde l'achat d'énergie sous un angle plus large. Notre métier de mandataire CEE consiste d'abord à réduire la consommation, puis à sécuriser le financement des travaux. L'achat d'énergie complète ce travail : une fois la consommation maîtrisée, nous vérifions la facture et vous aidons à mettre les fournisseurs en concurrence. Cette intervention est gratuite pour votre entreprise.</p>
+
+      <p>Nous ne promettons pas de baisse en pourcentage. Une économie sur la fourniture dépend des marchés au moment de la signature, que personne ne contrôle. Par honnêteté envers nos clients, nous ne chiffrons aucune économie avant d'avoir analysé leurs factures. Nous pouvons en revanche garantir une facture comprise et contrôlée ligne par ligne.</p>
+
+      <h2>Prix fixe, prix indexé ou achat par blocs : choisir sa stratégie d'achat</h2>
+
+      <p>La stratégie d'achat désigne la manière dont une entreprise fixe le prix de son énergie : en une fois, au fil du marché ou par étapes. Elle se choisit avant de consulter les fournisseurs, selon le poids de l'énergie dans vos coûts et votre tolérance au risque.</p>
+
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr><th>Formule</th><th>Principe</th><th>Pour qui</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Prix fixe</td><td>Prix de la fourniture figé pour la durée du contrat</td><td>Entreprises qui veulent un budget prévisible</td></tr>
+            <tr><td>Prix indexé</td><td>Prix qui suit un indice de marché, mois par mois ou jour par jour</td><td>Gros consommateurs capables de suivre les marchés</td></tr>
+            <tr><td>Achat par blocs (offre à clics)</td><td>Fixation du prix en plusieurs fois, par tranches de volume</td><td>Consommateurs importants, avec une organisation dédiée</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>Dans son guide de bonnes pratiques, la Commission de régulation de l'énergie rappelle que les contrats à prix fixe permettent aux acheteurs de connaître leur budget d'achat d'électricité. Les offres à clics, elles, demandent une expertise et une vigilance accrues. Elles n'ont de sens que si une personne, dans l'entreprise ou à ses côtés, décide des moments de fixation.</p>
+
+      <p>Quelle que soit la formule, vérifiez trois clauses avant de signer :</p>
+
+      <ul>
+        <li>la durée du contrat et sa date d'échéance ;</li>
+        <li>les conditions et le coût d'une résiliation anticipée ;</li>
+        <li>la tolérance sur les volumes consommés, à la hausse comme à la baisse.</li>
+      </ul>
+
+      <h2>Comment lire une facture d'électricité professionnelle</h2>
+
+      <p>Analyser une facture d'électricité consiste à séparer ce qui dépend du fournisseur de ce qui relève de la régulation. La facture se décompose en trois blocs :</p>
+
+      <ul>
+        <li><strong>La fourniture :</strong> le prix de l'énergie consommée, éventuellement complété par des frais du fournisseur. C'est la seule partie mise en concurrence.</li>
+        <li><strong>L'acheminement (TURPE) :</strong> le tarif d'utilisation des réseaux publics d'électricité, identique quel que soit le fournisseur, fixé par la Commission de régulation de l'énergie (CRE). Le TURPE 7 HTA-BT est entré en vigueur le 1er août 2025.</li>
+        <li><strong>Les taxes :</strong> l'accise sur l'électricité, codifiée à l'article L. 312-37 du code des impositions sur les biens et services (CIBS), puis la TVA. Depuis le 1er août 2025, les tarifs pleins d'accise comprennent une majoration prévue à l'article L. 312-37-1 du même code.</li>
+      </ul>
+
+      <p>L'acheminement évolue chaque année. Par sa délibération n° 2026-105 du 21 mai 2026, la Commission de régulation de l'énergie a fait évoluer la grille du TURPE 7 HTA-BT d'Enedis de +3,04 % au 1er août 2026. Cette hausse s'applique à toutes les entreprises raccordées à ce réseau, quel que soit leur fournisseur.</p>
+
+      <p>Dans l'acheminement, deux paramètres dépendent de vos choix : la puissance contractuelle, choisie à la souscription, et l'option tarifaire. Ce sont les premiers points à contrôler.</p>
+
+      <h2>Taux réduits d'accise et erreurs de facturation les plus fréquentes</h2>
+
+      <p>L'optimisation des taxes sur l'énergie relève du droit, non de la négociation. Les tarifs réduits, les exonérations et les exemptions d'accise sont listés aux articles L. 312-42 et suivants du code des impositions sur les biens et services. Ils visent certains usages et certains secteurs. Un tarif réduit d'accise n'est jamais appliqué d'office : c'est à l'entreprise d'en faire la demande.</p>
+
+      <p>Le mécanisme est déclaratif. Lors de la conclusion d'un contrat de fourniture, l'utilisateur certifie auprès de son fournisseur, au moyen d'une attestation, les usages exemptés, exonérés ou taxés à taux réduit et les quantités concernées. Ces attestations ne sont pas transmises à l'administration fiscale : elles sont tenues à sa disposition. Chaque cas porte un code, de E01 à E29 pour l'accise sur l'électricité et de G01 à G17 pour le gaz naturel.</p>
+
+      <p>Voici les erreurs que nous rencontrons le plus souvent :</p>
+
+      <ol>
+        <li>une attestation de taux réduit jamais remise au fournisseur, ou non renouvelée au changement de contrat ;</li>
+        <li>une puissance contractuelle trop haute, payée chaque mois sans utilité ;</li>
+        <li>des dépassements de puissance répétés, signe d'une puissance trop basse ;</li>
+        <li>une option tarifaire d'acheminement inadaptée au profil de consommation ;</li>
+        <li>des index estimés jamais régularisés, ou une consommation facturée sur un mauvais point de livraison.</li>
+      </ol>
+
+      <p>Depuis le 1er janvier 2023, la Direction générale des finances publiques (DGFiP) est l'administration compétente pour les accises sur l'électricité et le gaz naturel. C'est donc à elle que s'adresse une demande portant sur un taux réduit.</p>
+
+      <h2>Mettre les fournisseurs en concurrence par un appel d'offres</h2>
+
+      <p>Un appel d'offres énergie est une consultation organisée de plusieurs fournisseurs, sur un cahier des charges identique, afin d'obtenir des offres réellement comparables. Il se prépare en quatre étapes :</p>
+
+      <ol>
+        <li>rassembler les données : factures, courbes de charge, puissances, dates d'échéance de chaque site ;</li>
+        <li>rédiger un cahier des charges : volumes, durée, formule de prix, clauses de tolérance ;</li>
+        <li>consulter plusieurs fournisseurs le même jour, pour comparer des prix fixés dans les mêmes conditions de marché ;</li>
+        <li>analyser les offres au-delà de la fourniture : frais annexes, conditions de sortie, qualité de service.</li>
+      </ol>
+
+      <p>Si vous avez plusieurs sites, regroupez les points de livraison dans une même consultation : un volume global plus important intéresse davantage de fournisseurs. Pour le gaz, la démarche est identique, avec des formules de prix comparables à celles de l'électricité.</p>
+
+      <p>Le calendrier compte autant que le cahier des charges. Une consultation lancée la veille de l'échéance du contrat laisse peu de marge de négociation.</p>
+
+      <h2>Exemple chiffré : l'effet de la hausse du TURPE sur une facture industrielle</h2>
+
+      <p>Exemple : un site industriel raccordé au réseau d'Enedis paie, par exemple, 30 000 € HT par an d'acheminement.</p>
+
+      <ul>
+        <li>Évolution de la grille du TURPE 7 HTA-BT au 1er août 2026 : +3,04 %.</li>
+        <li>Effet en année pleine : 30 000 × 3,04 % = <strong>912 € HT</strong> de plus, sans changement de consommation.</li>
+        <li>Aucune renégociation de la fourniture ne compense directement ce poste, fixé par le régulateur.</li>
+      </ul>
+
+      <p>Deux leviers restent pourtant disponibles : ajuster la puissance contractuelle et l'option tarifaire à la consommation réelle, et réduire les kWh consommés. Le premier se règle sur la facture ; le second passe par des travaux, que les CEE peuvent financer en partie.</p>
+
+      <p>Le même raisonnement vaut pour l'accise, qui suit la consommation : chaque kWh évité réduit aussi la taxe correspondante.</p>
+
+      <h2>Réduire la consommation grâce aux travaux financés par les CEE</h2>
+
+      <p>Réduire la consommation, c'est agir sur la seule variable que ni le marché ni le régulateur ne fixent : le volume. Trois leviers se combinent :</p>
+
+      <ul>
+        <li>des travaux d'efficacité énergétique, financés en partie par une prime CEE ;</li>
+        <li>un pilotage plus fin des équipements, pour éviter les consommations inutiles la nuit et le week-end ;</li>
+        <li>une production sur site, pour l'électricité que vous continuez à consommer de jour.</li>
+      </ul>
+
+      <p>La facture la plus basse reste celle des kWh que vous ne consommez plus. Variateurs de vitesse, récupération de chaleur, pompe à chaleur, gestion technique du bâtiment : ces travaux ouvrent droit à une prime CEE qui réduit leur coût. Notre page sur le <a href="/services/financement-operations/">financement CEE</a> détaille le calcul de la prime et le plan de financement.</p>
+
+      <p>Pour les bâtiments tertiaires, cette baisse de consommation sert aussi la trajectoire imposée par le <a href="/services/decret-tertiaire/">décret tertiaire</a>. Lorsque la consommation de jour reste importante, une centrale en <a href="/services/photovoltaique/">autoconsommation photovoltaïque</a> peut réduire encore l'achat au réseau.</p>
+
+      <p>Nous suivons cet ordre : réduire, puis produire, et enfin acheter au meilleur prix l'énergie qui reste nécessaire. Retrouvez l'ensemble de <a href="/services/">nos services</a>.</p>
+
+      <h2>Questions fréquentes sur le courtage en énergie</h2>
+
+      <FaqAccordion items={faq} />
+
+      <h2>Courtier en énergie : ce que vous êtes en droit d'attendre</h2>
+
+      <p>Un <strong>courtier en énergie</strong> utile commence par expliquer la facture : la fourniture se négocie, l'acheminement et les taxes se contrôlent. Choisissez votre stratégie de prix avant de consulter, vérifiez puissance, option tarifaire et attestations de taux réduit, puis réduisez la consommation avec l'aide des CEE. Envoyez-nous vos dernières factures : nous les analysons gratuitement.</p>
+
+      <div class="rounded-lg p-8 mt-10 text-center" style="background-color: #f0f4f8;">
+        <p class="text-xl font-bold text-navy-900 mb-3">Vos factures d'énergie sont-elles justes ?</p>
+        <p class="text-navy-600 mb-6">Puissance, option d'acheminement, taux réduits et stratégie d'achat.</p>
+        <a href="/diagnostic-gratuit/" class="inline-flex items-center justify-center rounded-md px-8 py-4 text-base font-semibold no-underline transition-colors" style="background-color: #d4a024; color: #102a43;">Faire étudier mon projet</a>
+      </div>
+
+      <p class="text-sm mt-10">Sources :</p>
+      <ul class="text-sm">
+        <li><a href="https://www.cre.fr/fileadmin/Documents/Deliberations/2026/260521_2026-105_Evolution_TURPE_7_HTA-BT.pdf" target="_blank" rel="noopener noreferrer">Commission de régulation de l'énergie, délibération n° 2026-105 du 21 mai 2026</a></li>
+        <li><a href="https://www.impots.gouv.fr/taxes-interieures-de-consommation-tic" target="_blank" rel="noopener noreferrer">impots.gouv.fr, accises sur les énergies</a></li>
+        <li><a href="https://www.cre.fr/content/download/27782/file/Guide-de-bonnes-pratiques.pdf" target="_blank" rel="noopener noreferrer">Commission de régulation de l'énergie, guide de bonnes pratiques des contrats d'énergie</a></li>
+      </ul>
+    </div>
+  </article>
+</Base>

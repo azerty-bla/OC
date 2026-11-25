@@ -1,0 +1,185 @@
+---
+import "../../styles/global.css";
+import Base from "../../layouts/Base.astro";
+import { getPageDates, formatDateFr } from "../../lib/pageDates.mjs";
+import FaqAccordion from "../../components/FaqAccordion.astro";
+
+const siteUrl = "https://oteria-conseil.fr";
+const canonical = "/services/";
+const title = "Nos services : obligations, travaux et financement CEE";
+const description = "Décret BACS, décret tertiaire, loi APER, loi LOM, financement CEE, photovoltaïque, achat d'énergie : ce qu'Oteria Conseil prend en charge pour vous.";
+const h1 = "Les services d'Oteria Conseil : obligations, travaux et financement CEE";
+const pageDates = getPageDates(canonical);
+
+const reglementaire = [
+  { href: "/services/decret-bacs/", name: "Décret BACS", text: "GTB obligatoire au-delà de 70 kW de chauffage ou de climatisation, échéance reportée au 1er janvier 2030 pour l'existant, prime CEE si la GTB est de classe A ou B." },
+  { href: "/services/decret-tertiaire/", name: "Décret tertiaire", text: "Surfaces tertiaires d'au moins 1 000 m² : année de référence, déclarations OPERAT, objectif de −40 % en 2030 et plan d'actions financé par les CEE." },
+  { href: "/services/loi-aper/", name: "Loi APER", text: "Ombrières photovoltaïques sur les parkings extérieurs de plus de 1 500 m², solarisation des toitures, calcul de surface, report et exemptions." },
+  { href: "/services/loi-lom/", name: "Loi LOM", text: "Bornes de recharge, pré-équipement des parkings et flottes de véhicules : ce que la loi d'orientation des mobilités impose aux entreprises." },
+];
+
+const financement = [
+  { href: "/services/mandataire-cee/", name: "Mandataire CEE", text: "Notre métier : poser le cadre CEE avant la signature du devis, vérifier l'éligibilité et sécuriser le dossier jusqu'au versement de la prime." },
+  { href: "/services/financement-operations/", name: "Financement des opérations", text: "Prime CEE, valorisation des certificats, cumul avec les autres aides : comment se finance une opération d'économies d'énergie." },
+  { href: "/services/photovoltaique/", name: "Photovoltaïque", text: "Autoconsommation ou revente, toiture, ombrière ou hangar : étude de votre projet et mise en relation avec des installateurs partenaires." },
+  { href: "/services/achat-energie-optimisation-factures/", name: "Achat d'énergie et factures", text: "Lecture de facture, taxes et acheminement, stratégie d'achat : réduire le coût de l'énergie que vous continuez à consommer." },
+];
+
+const faq = [
+  {
+    question: "Faire appel à Oteria Conseil est-il payant ?",
+    answer: "Non. L'étude du projet, la sélection des installateurs partenaires et la sécurisation du dossier CEE ne coûtent rien à votre entreprise.",
+  },
+  {
+    question: "Oteria Conseil réalise-t-il les travaux ?",
+    answer: "Non. Nous étudions le projet et nous vous mettons en relation avec des installateurs partenaires choisis pour la qualité de leur travail. Nous veillons aussi à ce que les travaux soient faits dans les règles de l'art.",
+  },
+  {
+    question: "À quel moment faut-il nous contacter ?",
+    answer: "Avant la signature de tout devis. Pour les CEE, la preuve du rôle actif et incitatif doit être antérieure ou au plus égale à la date d'acceptation du devis.",
+  },
+];
+
+const schema = [
+  { "@context": "https://schema.org", "@type": "WebPage", name: title, description, url: `${siteUrl}${canonical}`, ...(pageDates ? { datePublished: pageDates.published, dateModified: pageDates.modified } : {}) },
+  {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: h1,
+    description,
+    author: { "@type": "Organization", name: "Oteria Conseil", url: siteUrl },
+    publisher: { "@type": "Organization", name: "Oteria Conseil", url: siteUrl },
+    mainEntityOfPage: `${siteUrl}${canonical}`,
+    ...(pageDates ? { datePublished: pageDates.published, dateModified: pageDates.modified } : {}),
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Accueil", item: `${siteUrl}/` },
+      { "@type": "ListItem", position: 2, name: "Nos services", item: `${siteUrl}${canonical}` },
+    ],
+  },
+  { "@context": "https://schema.org", "@type": "ProfessionalService", name: "Oteria Conseil", url: siteUrl, description: "Mandataire CEE : étude des projets, sélection d'installateurs partenaires et sécurisation des dossiers de certificats d'économies d'énergie", areaServed: "FR" },
+  {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    itemListElement: [...reglementaire, ...financement].map((s, i) => ({ "@type": "ListItem", position: i + 1, name: s.name, url: `${siteUrl}${s.href}` })),
+  },
+  { "@context": "https://schema.org", "@type": "FAQPage", mainEntity: faq.map((f) => ({ "@type": "Question", name: f.question, acceptedAnswer: { "@type": "Answer", text: f.answer } })) },
+];
+---
+
+<Base title={title} description={description} canonicalPath={canonical} modified={pageDates?.modified}>
+  <script type="application/ld+json" set:html={JSON.stringify(schema)} />
+
+  <section style="background-color: #102a43;">
+    <div class="mx-auto max-w-7xl px-6 py-14 md:py-20">
+      <nav aria-label="Fil d'Ariane" class="mb-8">
+        <ol class="flex flex-wrap items-center gap-2 text-sm" style="color: #9fb3c8;">
+          <li><a href="/" class="no-underline" style="color: #9fb3c8;">Accueil</a></li>
+          <li aria-hidden="true">/</li>
+          <li style="color: #f5c04a;" class="font-medium">Nos services</li>
+        </ol>
+      </nav>
+      <h1 class="text-3xl md:text-4xl lg:text-5xl font-bold leading-tight max-w-4xl" style="color: #ffffff;">{h1}</h1>
+      {pageDates && (
+        <p class="text-sm mt-4" style="color: #9fb3c8;">Mis à jour le <time datetime={pageDates.modified}>{formatDateFr(pageDates.modified)}</time></p>
+      )}
+      <p class="mt-6 text-lg leading-relaxed max-w-3xl" style="color: #d9e2ec;">Une obligation réglementaire impose souvent des travaux, et ces travaux peuvent être en partie financés par les certificats d'économies d'énergie. Oteria Conseil fait le lien entre les deux, gratuitement pour votre entreprise. Chaque page ci-dessous détaille une obligation ou un levier de financement, avec ses seuils officiels et un exemple chiffré.</p>
+      <div class="mt-8">
+        <a href="/diagnostic-gratuit/" class="inline-flex items-center rounded-md px-6 py-3 text-sm font-semibold no-underline" style="background-color: #d4a024; color: #102a43;">Faire étudier mon projet</a>
+      </div>
+    </div>
+  </section>
+
+  <article class="expertise-content">
+    <div class="mx-auto max-w-5xl px-6 py-14 md:py-20">
+
+      <h2>Ce qu'Oteria Conseil prend en charge pour vous</h2>
+
+      <p>Oteria Conseil est mandataire CEE. Nous étudions votre projet, vérifions les obligations qui s'appliquent à votre site et recensons les fiches CEE mobilisables. Nous vous mettons alors en relation avec des installateurs partenaires choisis pour la qualité de leur travail ; nous n'installons rien nous-mêmes.</p>
+
+      <p>Lorsque des CEE sont en jeu, nous sécurisons le dossier : cadre posé avant la signature du devis, pièces conformes à la fiche, travaux réalisés dans les règles de l'art. Vous ne payez rien pour cet accompagnement.</p>
+
+      <h2>Les obligations réglementaires de vos bâtiments et de vos sites</h2>
+
+      <p>Les obligations énergétiques des entreprises sont fixées, pour l'essentiel, par quatre textes. Chacun fait l'objet d'une page détaillée, à jour des dernières modifications :</p>
+
+      <div class="expertise-cards">
+        {reglementaire.map((s) => (
+          <div class="card">
+            <h3><a href={s.href}>{s.name}</a></h3>
+            <p>{s.text}</p>
+          </div>
+        ))}
+      </div>
+
+      <h2>Financer les travaux, produire et acheter votre énergie</h2>
+
+      <p>Le second volet de nos services concerne le financement : payer une partie des travaux, produire une partie de votre électricité et acheter moins cher celle que vous consommez encore. La prime CEE correspond à la valorisation des certificats d'économies d'énergie générés par vos travaux.</p>
+
+      <div class="expertise-cards">
+        {financement.map((s) => (
+          <div class="card">
+            <h3><a href={s.href}>{s.name}</a></h3>
+            <p>{s.text}</p>
+          </div>
+        ))}
+      </div>
+
+      <h2>Chaque obligation et son financement possible</h2>
+
+      <p>Le tableau ci-dessous indique, pour chaque obligation, le critère qui la déclenche, l'échéance à retenir et ce que les CEE peuvent financer.</p>
+
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr><th>Obligation</th><th>Critère</th><th>Échéance</th><th>Financement CEE</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Décret BACS</td><td>Chauffage ou climatisation de plus de 70 kW</td><td>1er janvier 2030 pour l'existant</td><td>GTB de classe A ou B (BAT-TH-116), opérations engagées avant le 1er janvier 2030</td></tr>
+            <tr><td>Décret tertiaire</td><td>Au moins 1 000 m² d'activité tertiaire</td><td>−40 % en 2030, déclaration au plus tard le 30 septembre de chaque année</td><td>Travaux du plan d'actions couverts par une fiche en vigueur</td></tr>
+            <tr><td>Loi APER, parkings</td><td>Parc extérieur de plus de 1 500 m²</td><td>1er juillet 2026 ou 1er juillet 2028 selon la taille</td><td>Pas de fiche pour les ombrières ; CEE possibles sur les bâtiments du site</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>Ce croisement résume notre approche : une GTB imposée par le décret BACS sert aussi la trajectoire du décret tertiaire, et un chantier d'ombrières peut être l'occasion de travaux d'efficacité éligibles sur les bâtiments voisins.</p>
+
+      <h2>Comment se déroule l'étude de votre site</h2>
+
+      <ol>
+        <li><strong>Vous nous décrivez votre site :</strong> surfaces, usages, puissances installées, parking, factures d'énergie.</li>
+        <li><strong>Nous identifions les obligations</strong> qui s'appliquent et leurs échéances, ainsi que les travaux finançables par les CEE.</li>
+        <li><strong>Nous sélectionnons des installateurs partenaires</strong> et vous aidons à comparer des devis établis sur les mêmes bases.</li>
+        <li><strong>Nous posons le cadre CEE avant la signature</strong>, puis nous suivons le dossier jusqu'au versement de la prime.</li>
+      </ol>
+
+          <p>Notre méthode est exigeante : nous ne recommandons que des travaux réellement éligibles, quitte à vous déconseiller une opération.</p>
+
+      <p>Pour le détail de notre rôle, consultez notre page <a href="/services/mandataire-cee/">mandataire CEE</a>. Pour le fonctionnement général du dispositif, consultez notre rubrique <a href="/dispositifs/">dispositifs CEE</a>.</p>
+
+      <h2>Questions fréquentes sur l'intervention d'Oteria Conseil</h2>
+
+      <FaqAccordion items={faq} />
+
+      <h2>Nos services en résumé</h2>
+
+      <p>Oteria Conseil vous accompagne sur les obligations énergétiques des entreprises, le financement CEE des travaux, le photovoltaïque et l'achat d'énergie. Un même principe les relie : partir de votre obligation pour aller vers des travaux utiles et financés. Décrivez-nous votre site : nous vous dirons par où commencer.</p>
+
+      <div class="rounded-lg p-8 mt-10 text-center" style="background-color: #f0f4f8;">
+        <p class="text-xl font-bold text-navy-900 mb-3">Par où commencer sur votre site ?</p>
+        <p class="text-navy-600 mb-6">Étude gratuite : obligations applicables, échéances et travaux finançables par les CEE.</p>
+        <a href="/diagnostic-gratuit/" class="inline-flex items-center justify-center rounded-md px-8 py-4 text-base font-semibold no-underline" style="background-color: #d4a024; color: #102a43;">Faire étudier mon projet</a>
+      </div>
+
+      <p class="text-sm mt-10">Sources des seuils et échéances :</p>
+      <ul class="text-sm">
+        <li><a href="https://rt-re-batiment.developpement-durable.gouv.fr/IMG/pdf/guide_bacs_janvier_2026.pdf" target="_blank" rel="noopener noreferrer">guide d'application du décret BACS (ministère)</a></li>
+        <li><a href="https://entreprendre.service-public.gouv.fr/vosdroits/F38065" target="_blank" rel="noopener noreferrer">Service Public Entreprendre, décret tertiaire</a></li>
+        <li><a href="https://www.entreprises.gouv.fr/espace-presse/solarisation-des-parcs-de-stationnement-le-gouvernement-encourage-les-panneaux" target="_blank" rel="noopener noreferrer">ministère de l'Économie, solarisation des parcs de stationnement</a></li>
+      </ul>
+    </div>
+  </article>
+</Base>

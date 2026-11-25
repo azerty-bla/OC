@@ -197,6 +197,20 @@ Utiliser des combinaisons de mots qui existent naturellement en francais :
 
 Ces exemples illustrent le principe. Il s'applique a toutes les thematiques, pas seulement l'energie ou la renovation. En cas de doute sur une collocation, la reformuler avec des mots plus simples.
 
+### Nom de l'entreprise et sujet des verbes (CRITIQUE)
+
+Retour client du 2026-11-21 (oteria-conseil.fr) : « Ce que font les services Oteria Conseil » a ete juge « ni naturel ni pro ». Regles :
+
+- **Le nom complet, toujours** : `config.project.brand` s'ecrit en entier (« Oteria Conseil », jamais « Oteria »). Pas de troncature, pas de sigle invente. Controle automatique : `validate-writing` → `brand_truncated`.
+- **La marque n'est pas un adjectif** : jamais « les services Oteria Conseil », « l'equipe Oteria Conseil », « l'accompagnement Oteria Conseil ». Ecrire « les services d'Oteria Conseil », ou mieux, faire de l'entreprise le sujet : « Oteria Conseil etudie votre projet ». Controle : `brand_as_adjective`.
+- **Le bon sujet du verbe** : c'est une personne ou l'entreprise qui agit, pas un service, une page, une offre ou un dispositif. « Les services font… », « Notre accompagnement vous aide… », « Cette solution s'occupe de… » → « Oteria Conseil fait… », « Nous… ». Un texte reglementaire « impose », un decret « fixe » : ca reste correct.
+- **Titres (H2/H3) en francais redige**, pas en style telegraphique : pas d'empilement de noms (« Notre accompagnement loi APER », « Notre accompagnement decret tertiaire, gratuit pour vous », « Toiture, ombriere, hangar agricole, sol »). Ecrire « Comment Oteria Conseil vous accompagne face a la loi APER », « Toiture, ombriere ou hangar : ou installer les panneaux ».
+- **Pas de titre identique sur toutes les pages** d'un cluster (« Ce qu'il faut retenir », « Notre accompagnement » repetes 9 fois) : chaque titre dit quelque chose du sujet de la page.
+- **Registre** : celui d'un consultant francais qui ecrit a un directeur technique ou financier. Ni oral (« Cote CEE, », « il suffit de », « Prenons un exemple »), ni dramatise (« C'est la que se trouve le piege », « Le point que l'on oublie »), ni administratif lourd. Phrases completes, vocabulaire exact, ton pose.
+- **Negations et constructions** : « ne fixent ni marque ni technologie » (pas « ne fixent pas une marque ni une technologie »). Pas de « celui-ci doit se mettre en conformite » quand c'est le proprietaire qui agit.
+- **Sigles a double sens** : ne pas abreger « temps de retour sur investissement » en TRI (TRI = taux de rentabilite interne pour un lecteur financier) ; ecrire « temps de retour ».
+- **Test final de relecture** : lire chaque titre et la premiere phrase de chaque section a voix haute ; si un consultant ne le dirait pas a son client, reecrire.
+
 ---
 
 ## Donnees et chiffres

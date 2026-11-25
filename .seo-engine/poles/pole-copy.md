@@ -239,6 +239,12 @@ Avant d'ecrire le fichier sur disque, effectue cette relecture systematique dans
 - Les transitions entre sections sont-elles logiques ou plaquees ?
 - Y a-t-il des phrases creuses, des tautologies, des evidences inutiles ?
 
+**Passe 4 bis — Marque, sujets et titres (CRITIQUE, retour client 2026-11-21) :**
+- Le nom de l'entreprise (`config.project.brand`) est ecrit en entier partout, jamais tronque, jamais employe comme adjectif (« les services X », « l'equipe X » → « les services de X » ou « X + verbe »).
+- Pour chaque verbe d'action, le sujet est-il celui qui agit vraiment ? L'entreprise ou « nous » agit ; un service, une offre, une page ou un accompagnement n'« etudie », ne « fait », ne « s'occupe » de rien.
+- Relis la liste des H2/H3 seule, comme un sommaire : chaque titre est une phrase ou un groupe nominal francais complet, precis, propre a la page. Pas d'empilement de noms (« Notre accompagnement loi APER »), pas de titre generique repete de page en page (« Ce qu'il faut retenir », « Notre accompagnement »).
+- Registre d'un consultant qui ecrit a un dirigeant : ni oral, ni dramatise, ni jargon administratif. Detail des regles : `references/content-guidelines.md`, « Nom de l'entreprise et sujet des verbes ».
+
 **Passe 5 — Coherence avec la recherche :**
 - Chaque chiffre, date et reference du texte correspond-il a un fait de `research.verified_facts` (note son identifiant), avec ses qualificatifs et dans le contexte de son extrait ?
 - Chaque calcul est-il declare dans `copy.calculations` ?

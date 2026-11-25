@@ -53,10 +53,12 @@ if (sidecarPath) {
 }
 
 let maxSectionDensity = 3;
+let siteLanguage = 'fr';
 if (configPath) {
   try {
     const cfg = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
     maxSectionDensity = cfg.seo?.max_section_keyword_density_percent ?? 3;
+    siteLanguage = String(cfg.project?.language || 'fr').toLowerCase().slice(0, 2);
   } catch (e) {
     warnings.push(`Config illisible: ${e.message}`);
   }
@@ -493,8 +495,13 @@ for (const word of accentCheckWords) {
   }
 }
 
+// Le dictionnaire et les motifs d'accents sont français : hors français, le contrôle ne s'applique pas
+// (la relecture de la langue du site relève de validate-language / LanguageTool).
+if (siteLanguage !== 'fr') foundAccentErrors.length = 0;
 addCheck('accent_verification', foundAccentErrors.length === 0,
-  foundAccentErrors.length === 0
+  siteLanguage !== 'fr'
+    ? `Non applicable : contrôle d'accents français, site en « ${siteLanguage} » (relecture via validate-language)`
+    : foundAccentErrors.length === 0
     ? 'Accents corrects (dictionnaire ~300 mots + patterns prefixes/suffixes)'
     : `${foundAccentErrors.length} mot(s) sans accent: ${foundAccentErrors.slice(0, 5).join(', ')}${foundAccentErrors.length > 5 ? ` (+${foundAccentErrors.length - 5} autres)` : ''}`);
 
@@ -511,6 +518,9 @@ const bannedFormulations = [
   "il est crucial de", "il est primordial de", "comme nous l'avons vu",
   "en ce qui concerne", "en d'autres termes", "au fil des ans",
   "de nos jours", "pour conclure",
+  // Tics oraux ou dramatisés relevés par un client (2026-11-21) : ni naturels ni pros
+  "c'est la que se trouve", "le point que l'on oublie", "le point qu'on oublie",
+  "prenons un exemple", "prenons l'exemple", "il suffit de multiplier",
 ];
 
 const textNorm = normalize(plainText);
@@ -644,6 +654,47 @@ addCheck('number_format_french', numberIssues.length === 0,
   numberIssues.length === 0
     ? 'Formatage des nombres conforme au francais'
     : `${numberIssues.length} nombre(s) au format anglais: ${numberIssues.slice(0, 3).join('; ')}${numberIssues.length > 3 ? '...' : ''}`);
+
+// =================================================================
+// BRAND NAME (config.project.brand) — nom complet, jamais en adjectif
+// =================================================================
+// Retour client 2026-11-21 : « Oteria » seul et « les services Oteria Conseil »
+// ont été jugés ni naturels ni professionnels. Voir content-guidelines.md,
+// « Nom de l'entreprise et sujet des verbes ».
+let brandName = '';
+if (configPath) {
+  try {
+    const cfgBrand = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
+    brandName = String(cfgBrand.project?.brand || cfgBrand.project?.name || '').trim();
+  } catch (e) { /* déjà signalé plus haut */ }
+}
+if (brandName && siteLanguage === 'fr') {
+  const esc = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const brandWords = brandName.split(/\s+/);
+  // 1. Troncature : premier mot de la marque sans la suite (« Oteria » pour « Oteria Conseil »)
+  const truncated = [];
+  if (brandWords.length > 1) {
+    const rest = brandWords.slice(1).join('\\s+');
+    const re = new RegExp(`(?<![\\p{L}\\p{N}@./-])${esc(brandWords[0])}(?![\\p{L}\\p{N}-])(?!\\s+${rest})`, 'gu');
+    let m;
+    while ((m = re.exec(plainText)) !== null) {
+      truncated.push(plainText.slice(Math.max(0, m.index - 30), m.index + brandWords[0].length + 25).trim());
+    }
+  }
+  addCheck('brand_truncated', truncated.length === 0,
+    truncated.length === 0
+      ? `Nom de marque complet (« ${brandName} »)`
+      : `${truncated.length} occurrence(s) de « ${brandWords[0]} » sans « ${brandWords.slice(1).join(' ')} » : « …${truncated.slice(0, 3).join(' … ')}… » → écrire « ${brandName} »`);
+
+  // 2. Marque employée comme adjectif après un nom (« les services Oteria Conseil »)
+  const nouns = 'services?|équipes?|experts?|accompagnements?|offres?|conseillers?|méthodes?|solutions?|prestations?|consultants?|interventions?|missions?';
+  const adjRe = new RegExp(`\\b(?:les?|la|l'|nos|vos|des|du|ces?|cette)\\s*(?:${nouns})\\s+${esc(brandName).replace(/\\s+|\s+/g, '\\s+')}`, 'giu');
+  const adjHits = plainText.match(adjRe) || [];
+  addCheck('brand_as_adjective', adjHits.length === 0,
+    adjHits.length === 0
+      ? 'Marque jamais employée comme adjectif'
+      : `${adjHits.length} tournure(s) « nom + marque » : « ${adjHits.slice(0, 3).join(' », « ')} » → « les services d'${brandName} » ou, mieux, « ${brandName} + verbe »`);
+}
 
 // =================================================================
 // OUTPUT

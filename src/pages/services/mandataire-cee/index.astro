@@ -1,0 +1,217 @@
+---
+import "../../../styles/global.css";
+import Base from "../../../layouts/Base.astro";
+import { getPageDates, formatDateFr } from "../../../lib/pageDates.mjs";
+import FaqAccordion from "../../../components/FaqAccordion.astro";
+
+const siteUrl = "https://oteria-conseil.fr";
+const canonical = "/services/mandataire-cee/";
+const title = "Mandataire CEE : rôle, différence avec le délégataire";
+const description = "Mandataire CEE : ce qu'il fait pour vous, en quoi il diffère d'un délégataire ou d'un obligé, comment le choisir, et l'effet des contrôles de 2026.";
+const h1 = "Mandataire CEE : Oteria Conseil prépare et sécurise votre dossier de prime";
+const pageDates = getPageDates(canonical);
+
+const faq = [
+  {
+    question: "Existe-t-il une liste officielle des mandataires CEE ?",
+    answer: "Le ministère publie la liste des délégataires dont la demande a été validée ; nous n'avons pas trouvé d'équivalent pour les mandataires. Méfiez-vous des « listes de mandataires » publiées par des acteurs du marché : elles sont commerciales.",
+  },
+  {
+    question: "Quelle différence entre un mandataire CEE et un courtier CEE ?",
+    answer: "Les deux mots sont souvent employés l'un pour l'autre. Ce qui compte, c'est le contrat : pour qui la structure agit-elle, signe-t-elle des documents au nom de quelqu'un, et qui reste le demandeur responsable du dossier ?",
+  },
+  {
+    question: "Comment devenir mandataire CEE ?",
+    answer: "Le mandataire agit au nom d'un mandant, avec un mandat écrit, et les documents qu'il signe doivent identifier explicitement ce mandant. Devenir délégataire suppose en revanche une demande validée par l'administration, qui publie la liste des délégataires.",
+  },
+  {
+    question: "Le mandataire peut-il intervenir après la signature du devis ?",
+    answer: "Pour la prime, non. La preuve du rôle actif et incitatif doit être antérieure ou égale à la date d'engagement, c'est-à-dire la date d'acceptation du devis. Une fois le devis signé sans cadre CEE, il est trop tard.",
+  },
+  {
+    question: "Faut-il un mandataire si l'entreprise dépose elle-même ses CEE ?",
+    answer: "Lorsque le demandeur des CEE et le bénéficiaire des travaux sont la même entreprise, avec un SIREN identique, le rôle actif et incitatif existe de fait. Les autres exigences de la fiche restent à respecter, et c'est souvent là qu'un regard extérieur évite les erreurs.",
+  },
+  {
+    question: "Faire appel à un mandataire est-il payant pour l'entreprise ?",
+    answer: "Oteria Conseil vous accompagne gratuitement. Demandez toujours à tout intervenant, avant de signer, ce que vous aurez à payer et ce qui reste à votre charge.",
+  },
+];
+
+const schema = [
+  { "@context": "https://schema.org", "@type": "WebPage", name: title, description, url: `${siteUrl}${canonical}`, ...(pageDates ? { datePublished: pageDates.published, dateModified: pageDates.modified } : {}) },
+  {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: h1,
+    description,
+    author: { "@type": "Organization", name: "Oteria Conseil", url: siteUrl },
+    publisher: { "@type": "Organization", name: "Oteria Conseil", url: siteUrl },
+    mainEntityOfPage: `${siteUrl}${canonical}`,
+    ...(pageDates ? { datePublished: pageDates.published, dateModified: pageDates.modified } : {}),
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Accueil", item: `${siteUrl}/` },
+      { "@type": "ListItem", position: 2, name: "Nos services", item: `${siteUrl}/services/` },
+      { "@type": "ListItem", position: 3, name: "Mandataire CEE", item: `${siteUrl}${canonical}` },
+    ],
+  },
+  { "@context": "https://schema.org", "@type": "ProfessionalService", name: "Oteria Conseil", url: siteUrl, description: "Mandataire CEE : étude des projets, sélection d'installateurs partenaires et sécurisation des dossiers de certificats d'économies d'énergie", areaServed: "FR" },
+  { "@context": "https://schema.org", "@type": "FAQPage", mainEntity: faq.map((f) => ({ "@type": "Question", name: f.question, acceptedAnswer: { "@type": "Answer", text: f.answer } })) },
+];
+---
+
+<Base title={title} description={description} canonicalPath={canonical} modified={pageDates?.modified}>
+  <script type="application/ld+json" set:html={JSON.stringify(schema)} />
+
+  <section style="background-color: #102a43;">
+    <div class="mx-auto max-w-7xl px-6 py-14 md:py-20">
+      <nav aria-label="Fil d'Ariane" class="mb-8">
+        <ol class="flex flex-wrap items-center gap-2 text-sm" style="color: #9fb3c8;">
+          <li><a href="/" class="no-underline" style="color: #9fb3c8;">Accueil</a></li>
+          <li aria-hidden="true">/</li>
+          <li><a href="/services/" class="no-underline" style="color: #9fb3c8;">Nos services</a></li>
+          <li aria-hidden="true">/</li>
+          <li style="color: #f5c04a;" class="font-medium">Mandataire CEE</li>
+        </ol>
+      </nav>
+      <h1 class="text-3xl md:text-4xl lg:text-5xl font-bold leading-tight max-w-4xl" style="color: #ffffff;">{h1}</h1>
+      {pageDates && (
+        <p class="text-sm mt-4" style="color: #9fb3c8;">Mis à jour le <time datetime={pageDates.modified}>{formatDateFr(pageDates.modified)}</time> · Oteria Conseil</p>
+      )}
+      <p class="mt-6 text-lg leading-relaxed max-w-3xl" style="color: #d9e2ec;">Oteria Conseil est <strong>mandataire CEE</strong> : nous agissons au nom de votre entreprise pour tout ce qui conditionne l'obtention des certificats d'économies d'énergie. Le bon moment, les bonnes pièces, le bon interlocuteur. Nous étudions votre projet, vous mettons en relation avec des installateurs partenaires et vérifions que le dossier est conforme. Voici ce que recouvre ce rôle et ce qui le distingue d'un délégataire.</p>
+      <div class="mt-8">
+        <a href="/diagnostic-gratuit/" class="inline-flex items-center rounded-md px-6 py-3 text-sm font-semibold no-underline" style="background-color: #d4a024; color: #102a43;">Faire étudier mon projet</a>
+      </div>
+    </div>
+  </section>
+
+  <article class="expertise-content">
+    <div class="mx-auto max-w-3xl px-6 py-14 md:py-20">
+
+      <div class="expertise-highlight">
+        <p><strong>L'essentiel :</strong> le mandataire CEE agit au nom de son client, sur la base d'un mandat écrit. Il ne porte pas l'obligation d'économies d'énergie, contrairement à l'obligé et au délégataire. Son intervention compte surtout avant les travaux : poser le cadre CEE avant la signature du devis, puis s'assurer que le dossier est complet et conforme.</p>
+      </div>
+
+      <h2>Le rôle du mandataire CEE</h2>
+
+      <p>Le mandataire CEE est l'intermédiaire qui agit au nom de son client pour préparer et sécuriser son dossier de prime. Le mot « mandataire » vient du droit commun : il désigne celui qui agit au nom et pour le compte d'un mandant. Dans le dispositif des CEE, la foire aux questions du ministère rappelle qu'un document signé par un mandataire au nom d'un mandant doit explicitement identifier ce mandant.</p>
+
+      <p>À la différence du délégataire, dont l'administration valide la demande et publie le nom, le mandataire tient son rôle du contrat qui le lie à son client. Pour l'entreprise, ce rôle consiste à transformer un projet de travaux en opération finançable : vérifier qu'une fiche CEE s'applique, que les travaux respectent ses conditions techniques et que la chronologie reste la bonne.</p>
+
+      <h2>Mandataire, délégataire, obligé : le rôle de chacun</h2>
+
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr><th>Acteur</th><th>Porte une obligation ?</th><th>Rôle dans votre dossier</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Obligé</td><td>Oui, fixée par l'État</td><td>Finance les économies d'énergie pour remplir son obligation</td></tr>
+            <tr><td>Délégataire</td><td>Oui, reprise d'un obligé</td><td>Même rôle que l'obligé, une fois sa délégation validée</td></tr>
+            <tr><td>Demandeur des CEE</td><td>Responsable du dossier</td><td>Dépose la demande et répond des manquements</td></tr>
+            <tr><td>Mandataire CEE</td><td>Non</td><td>Agit pour son client : éligibilité, chronologie, pièces, suivi</td></tr>
+            <tr><td>Installateur</td><td>Non</td><td>Réalise les travaux et fournit la preuve de réalisation</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>Le délégataire devient « obligé » à la réception de la réponse du ministre, ou au plus tard à l'expiration d'un délai de 2 mois après sa demande. Il ne peut jouer un rôle actif et incitatif qu'après validation de son statut par le Pôle national des certificats d'économies d'énergie. Le ministère publie la liste des délégataires validés pour la 6e période, qui a débuté le 1er janvier 2026. Pour le détail de leur fonctionnement, voir notre page <a href="/dispositifs/obliges/">obligés et délégataires CEE</a>.</p>
+
+      <p>Selon le ministère, le premier détenteur des CEE, donc le demandeur, répond des manquements au cadre réglementaire, quelle que soit l'origine de l'information erronée. Une erreur dans le dossier a donc toujours un coût pour l'un des acteurs.</p>
+
+      <h2>Ce que le mandataire fait à votre place</h2>
+
+      <ul>
+        <li><strong>Éligibilité :</strong> identifier la fiche d'opération standardisée en vigueur et ses conditions (classe, performance, secteur).</li>
+        <li><strong>Chronologie :</strong> poser le cadre CEE avant la date d'engagement, c'est-à-dire avant l'acceptation du devis ou du bon de commande.</li>
+        <li><strong>Choix des installateurs :</strong> orienter vers des professionnels capables de fournir une preuve de réalisation conforme.</li>
+        <li><strong>Pièces :</strong> devis, factures, attestation sur l'honneur, mentions techniques exigées par la fiche.</li>
+        <li><strong>Valorisation :</strong> chiffrer le volume en <a href="/dispositifs/kwh-cumac/">kWh  cumac</a> et suivre le dossier jusqu'au versement de la prime.</li>
+      </ul>
+
+      <h2>Un accompagnement gratuit pour votre entreprise</h2>
+
+      <p>Oteria Conseil ne facture rien à l'entreprise : l'étude du projet, la sélection des installateurs partenaires et la sécurisation du dossier sont gratuites pour vous.</p>
+
+      <p>Quel que soit votre interlocuteur, posez la question par écrit avant de signer : que vais-je payer, et quelle part de la prime me revient ? Une réponse floue est un signal d'alerte.</p>
+
+      <h2>Comment choisir un mandataire CEE</h2>
+
+      <p>Plutôt qu'une liste de noms, voici les questions qui permettent d'évaluer n'importe quel intervenant :</p>
+
+      <ol>
+        <li>Le mandat est-il écrit, et précise-t-il pour qui vous agissez et ce que vous signez en mon nom ?</li>
+        <li>Qui déposera la demande de CEE, et répondra donc du dossier ?</li>
+        <li>Le cadre CEE sera-t-il signé avant l'acceptation de mon devis ?</li>
+        <li>Quelle fiche s'applique à mes travaux, et quelles conditions dois-je respecter ?</li>
+        <li>Comment le volume de kWh  cumac a-t-il été calculé (surface, zone, secteur) ?</li>
+        <li>Quels installateurs proposez-vous, et sur quels critères les avez-vous choisis ?</li>
+        <li>Qui vérifie la preuve de réalisation avant le dépôt ?</li>
+        <li>Que se passe-t-il si un contrôle relève une non-conformité ?</li>
+      </ol>
+
+          <p>Un mandataire sérieux vous dit aussi quand un dossier ne passera pas. Oteria Conseil s'impose cette déontologie : aucun dossier n'est engagé sans que sa conformité ait été vérifiée.</p>
+
+      <h2>Ce qui change avec les contrôles de 2025 et 2026</h2>
+
+      <p>Les contrôles se renforcent. La loi du 30 juin 2025 contre toutes les fraudes aux aides publiques a ajouté une sanction pécuniaire visant certains acquéreurs de CEE. Elle frappe ceux qui n'ont pas mis en place, ou mal mis en place, leurs dispositifs de détection des risques.</p>
+
+      <p>Le décret n° 2026-945 du 9 octobre 2026 et son arrêté précisent ces vérifications. L'acquéreur doit examiner les liens capitalistiques avec le cédant, en retenant désormais la notion de contrôle. Un formulaire daté et signé est joint au contrat de cession au plus tard à la date de l'ordre de transfert des certificats.</p>
+
+      <p>Pour l'entreprise bénéficiaire, la conséquence est directe : les acheteurs de CEE regardent de plus près la qualité des dossiers et des intermédiaires. Un dossier propre dès l'origine se valorise mieux.</p>
+
+      <h2>Les erreurs qui font perdre une prime CEE</h2>
+
+      <p>La plupart des dossiers refusés ou réduits tiennent à quelques erreurs, toujours les mêmes :</p>
+
+      <ul>
+        <li><strong>Devis signé trop tôt :</strong> la date d'engagement correspond à l'acceptation du devis ou du bon de commande ; la preuve du rôle actif et incitatif doit la précéder ou tomber le même jour.</li>
+        <li><strong>Mauvais secteur :</strong> les fiches tertiaires reconnaissent cinq secteurs d'activité ; des bureaux situés sur un site industriel relèvent des fiches tertiaires.</li>
+        <li><strong>Preuve incomplète :</strong> la facture ne reprend pas les mentions techniques exigées par la fiche.</li>
+        <li><strong>Fiche échue :</strong> une fiche vaut pour des opérations engagées dans une période donnée ; la fiche GTB BAT-TH-116 s'applique aux opérations engagées avant le 1er janvier 2030.</li>
+        <li><strong>Mandat flou :</strong> un document signé au nom du client doit identifier explicitement ce dernier.</li>
+      </ul>
+
+      <p>Depuis le 1er janvier 2018, le demandeur justifie la date d'engagement en archivant le contrat de réalisation accepté par le bénéficiaire. Conservez donc chaque devis signé, daté, avec ses mentions.</p>
+
+      <h2>Notre méthode appliquée à un exemple chiffré</h2>
+
+      <p>Exemple : une entreprise prévoit d'installer une GTB de classe B pilotant le chauffage de 1 800 m² de bureaux en zone climatique H2. La fiche BAT-TH-116 donne un forfait de 240 kWh  cumac par m² et un coefficient de 0,9.</p>
+
+      <ul>
+        <li>Volume attendu : 240 × 0,9 × 1 800 = <strong>388 800 kWh  cumac</strong>.</li>
+        <li>Si vous acceptez le devis avant que le cadre CEE soit posé, la preuve du rôle actif et incitatif arrive trop tard : vous perdez la prime.</li>
+        <li>Si la facture ne mentionne pas les fonctions de classe B ou A, ni la marque et la référence du système accompagnées d'un document de l'installateur, le dossier est non conforme.</li>
+      </ul>
+
+      <p>Notre travail consiste à éviter ces deux écueils. Nous fixons le cadre avant la signature et orientons vers un installateur partenaire qui connaît les exigences de la fiche. Nous vérifions aussi les pièces avant le dépôt. Notre page <a href="/dispositifs/calcul-prime/">calcul de la prime CEE</a> détaille la méthode.</p>
+
+      <p>Le même travail s'applique aux obligations réglementaires que nous suivons, comme le <a href="/services/decret-bacs/">décret BACS</a> ou le <a href="/services/decret-tertiaire/">décret tertiaire</a>. Pour le calendrier de trésorerie et le cumul d'aides, voir notre page <a href="/services/financement-operations/">financement CEE</a>. Retrouvez-les parmi <a href="/services/">nos services</a>.</p>
+
+      <h2>Questions fréquentes sur le mandataire CEE</h2>
+
+      <FaqAccordion items={faq} />
+
+      <h2>Mandataire CEE : les points à retenir</h2>
+
+      <p>Le mandataire ne porte pas d'obligation et ne remplace pas l'installateur : il sécurise les conditions d'acceptation du dossier, à commencer par la date. Avec les contrôles renforcés depuis 2025, cette rigueur compte davantage. Avant de signer votre prochain devis de travaux, envoyez-le-nous : nous vérifions gratuitement s'il ouvre droit à une prime.</p>
+
+      <div class="rounded-lg p-8 mt-10 text-center" style="background-color: #f0f4f8;">
+        <p class="text-xl font-bold text-navy-900 mb-3">Un devis de travaux à signer ?</p>
+        <p class="text-navy-600 mb-6">Envoyez-le avant signature : éligibilité CEE, fiche applicable, volume estimé.</p>
+        <a href="/diagnostic-gratuit/" class="inline-flex items-center justify-center rounded-md px-8 py-4 text-base font-semibold no-underline" style="background-color: #d4a024; color: #102a43;">Faire étudier mon projet</a>
+      </div>
+
+      <p class="text-sm mt-10">Sources :</p>
+      <ul class="text-sm">
+        <li><a href="https://www.ecologie.gouv.fr/politiques-publiques/questions-reponses-dispositif-cee" target="_blank" rel="noopener noreferrer">ministère de la Transition écologique, questions-réponses sur le dispositif des CEE</a></li>
+        <li><a href="https://www.ecologie.gouv.fr/sites/default/files/documents/Liste%20des%20d%C3%A9l%C3%A9gataires%20P6%20au%202026-06-05.pdf" target="_blank" rel="noopener noreferrer">liste officielle des délégataires de la 6e période</a></li>
+        <li><a href="https://www.banquedesterritoires.fr/detection-des-fraudes-aux-cee-un-decret-precise-les-exigences-de-verification-effectuer-par" target="_blank" rel="noopener noreferrer">Banque des Territoires, décret sur les vérifications des acquéreurs de CEE</a></li>
+      </ul>
+    </div>
+  </article>
+</Base>

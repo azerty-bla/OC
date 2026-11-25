@@ -1,0 +1,267 @@
+---
+import "../../../styles/global.css";
+import Base from "../../../layouts/Base.astro";
+import { getPageDates, formatDateFr } from "../../../lib/pageDates.mjs";
+import FaqAccordion from "../../../components/FaqAccordion.astro";
+
+const siteUrl = "https://oteria-conseil.fr";
+const canonical = "/services/decret-bacs/";
+const title = "Décret BACS : obligations, échéances et financement CEE";
+const description = "Décret BACS : bâtiments concernés dès 70 kW, échéance reportée au 1er janvier 2030, classe de GTB exigée et prime CEE BAT-TH-116, avec un exemple chiffré.";
+const h1 = "Décret BACS : qui est concerné, quand, et comment financer la GTB";
+const pageDates = getPageDates(canonical);
+
+const faq = [
+  {
+    question: "Un petit bâtiment tertiaire peut-il être soumis au décret BACS ?",
+    answer: "Oui, s'il abrite une activité tertiaire et que son système de chauffage ou de climatisation dépasse 70 kW. Le décret BACS raisonne en puissance nominale utile, pas en surface : le seuil d'au moins 1 000 m² relève du décret tertiaire.",
+  },
+  {
+    question: "L'échéance de 2027 s'applique-t-elle encore ?",
+    answer: "Non pour les bâtiments existants dont le système dépasse 70 kW : le décret n° 2025-1343 du 26 décembre 2025 a reporté leur échéance au 1er janvier 2030. Les systèmes de plus de 290 kW devaient, eux, être équipés avant le 1er janvier 2025.",
+  },
+  {
+    question: "Une GTB de classe C suffit-elle ?",
+    answer: "Pour la conformité, oui : le guide du ministère indique qu'un BACS de classe C est réputé répondre aux exigences du décret. Pour la prime CEE, non : la fiche BAT-TH-116 exige des fonctions de classe A ou B.",
+  },
+  {
+    question: "Qui doit installer le système : le propriétaire ou le locataire ?",
+    answer: "L'obligation pèse sur le propriétaire du système de chauffage ou de climatisation dont la puissance dépasse le seuil. Pour un bâtiment relié à un réseau de chaleur, la puissance retenue est celle de la sous-station.",
+  },
+  {
+    question: "Peut-on demander la prime CEE après avoir signé le devis de GTB ?",
+    answer: "Non. La preuve du rôle actif et incitatif doit être antérieure ou égale à la date d'engagement, c'est-à-dire la date d'acceptation du devis. Le cadre CEE se fixe donc avant toute signature.",
+  },
+];
+
+const schema = [
+  {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    name: title,
+    description,
+    url: `${siteUrl}${canonical}`,
+    ...(pageDates ? { datePublished: pageDates.published, dateModified: pageDates.modified } : {}),
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: h1,
+    description,
+    author: { "@type": "Organization", name: "Oteria Conseil", url: siteUrl },
+    publisher: { "@type": "Organization", name: "Oteria Conseil", url: siteUrl },
+    mainEntityOfPage: `${siteUrl}${canonical}`,
+    ...(pageDates ? { datePublished: pageDates.published, dateModified: pageDates.modified } : {}),
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Accueil", item: `${siteUrl}/` },
+      { "@type": "ListItem", position: 2, name: "Nos services", item: `${siteUrl}/services/` },
+      { "@type": "ListItem", position: 3, name: "Décret BACS", item: `${siteUrl}${canonical}` },
+    ],
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "ProfessionalService",
+    name: "Oteria Conseil",
+    url: siteUrl,
+    description: "Mandataire CEE : étude des projets, sélection d'installateurs partenaires et sécurisation des dossiers de certificats d'économies d'énergie",
+    areaServed: "FR",
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faq.map((f) => ({ "@type": "Question", name: f.question, acceptedAnswer: { "@type": "Answer", text: f.answer } })),
+  },
+];
+---
+
+<Base title={title} description={description} canonicalPath={canonical} modified={pageDates?.modified}>
+  <script type="application/ld+json" set:html={JSON.stringify(schema)} />
+
+  <section style="background-color: #102a43;">
+    <div class="mx-auto max-w-7xl px-6 py-14 md:py-20">
+      <nav aria-label="Fil d'Ariane" class="mb-8">
+        <ol class="flex flex-wrap items-center gap-2 text-sm" style="color: #9fb3c8;">
+          <li><a href="/" class="no-underline" style="color: #9fb3c8;">Accueil</a></li>
+          <li aria-hidden="true">/</li>
+          <li><a href="/services/" class="no-underline" style="color: #9fb3c8;">Nos services</a></li>
+          <li aria-hidden="true">/</li>
+          <li style="color: #f5c04a;" class="font-medium">Décret BACS</li>
+        </ol>
+      </nav>
+      <h1 class="text-3xl md:text-4xl lg:text-5xl font-bold leading-tight max-w-4xl" style="color: #ffffff;">{h1}</h1>
+      {pageDates && (
+        <p class="text-sm mt-4" style="color: #9fb3c8;">Mis à jour le <time datetime={pageDates.modified}>{formatDateFr(pageDates.modified)}</time> · Oteria Conseil, mandataire CEE</p>
+      )}
+      <p class="mt-6 text-lg leading-relaxed max-w-3xl" style="color: #d9e2ec;">Le <strong>décret BACS</strong> impose d'équiper d'un système d'automatisation et de contrôle, autrement dit d'une GTB, les bâtiments tertiaires dont le chauffage ou la climatisation dépasse une certaine puissance. Voici les seuils, le calendrier reporté à 2030 et la prime CEE qui peut financer une partie de l'équipement.</p>
+      <div class="mt-8">
+        <a href="/diagnostic-gratuit/" class="inline-flex items-center rounded-md px-6 py-3 text-sm font-semibold no-underline" style="background-color: #d4a024; color: #102a43;">Faire étudier mon projet</a>
+      </div>
+    </div>
+  </section>
+
+  <article class="expertise-content">
+    <div class="mx-auto max-w-3xl px-6 py-14 md:py-20">
+
+      <div class="expertise-highlight">
+        <p><strong>L'essentiel :</strong> tout bâtiment où s'exerce une activité tertiaire et dont le système de chauffage ou de climatisation dépasse 70 kW doit être équipé d'un BACS. Les systèmes de plus de 290 kW devaient l'être avant le 1er janvier 2025 ; pour les bâtiments existants au-delà de 70 kW, l'échéance tombe désormais le 1er janvier 2030. Une GTB de classe A ou B ouvre droit à la prime CEE BAT-TH-116.</p>
+      </div>
+
+      <h2>Ce que le décret BACS impose</h2>
+
+      <p>Un BACS (<em>building automation and control system</em>) désigne un système d'automatisation et de contrôle du bâtiment. Il pilote le chauffage, la climatisation, la ventilation, l'eau chaude sanitaire, l'éclairage intégré et la production d'électricité sur site. Le ministère précise qu'il correspond à une gestion technique de bâtiment, la <a href="/expertises/gtb-gtc/">GTB</a>.</p>
+
+      <p>Le cadre vient du <strong>décret n° 2020-887 du 20 juillet 2020</strong>, modifié par le décret n° 2023-259 du 7 avril 2023 et complété par un arrêté du même jour. Ces textes ne fixent ni marque ni technologie, mais des fonctions que le système doit remplir :</p>
+
+      <ul>
+        <li>suivre, enregistrer et analyser en continu, par zone fonctionnelle et au pas horaire, la production et la consommation d'énergie des systèmes techniques ;</li>
+        <li>situer l'efficacité énergétique du bâtiment par rapport à des valeurs de référence ;</li>
+        <li>détecter les pertes d'efficacité et en informer l'exploitant ;</li>
+        <li>être interopérable avec les différents systèmes techniques ;</li>
+        <li>permettre un arrêt manuel et la gestion autonome des systèmes reliés.</li>
+      </ul>
+
+      <p>Les données de consommation doivent être conservées pendant 5 ans, sur le système ou de façon dématérialisée, à l'échelle mensuelle. Elles appartiennent au propriétaire du BACS, qui les transmet au gestionnaire du bâtiment et, le cas échéant, au locataire pour ses déclarations.</p>
+
+      <h2>Qui est concerné par le décret BACS ?</h2>
+
+      <p>L'obligation porte sur les bâtiments où s'exercent des activités tertiaires, marchandes ou non, y compris ceux qui appartiennent à des personnes morales du secteur primaire ou secondaire. Les bureaux administratifs d'un site agricole ou d'une usine entrent donc dans le champ.</p>
+
+      <h3>Un critère de puissance, et non de surface</h3>
+
+      <p>Le guide d'application du ministère le résume ainsi : le décret tertiaire repose sur une condition de surface, le décret BACS sur une condition de <strong>puissance nominale utile</strong>. Le seuil s'apprécie sur le système de chauffage ou de climatisation, combiné ou non avec la ventilation. Pour une pompe à chaleur, on retient la plus élevée des puissances calorifique et frigorifique ; plusieurs machines qui servent le même bâtiment s'additionnent.</p>
+
+      <p>Pour un bâtiment raccordé à un réseau de chaleur ou de froid, la puissance à considérer est celle de la sous-station. L'obligation revient au propriétaire du système qui dépasse le seuil, ce qui n'est pas toujours le propriétaire des murs.</p>
+
+      <h3>Sur les sites industriels et agricoles, les locaux tertiaires sont visés</h3>
+
+      <p>Sur un site de production, le décret vise les bâtiments où s'exercent des activités tertiaires, comme les bureaux, les salles de réunion ou les locaux sociaux. Pour les CEE, la règle va dans le même sens : pour des bureaux implantés sur un site industriel, ce sont les fiches du secteur tertiaire qui s'appliquent, et non les fiches industrielles. Les ateliers, eux, restent hors de la fiche GTB tertiaire ; voir notre page <a href="/expertises/gtb-gtc/industrie/">GTB en milieu industriel</a>.</p>
+
+      <h2>Les échéances du décret BACS : 2025, 2030 et bâtiments neufs</h2>
+
+      <p>Le <strong>décret n° 2025-1343 du 26 décembre 2025</strong> a repoussé l'échéance des bâtiments existants au seuil de 70 kW au 1er janvier 2030. De nombreuses pages en ligne mentionnent encore 2027 ; cette date ne s'applique plus aux bâtiments existants.</p>
+
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr><th>Situation du bâtiment</th><th>Puissance du système</th><th>Obligation</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Existant</td><td>Supérieure à 290 kW</td><td>BACS installé avant le 1er janvier 2025</td></tr>
+            <tr><td>Existant</td><td>Supérieure à 70 kW</td><td>BACS installé avant le 1er janvier 2030</td></tr>
+            <tr><td>Neuf, permis déposé à partir du 22 juillet 2021</td><td>Supérieure à 290 kW</td><td>BACS à la livraison</td></tr>
+            <tr><td>Neuf, permis déposé à partir du 9 avril 2024</td><td>Supérieure à 70 kW</td><td>BACS à la livraison</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>Le guide du ministère considère comme existant tout bâtiment dont le permis est antérieur à ces dates. Son propriétaire doit le mettre en conformité avant le 1er janvier 2025 ou le 1er janvier 2030, selon la puissance installée.</p>
+
+      <h2>Quelle classe de GTB viser pour être conforme ?</h2>
+
+      <p>Le décret ne cite pas de classe : il fixe des fonctions. Le guide du ministère s'appuie sur la norme NF EN ISO 52120-1, qui range les systèmes en quatre classes, de A (haute performance) à D (inefficace). Il précise que les BACS de classe C sont réputés répondre à l'ensemble des exigences réglementaires.</p>
+
+      <p>Conformité et financement ne vont pourtant pas de pair. Une GTB de classe C suffit à la conformité, mais n'ouvre droit à aucune prime CEE : la fiche BAT-TH-116 exige des fonctions de régulation de classe B ou A. Une classe B coûte plus cher à l'achat, mais une partie de l'écart peut être financée. Pour comparer les budgets, consultez nos <a href="/expertises/gtb-gtc/tarifs/">prix de GTB par classe</a>.</p>
+
+      <h2>Dérogation, inspection périodique et sanctions</h2>
+
+      <h3>La dérogation pour un temps de retour supérieur à 10 ans</h3>
+
+      <p>Le propriétaire d'un bâtiment existant est dispensé de l'obligation si une étude établit que le temps de retour du BACS est supérieur à 10 ans. L'arrêté du 7 avril 2023 encadre ce calcul : le coût est établi à partir d'au moins deux devis réels, et le gain d'énergie retenu est fixé à 15 % des consommations, sauf audit énergétique.</p>
+
+      <p>Ce temps de retour se calcule déduction faite des aides financières et des certificats d'économies d'énergie potentiels. Une prime CEE le raccourcit donc et peut faire tomber la dérogation. Exemple : pour des systèmes qui consomment en moyenne 800 000 kWh par an, le gain conventionnel retenu atteint 120 000 kWh par an. Si le surcoût, CEE déduits, reste inférieur à dix années de cette économie, le propriétaire doit équiper le bâtiment.</p>
+
+      <h3>L'inspection périodique</h3>
+
+      <p>Le propriétaire du BACS le fait inspecter selon une périodicité qui ne peut excéder cinq ans. L'inspection donne lieu à un rapport remis au plus tard un mois après la visite. La fiche Service Public précise que ce rapport doit être conservé pendant 10 ans.</p>
+
+      <h3>Quelles sanctions en cas de non-respect ?</h3>
+
+      <p>Ni le guide d'application du ministère ni la fiche Service Public consacrée aux GTB ne mentionnent d'amende propre au décret BACS. Le risque tient plutôt au décret tertiaire : sans pilotage, ses objectifs sont difficiles à atteindre, et ce texte prévoit des amendes ainsi que la publication des mises en demeure.</p>
+
+      <h2>Financer la GTB avec la prime CEE BAT-TH-116</h2>
+
+      <p>La fiche d'opération standardisée BAT-TH-116 finance la mise en place d'un système de gestion technique dans un bâtiment tertiaire existant. Dans la version publiée par le ministère, elle pose les conditions suivantes :</p>
+
+      <ul>
+        <li>fonctions de régulation de classe B ou A au sens de la norme NF EN ISO 52120-1 : 2022 pour le chauffage ;</li>
+        <li>le cas échéant, ces mêmes fonctions pour l'eau chaude sanitaire, le refroidissement, l'éclairage et les auxiliaires ;</li>
+        <li>achat d'un système neuf, ou amélioration d'un système existant qui était au plus de classe C ;</li>
+        <li>le simple raccordement à une GTB existante n'est pas éligible ;</li>
+        <li>mise en place par un professionnel, avec une preuve de réalisation qui mentionne la classe ;</li>
+        <li>opération engagée avant le 1er janvier 2030.</li>
+      </ul>
+
+      <p>Le volume de certificats se calcule pour chaque usage piloté : forfait en kWh  cumac par m² (selon la classe et le secteur) × coefficient de zone climatique × surface gérée. Les coefficients valent 1,1 en zone H1, 0,9 en zone H2 et 0,6 en zone H3. La fiche retient une durée de vie conventionnelle de 15 ans. Le détail des forfaits figure sur notre page <a href="/expertises/gtb-gtc/prime-cee/">prime CEE pour une GTB</a>.</p>
+
+      <h3>Exemple chiffré : bureaux de 3 200 m² en zone H2</h3>
+
+      <p>Exemple : un immeuble de bureaux de 3 200 m² situé en zone climatique H2, dont la GTB pilotera le chauffage, la climatisation, l'éclairage et les auxiliaires, sans eau chaude sanitaire. Les forfaits « Bureaux » de la fiche donnent :</p>
+
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr><th>Usage piloté</th><th>Classe B (kWh  cumac/m²)</th><th>Classe A (kWh  cumac/m²)</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Chauffage</td><td>240</td><td>360</td></tr>
+            <tr><td>Refroidissement, climatisation</td><td>97</td><td>233</td></tr>
+            <tr><td>Éclairage</td><td>90</td><td>184</td></tr>
+            <tr><td>Auxiliaires</td><td>8</td><td>19</td></tr>
+            <tr><td><strong>Total</strong></td><td><strong>435</strong></td><td><strong>796</strong></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>En classe B, le volume atteint 435 × 0,9 × 3 200 = <strong>1 252 800 kWh  cumac</strong>, soit environ 1 253 MWh  cumac. En classe A, il monte à 796 × 0,9 × 3 200 = 2 292 480 kWh  cumac. L'écart entre les deux classes représente 1 039 680 kWh  cumac, à mettre en regard du surcoût d'une GTB de classe A.</p>
+
+      <p>Pour obtenir un montant en euros, on multiplie les MWh  cumac par le prix négocié avec l'acheteur des certificats ; notre <a href="/dispositifs/barometre-prix-cee/">baromètre du prix des CEE</a> donne les cours récents. Notre page GTB applique la même méthode à un autre bâtiment : seuls la surface, la zone et les usages changent.</p>
+
+      <h2>Décret BACS et décret tertiaire : deux obligations, un même équipement</h2>
+
+      <p>Le décret tertiaire fixe une obligation de résultat, le décret BACS une obligation de moyens. Le premier vise les surfaces d'activité tertiaire d'au moins 1 000 m² et impose une baisse de consommation. Le second vise la puissance installée et impose un équipement. Un même site peut relever des deux, de l'un seul, ou d'aucun.</p>
+
+      <p>Quand les deux s'appliquent, la GTB joue un double rôle. Elle satisfait le décret BACS et fournit les données horaires utiles au plan d'actions et aux déclarations OPERAT. Le guide du ministère la décrit d'ailleurs comme un levier du plan d'actions. Pour la trajectoire et les déclarations, voir notre page <a href="/services/decret-tertiaire/">accompagnement décret tertiaire</a>.</p>
+
+      <h2>Ce qu'Oteria Conseil fait pour votre conformité au décret BACS</h2>
+
+      <p>Oteria Conseil est mandataire CEE. Nous ne vendons ni n'installons de GTB. Nous étudions votre bâtiment, vérifions s'il entre dans le champ du décret et à quelle échéance, puis vous mettons en relation avec des installateurs partenaires choisis pour la qualité de leur travail. Cet accompagnement est gratuit pour vous.</p>
+
+      <ol>
+        <li><strong>Diagnostic réglementaire :</strong> puissance des systèmes, usage tertiaire, date du permis, besoin éventuel d'une étude de temps de retour.</li>
+        <li><strong>Choix de la classe :</strong> comparaison entre une classe C (conformité seule) et une classe B ou A (conformité et prime), sur devis réels.</li>
+        <li><strong>Cadre CEE posé avant la signature du devis :</strong> le rôle actif et incitatif doit précéder la date d'acceptation du devis, faute de quoi vous perdez la prime.</li>
+        <li><strong>Dossier conforme :</strong> preuve de réalisation mentionnant la classe B ou A, surfaces par usage, zone climatique, non-cumul avec les fiches exclues.</li>
+      </ol>
+
+          <p>Nous vérifions avec rigueur la classe de la GTB proposée : une GTB de classe C, conforme au décret, ne doit jamais vous être présentée comme finançable par la prime CEE.</p>
+
+      <p>Nous sécurisons le dossier et veillons à ce que les travaux soient faits dans les règles de l'art. Pour comprendre notre rôle, lisez notre page <a href="/services/mandataire-cee/">mandataire CEE</a>, ou revenez à l'ensemble de <a href="/services/">nos services</a>. Pour assembler prime, prêt et trésorerie, voir aussi notre page sur le <a href="/services/financement-operations/">financement CEE</a>.</p>
+
+      <h2>Questions fréquentes sur le décret BACS</h2>
+
+      <FaqAccordion items={faq} />
+
+      <h2>Décret BACS : les points à retenir</h2>
+
+      <p>Le texte s'organise autour de trois échéances : 2025 au-delà de 290 kW, 2030 au-delà de 70 kW pour l'existant, la livraison pour le neuf. La classe C suffit pour être conforme. Seule une GTB de classe B ou A ouvre droit aux CEE, à condition de poser le cadre avant la signature du devis. Envoyez-nous les puissances de vos installations : nous vous dirons si vous êtes concerné et ce que la prime peut couvrir.</p>
+
+      <div class="rounded-lg p-8 mt-10 text-center" style="background-color: #f0f4f8;">
+        <p class="text-xl font-bold text-navy-900 mb-3">Votre bâtiment dépasse-t-il 70 kW ?</p>
+        <p class="text-navy-600 mb-6">Étude gratuite : conformité BACS, classe de GTB à viser et estimation du volume de CEE.</p>
+        <a href="/diagnostic-gratuit/" class="inline-flex items-center justify-center rounded-md px-8 py-4 text-base font-semibold no-underline" style="background-color: #d4a024; color: #102a43;">Faire étudier mon projet</a>
+      </div>
+
+      <p class="text-sm mt-10">Sources :</p>
+      <ul class="text-sm">
+        <li><a href="https://rt-re-batiment.developpement-durable.gouv.fr/IMG/pdf/guide_bacs_janvier_2026.pdf" target="_blank" rel="noopener noreferrer">guide d'application du décret BACS, ministère, version de janvier 2026</a></li>
+        <li><a href="https://www.ecologie.gouv.fr/sites/default/files/documents/BAT-TH-116%20vA62-6%20%C3%A0%20compter%20du%2001-01-2025_1.pdf" target="_blank" rel="noopener noreferrer">fiche CEE BAT-TH-116</a></li>
+        <li><a href="https://entreprendre.service-public.gouv.fr/vosdroits/F38102" target="_blank" rel="noopener noreferrer">Service Public Entreprendre, systèmes de gestion technique du bâtiment</a></li>
+        <li><a href="https://www.banquedesterritoires.fr/batiments-tertiaires-le-calendrier-de-mise-en-oeuvre-des-systemes-dautomatisation-et-de-controle" target="_blank" rel="noopener noreferrer">Banque des Territoires, report du calendrier à 2030</a></li>
+      </ul>
+    </div>
+  </article>
+</Base>
